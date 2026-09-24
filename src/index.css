@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --azul: #2340FF;
+    --azul2: #1B34D6;
+    --tinta: #0F1222;
+    --espuma: #F6F7F2;
+    --limao: #D4FF3A;
+    --chiclete: #FF4FA0;
+    --nevoa: #AFC0FF;
+    --grafite: #5B6070;
+    --linha: #DADCE3;
+    --card-bg: #EAECE6;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--azul);
+    color: var(--tinta);
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Bricolage Grotesque', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 18px;
+    line-height: 1.55;
+    background-color: var(--espuma);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+.font-disp {
+  font-family: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-serif-it {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+}
+
+/* Custom ribbons and clipping */
+.faixa-clip {
+  display: inline-block;
+  clip-path: polygon(0.6em 0, 100% 0, calc(100% - 0.6em) 100%, 0 100%);
+  padding: 0.35em 1.15em 0.38em;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.hl-mark {
+  background-color: var(--limao);
+  color: var(--tinta);
+  padding: 0 0.1em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marquee-scroll 70s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 18, 34, 0.05);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(35, 64, 255, 0.4);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(35, 64, 255, 0.7);
+}
