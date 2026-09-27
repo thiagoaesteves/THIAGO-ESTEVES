@@ -192,14 +192,17 @@ function PortfolioApp() {
               {/* Section Header */}
               <div className="max-w-4xl space-y-1 mb-10 md:mb-12">
                 <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block">
-                  Faixa Bônus
+                  Faixa Bônus · {totalBonus} faixas
                 </span>
-                <h2 className="font-disp font-extrabold text-4xl sm:text-6xl md:text-7xl tracking-[-0.045em] text-[#0F1222] leading-[1.02]">
-                  Ideias que eram só um post
+                <h2 className="font-disp font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-[5.25rem] tracking-[-0.05em] text-[#0F1222] leading-[0.95]">
+                  Especiais
                 </h2>
+                <p className="font-mono-code text-sm sm:text-base text-[#0F1222]/80 pt-2 font-medium">
+                  Ideias que eram pra ser só um post
+                </p>
               </div>
 
-              {/* Faixa Bônus Grid - Single Column with bonus styles */}
+              {/* Faixa Bônus Grid - Single Column */}
               <div className="grid grid-cols-1 gap-12 sm:gap-14 md:gap-16">
                 {casesBonus.map((item) => (
                   <CaseCard

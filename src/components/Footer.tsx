@@ -24,7 +24,7 @@ export const Footer: React.FC = () => {
               </g>
             </svg>
             <span className="text-white font-medium">
-              Thiago Esteves · Creative Copywriter &amp; Transmídia Storyteller
+              Thiago Esteves · Creative Copywriter &amp; Storyteller
             </span>
           </div>
 

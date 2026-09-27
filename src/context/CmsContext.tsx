@@ -1,14 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { CaseItem } from '../types';
+import { CaseItem, CaseBlock } from '../types';
 import { CASES as ORIGINAL_CASES } from '../data/cases';
+import { SobreData, ORIGINAL_SOBRE_DATA } from '../data/sobre';
 
-const STORAGE_KEY = 'thiago_portfolio_custom_cases_v9';
+// Use STORAGE_KEY v19 so that user customized texts, tags and project subtitles are preserved
+const STORAGE_KEY = 'thiago_portfolio_custom_cases_v19';
+const STORAGE_SOBRE_KEY = 'thiago_portfolio_custom_sobre_v1';
 
 interface CmsContextType {
   isEditMode: boolean;
   setIsEditMode: (val: boolean) => void;
   toggleEditMode: () => void;
   cases: CaseItem[];
+  sobre: SobreData;
   hasChanges: boolean;
   updateCaseField: (slug: string, field: keyof CaseItem, value: any) => void;
   updateCaseParagraph: (slug: string, index: number, value: string) => void;
@@ -22,6 +26,14 @@ interface CmsContextType {
   reorderCaseVideos: (slug: string, sourceIdx: number, targetIdx: number) => void;
   addCaseVideo: (slug: string, ytId: string) => void;
   removeCaseVideo: (slug: string, index: number) => void;
+  updateCaseBlocks: (slug: string, blocks: CaseBlock[]) => void;
+  updateSobreField: <K extends keyof SobreData>(field: K, value: SobreData[K]) => void;
+  updateSobreBioParagraph: (index: number, value: string) => void;
+  addSobreBioParagraph: () => void;
+  removeSobreBioParagraph: (index: number) => void;
+  updateSobreStat: (statKey: keyof SobreData['stats'], value: string) => void;
+  addSobreSegment: (segment: string) => void;
+  removeSobreSegment: (index: number) => void;
   saveChanges: () => void;
   resetToOriginal: () => void;
   exportModalOpen: boolean;
@@ -39,13 +51,39 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          // Keep all saved user customized texts, titles, concepts, delivs, and orders
+          // Ensure unicred reflects the complete 24 piece campaign gallery from ORIGINAL_CASES
+          const unicredOriginal = ORIGINAL_CASES.find((c) => c.slug === 'unicred');
+          return parsed.map((c: CaseItem) => {
+            if (c.slug === 'unicred' && unicredOriginal) {
+              return {
+                ...c,
+                imgs: unicredOriginal.imgs, // keeps the complete 24 campaign pieces with 4 horizontal + 20 stories
+              };
+            }
+            return c;
+          });
         }
       }
     } catch (e) {
       console.error('Erro ao ler casos do localStorage:', e);
     }
     return ORIGINAL_CASES;
+  });
+
+  const [sobre, setSobre] = useState<SobreData>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_SOBRE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          return { ...ORIGINAL_SOBRE_DATA, ...parsed };
+        }
+      }
+    } catch (e) {
+      console.error('Erro ao ler dados do Sobre do localStorage:', e);
+    }
+    return ORIGINAL_SOBRE_DATA;
   });
 
   const [hasChanges, setHasChanges] = useState<boolean>(false);
@@ -242,9 +280,91 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Vídeo removido.');
   };
 
+  const updateCaseBlocks = (slug: string, blocks: CaseBlock[]) => {
+    setCases((prev) =>
+      prev.map((c) => {
+        if (c.slug !== slug) return c;
+        const text = blocks.filter((b) => b.type === 'text').map((b) => b.value);
+        const yt = blocks.filter((b) => b.type === 'video').map((b) => b.value);
+        const imgs = blocks.filter((b) => b.type === 'image').map((b) => b.value);
+        return {
+          ...c,
+          blocks,
+          text,
+          yt,
+          imgs,
+        };
+      })
+    );
+    setHasChanges(true);
+  };
+
+  const updateSobreField = <K extends keyof SobreData>(field: K, value: SobreData[K]) => {
+    setSobre((prev) => ({ ...prev, [field]: value }));
+    setHasChanges(true);
+  };
+
+  const updateSobreBioParagraph = (index: number, value: string) => {
+    setSobre((prev) => {
+      const newBio = [...prev.bio];
+      newBio[index] = value;
+      return { ...prev, bio: newBio };
+    });
+    setHasChanges(true);
+  };
+
+  const addSobreBioParagraph = () => {
+    setSobre((prev) => ({
+      ...prev,
+      bio: [...prev.bio, 'Novo parágrafo da biografia. Clique para editar.'],
+    }));
+    setHasChanges(true);
+    showToast('Novo parágrafo adicionado à biografia.');
+  };
+
+  const removeSobreBioParagraph = (index: number) => {
+    setSobre((prev) => ({
+      ...prev,
+      bio: prev.bio.filter((_, i) => i !== index),
+    }));
+    setHasChanges(true);
+    showToast('Parágrafo da biografia removido.');
+  };
+
+  const updateSobreStat = (statKey: keyof SobreData['stats'], value: string) => {
+    setSobre((prev) => ({
+      ...prev,
+      stats: {
+        ...prev.stats,
+        [statKey]: value,
+      },
+    }));
+    setHasChanges(true);
+  };
+
+  const addSobreSegment = (segment: string) => {
+    if (!segment.trim()) return;
+    setSobre((prev) => ({
+      ...prev,
+      segments: [...prev.segments, segment.trim()],
+    }));
+    setHasChanges(true);
+    showToast('Segmento adicionado!');
+  };
+
+  const removeSobreSegment = (index: number) => {
+    setSobre((prev) => ({
+      ...prev,
+      segments: prev.segments.filter((_, i) => i !== index),
+    }));
+    setHasChanges(true);
+    showToast('Segmento removido.');
+  };
+
   const saveChanges = () => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cases));
+      localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(sobre));
       setHasChanges(false);
       showToast('Alterações salvas com sucesso no seu navegador!');
     } catch (e) {
@@ -254,9 +374,11 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const resetToOriginal = () => {
-    if (window.confirm('Tem certeza de que deseja restaurar a ordem e os textos originais do portfólio?')) {
+    if (window.confirm('Tem certeza de que deseja restaurar a ordem e os textos originais do portfólio (incluindo a seção Sobre)?')) {
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_SOBRE_KEY);
       setCases(ORIGINAL_CASES);
+      setSobre(ORIGINAL_SOBRE_DATA);
       setHasChanges(false);
       showToast('Portfólio restaurado para os dados originais!');
     }
@@ -269,6 +391,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsEditMode,
         toggleEditMode,
         cases,
+        sobre,
         hasChanges,
         updateCaseField,
         updateCaseParagraph,
@@ -282,6 +405,14 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         reorderCaseVideos,
         addCaseVideo,
         removeCaseVideo,
+        updateCaseBlocks,
+        updateSobreField,
+        updateSobreBioParagraph,
+        addSobreBioParagraph,
+        removeSobreBioParagraph,
+        updateSobreStat,
+        addSobreSegment,
+        removeSobreSegment,
         saveChanges,
         resetToOriginal,
         exportModalOpen,

@@ -30,7 +30,7 @@ export const CmsToolbar: React.FC = () => {
     <>
       {/* Toast Notification */}
       {activeNotification && (
-        <div className="fixed top-20 right-6 z-50 bg-[#0F1222] text-white px-5 py-3 rounded-lg shadow-2xl border border-white/20 flex items-center gap-3 animate-fade-in font-mono-code text-xs">
+        <div className="fixed top-20 right-6 z-[70] bg-[#0F1222] text-white px-5 py-3 rounded-lg shadow-2xl border border-white/20 flex items-center gap-3 animate-fade-in font-mono-code text-xs">
           <Sparkles className="w-4 h-4 text-[#D4FF3A] shrink-0" />
           <span>{activeNotification}</span>
         </div>
@@ -40,7 +40,7 @@ export const CmsToolbar: React.FC = () => {
       {isEditMode && (
         <aside
           aria-label="Barra do Modo Edição"
-          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-4xl bg-[#0F1222]/95 backdrop-blur-md text-white px-4 sm:px-6 py-3 rounded-2xl shadow-2xl border border-white/20 flex flex-wrap items-center justify-between gap-3 animate-fade-in"
+          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-4xl bg-[#0F1222]/95 backdrop-blur-md text-white px-4 sm:px-6 py-3 rounded-2xl shadow-2xl border border-white/20 flex flex-wrap items-center justify-between gap-3 animate-fade-in"
         >
           {/* Left badge and hints */}
           <div className="flex items-center gap-3">

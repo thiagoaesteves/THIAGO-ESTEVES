@@ -14,22 +14,23 @@ export const Hero: React.FC<HeroProps> = ({
   return (
     <section id="topo" className="relative bg-[#2340FF] text-[#F6F7F2] overflow-hidden min-h-[calc(100dvh-64px)] flex flex-col justify-between pt-6 pb-6 md:pt-10 md:pb-8">
       <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex-1 flex flex-col justify-between">
-        {/* Top Hero Row: Headline on the left, "T" Watermark Monogram on the right */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2 sm:pt-4 my-auto">
-          <div className="lg:col-span-9">
+        {/* Top Hero Row: Headline on the left, Monumental Watermark Monogram on the right bleeding softly */}
+        <div className="relative pt-2 sm:pt-4 my-auto min-h-[220px] sm:min-h-[260px] md:min-h-[300px] flex items-center">
+          <div className="max-w-4xl relative z-10">
             <h1 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-[3.75rem] xl:text-[4.4rem] tracking-tight text-white leading-[1.05]">
               Creative Copywriter <br />
               <span className="font-serif-it italic font-normal text-[#D4FF3A] inline-block sm:whitespace-nowrap">
-                &amp; Transmídia Storyteller
+                &amp; Storyteller
               </span>
             </h1>
           </div>
 
-          <div className="lg:col-span-3 flex justify-center lg:justify-end items-center select-none pointer-events-none">
-            <div className="w-[140px] sm:w-[170px] md:w-[200px] lg:w-[230px] aspect-[532/400]">
+          {/* Monumental Watermark: Large, architectural bleed off-canvas */}
+          <div className="absolute -right-12 sm:-right-8 md:-right-4 lg:right-0 -bottom-16 sm:-bottom-20 md:-bottom-24 lg:-bottom-28 pointer-events-none select-none z-0">
+            <div className="w-[320px] sm:w-[440px] md:w-[580px] lg:w-[680px] xl:w-[740px] aspect-[532/400]">
               <svg
                 viewBox="0 0 532.13 400"
-                className="w-full h-auto text-white opacity-20 hover:opacity-30 transition-opacity fill-current drop-shadow-sm"
+                className="w-full h-auto text-white opacity-[0.11] lg:opacity-[0.12] fill-current drop-shadow-sm transition-opacity duration-500"
                 aria-hidden="true"
               >
                 <g transform="translate(-35.145 -101.065) scale(7.34484)">
@@ -103,7 +104,7 @@ export const Hero: React.FC<HeroProps> = ({
                   Especiais
                 </b>
                 <small className="text-[#AFC0FF] text-sm block mt-0.5">
-                  Ativações, convenções &amp; guerrilha
+                  Ideias que eram pra ser só um post
                 </small>
               </div>
               <span className="text-3xl text-[#D4FF3A] transform group-hover:translate-x-2 transition-transform duration-200">

@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   GripVertical,
   ChevronUp,
   ChevronDown,
   Edit3,
   Image as ImageIcon,
+  Upload,
+  Link as LinkIcon,
+  Loader2,
 } from 'lucide-react';
 import { CaseItem } from '../types';
 import { useCms } from '../context/CmsContext';
+import { processImageUpload } from '../utils/imageUpload';
 
 interface CaseCardProps {
   item: CaseItem;
@@ -29,6 +33,8 @@ export const CaseCard: React.FC<CaseCardProps> = ({
   const [isDragOver, setIsDragOver] = useState(false);
   const [isEditingCover, setIsEditingCover] = useState(false);
   const [coverInput, setCoverInput] = useState(item.cover);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const coverFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // In edit mode, don't open modal if clicking on editable elements or action buttons
@@ -139,17 +145,18 @@ export const CaseCard: React.FC<CaseCardProps> = ({
               <ChevronDown className="w-4 h-4" />
             </button>
 
-            {/* Edit Cover URL Toggle */}
+            {/* Edit Cover Toggle Button */}
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsEditingCover(!isEditingCover);
               }}
-              className="p-1 rounded bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[#343848] dark:text-white text-xs font-mono-code flex items-center gap-1"
-              title="Trocar imagem de capa"
+              className="px-2 py-1 rounded bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[#343848] dark:text-white text-xs font-mono-code font-bold flex items-center gap-1 cursor-pointer"
+              title="Trocar imagem de capa do projeto"
             >
-              <ImageIcon className="w-3.5 h-3.5" />
+              <Upload className="w-3.5 h-3.5 text-[#2340FF] dark:text-[#D4FF3A]" />
+              <span className="hidden sm:inline">Trocar Capa</span>
             </button>
 
             {/* Open Detail & Edit Media */}
@@ -167,34 +174,93 @@ export const CaseCard: React.FC<CaseCardProps> = ({
         </div>
       )}
 
-      {/* Edit Cover URL Input Dropdown */}
+      {/* Edit Cover URL / Upload Dropdown */}
       {isEditMode && isEditingCover && (
         <div
-          className="cms-control mb-3 p-2.5 rounded bg-black/10 dark:bg-white/10 border border-black/10 dark:border-white/20 flex gap-2 items-center"
+          className="cms-control mb-3 p-3 rounded-lg bg-black/10 dark:bg-white/10 border border-black/15 dark:border-white/20 space-y-2"
           onClick={(e) => e.stopPropagation()}
         >
-          <input
-            type="text"
-            value={coverInput}
-            onChange={(e) => setCoverInput(e.target.value)}
-            placeholder="URL da imagem de capa..."
-            className="flex-1 px-2.5 py-1 text-xs font-mono-code bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 rounded text-[#0F1222] dark:text-white"
-          />
-          <button
-            type="button"
-            onClick={() => {
-              updateCaseField(item.slug, 'cover', coverInput);
-              setIsEditingCover(false);
-            }}
-            className="px-2.5 py-1 bg-[#2340FF] text-white text-xs font-mono-code rounded font-bold"
-          >
-            Salvar Capa
-          </button>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-mono-code font-bold text-[#0F1222] dark:text-white">
+              Alterar Capa do Projeto
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsEditingCover(false)}
+              className="text-xs text-gray-500 hover:text-red-500 font-mono-code"
+            >
+              Fechar
+            </button>
+          </div>
+
+          <div className="flex flex-wrap gap-2 items-center">
+            {/* Upload File Button */}
+            <input
+              ref={coverFileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setIsUploadingCover(true);
+                try {
+                  const dataUrl = await processImageUpload(file, 1600, 1000, 0.85);
+                  updateCaseField(item.slug, 'cover', dataUrl);
+                  setCoverInput(dataUrl);
+                  setIsEditingCover(false);
+                } catch (err) {
+                  console.error(err);
+                } finally {
+                  setIsUploadingCover(false);
+                  if (coverFileInputRef.current) coverFileInputRef.current.value = '';
+                }
+              }}
+            />
+
+            <button
+              type="button"
+              disabled={isUploadingCover}
+              onClick={() => coverFileInputRef.current?.click()}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2340FF] hover:bg-[#1B34D6] text-white text-xs font-mono-code font-bold rounded cursor-pointer transition-colors shadow-sm disabled:opacity-50"
+            >
+              {isUploadingCover ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Processando...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-3.5 h-3.5" /> Fazer Upload da Capa
+                </>
+              )}
+            </button>
+
+            <span className="text-xs font-mono-code text-gray-400">ou</span>
+
+            {/* URL input */}
+            <input
+              type="text"
+              value={coverInput}
+              onChange={(e) => setCoverInput(e.target.value)}
+              placeholder="Cole a URL da capa..."
+              className="flex-1 min-w-[200px] px-2.5 py-1 text-xs font-mono-code bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 rounded text-[#0F1222] dark:text-white"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                updateCaseField(item.slug, 'cover', coverInput);
+                setIsEditingCover(false);
+              }}
+              className="px-2.5 py-1 bg-black/20 dark:bg-white/20 hover:bg-black/30 dark:hover:bg-white/30 text-[#0F1222] dark:text-white text-xs font-mono-code rounded font-bold cursor-pointer"
+            >
+              Salvar Link
+            </button>
+          </div>
         </div>
       )}
 
       {/* Thumbnail Container */}
-      <div className="relative aspect-[16/9] bg-[#E4E6EA] dark:bg-[#1a1e36] overflow-hidden rounded-md border border-black/5 dark:border-white/10 shadow-sm">
+      <div className="relative aspect-[16/9] bg-[#E4E6EA] dark:bg-[#1a1e36] overflow-hidden rounded-md border border-black/5 dark:border-white/10 shadow-sm group/thumb">
         <img
           src={item.cover}
           alt={`Capa do case ${item.name}`}
@@ -202,6 +268,69 @@ export const CaseCard: React.FC<CaseCardProps> = ({
           referrerPolicy="no-referrer"
           className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
         />
+
+        {/* Edit Mode: Direct Upload Cover Button Overlay */}
+        {isEditMode && (
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-[2px] opacity-0 group-hover/thumb:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-4 z-20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <input
+              type="file"
+              id={`cover-file-${item.slug}`}
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setIsUploadingCover(true);
+                try {
+                  const dataUrl = await processImageUpload(file, 1600, 1000, 0.85);
+                  updateCaseField(item.slug, 'cover', dataUrl);
+                  setCoverInput(dataUrl);
+                } catch (err) {
+                  console.error(err);
+                } finally {
+                  setIsUploadingCover(false);
+                  e.target.value = '';
+                }
+              }}
+            />
+
+            <button
+              type="button"
+              disabled={isUploadingCover}
+              onClick={(e) => {
+                e.stopPropagation();
+                document.getElementById(`cover-file-${item.slug}`)?.click();
+              }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#2340FF] hover:bg-[#1B34D6] text-white text-xs font-mono-code font-bold shadow-lg transition-transform hover:scale-105 cursor-pointer disabled:opacity-50"
+            >
+              {isUploadingCover ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Carregando Capa...</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 text-[#D4FF3A]" />
+                  <span>Fazer Upload da Capa</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditingCover(true);
+              }}
+              className="text-[11px] font-mono-code text-white/80 hover:text-white underline cursor-pointer"
+            >
+              ou colar link / URL
+            </button>
+          </div>
+        )}
 
         {/* Triangle Corner Flap */}
         <div
@@ -218,8 +347,8 @@ export const CaseCard: React.FC<CaseCardProps> = ({
 
       {/* Meta Row */}
       <div
-        className={`flex justify-between items-baseline gap-2 mt-3.5 font-mono-code text-xs uppercase tracking-wider ${
-          bonus ? 'text-[#0F1222] font-semibold' : dark ? 'text-[#AFC0FF]' : 'text-[#5B6070]'
+        className={`flex justify-between items-baseline gap-3 mt-3.5 font-mono-code text-xs uppercase tracking-wider ${
+          bonus ? 'text-[#0F1222] font-semibold' : dark ? 'text-[#AFC0FF]' : 'text-[#343848]'
         }`}
       >
         {isEditMode ? (
@@ -228,11 +357,15 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             value={item.faixa}
             onClick={(e) => e.stopPropagation()}
             onChange={(e) => updateCaseField(item.slug, 'faixa', e.target.value)}
-            className="font-semibold bg-transparent border-b border-dashed border-[#2340FF] px-1 text-xs focus:outline-none focus:bg-black/5 dark:focus:bg-white/10 rounded"
+            className={`font-semibold border-b-2 border-dashed px-1.5 py-0.5 text-xs shrink-0 w-28 focus:outline-none rounded transition-colors ${
+              dark
+                ? 'text-[#D4FF3A] bg-white/10 border-[#FF4FA0] focus:bg-white/20'
+                : 'text-[#0F1222] bg-white/90 border-[#2340FF] shadow-sm focus:bg-white'
+            }`}
             title="Editar texto da Faixa"
           />
         ) : (
-          <span className="font-semibold">{item.faixa}</span>
+          <span className="font-semibold shrink-0">{item.faixa}</span>
         )}
 
         {isEditMode ? (
@@ -241,11 +374,17 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             value={item.deliv}
             onClick={(e) => e.stopPropagation()}
             onChange={(e) => updateCaseField(item.slug, 'deliv', e.target.value)}
-            className="text-right bg-transparent border-b border-dashed border-[#2340FF] px-1 text-xs focus:outline-none focus:bg-black/5 dark:focus:bg-white/10 rounded"
-            title="Editar Entregas"
+            className={`text-right flex-1 min-w-[150px] border-b-2 border-dashed px-2 py-0.5 text-xs focus:outline-none rounded transition-colors ${
+              dark
+                ? 'text-[#AFC0FF] bg-white/10 border-[#FF4FA0] focus:bg-white/20'
+                : 'text-[#0F1222] bg-white/90 border-[#2340FF] shadow-sm focus:bg-white'
+            }`}
+            title="Editar Entregas / Tag da Capa"
           />
         ) : (
-          <span className="truncate max-w-[60%] text-right">{item.deliv.split(/[ ,]/)[0]}</span>
+          <span className="text-right truncate max-w-[80%]" title={item.deliv}>
+            {item.deliv}
+          </span>
         )}
       </div>
 
@@ -256,8 +395,10 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             type="text"
             value={item.name}
             onChange={(e) => updateCaseField(item.slug, 'name', e.target.value)}
-            className={`w-full font-disp font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight leading-tight bg-transparent border-b-2 border-dashed border-[#2340FF] dark:border-[#FF4FA0] px-1 focus:outline-none focus:bg-black/5 dark:focus:bg-white/10 rounded transition-colors ${
-              dark ? 'text-white' : 'text-[#0F1222]'
+            className={`w-full font-disp font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight leading-tight border-b-2 border-dashed px-2 py-1 focus:outline-none rounded transition-colors ${
+              dark
+                ? 'text-white bg-white/10 border-[#FF4FA0] focus:bg-white/20'
+                : 'text-[#0F1222] bg-white/95 border-[#2340FF] shadow-sm focus:bg-white'
             }`}
             title="Clique para editar o título do projeto"
           />
@@ -283,8 +424,12 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             value={item.concept}
             rows={2}
             onChange={(e) => updateCaseField(item.slug, 'concept', e.target.value)}
-            className={`w-full text-lg sm:text-xl md:text-2xl leading-snug bg-transparent border border-dashed border-[#2340FF] dark:border-[#FF4FA0] p-1.5 focus:outline-none focus:bg-black/5 dark:focus:bg-white/10 rounded resize-y transition-colors ${
-              bonus ? 'text-[#1D2611]' : dark ? 'text-[#D5DBF5]' : 'text-[#343848]'
+            className={`w-full text-lg sm:text-xl md:text-2xl leading-snug border-2 border-dashed p-2 focus:outline-none rounded resize-y transition-colors ${
+              bonus
+                ? 'text-[#0F1222] bg-white/90 border-[#0F1222] focus:bg-white'
+                : dark
+                ? 'text-white bg-white/10 border-[#FF4FA0] focus:bg-white/20'
+                : 'text-[#0F1222] bg-white/95 border-[#2340FF] shadow-sm focus:bg-white'
             }`}
             title="Clique para editar o conceito do projeto"
           />
