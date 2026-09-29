@@ -5,12 +5,15 @@ import { SobreData, ORIGINAL_SOBRE_DATA } from '../data/sobre';
 
 // Use STORAGE_KEY v19 so that user customized texts, tags and project subtitles are preserved
 const STORAGE_KEY = 'thiago_portfolio_custom_cases_v19';
-const STORAGE_SOBRE_KEY = 'thiago_portfolio_custom_sobre_v1';
+const STORAGE_SOBRE_KEY = 'thiago_portfolio_custom_sobre_v2';
 
 interface CmsContextType {
   isEditMode: boolean;
   setIsEditMode: (val: boolean) => void;
   toggleEditMode: () => void;
+  iniciarModoEdicao: () => void;
+  triggerAdminEasterEgg: () => void;
+  changePassword: () => void;
   cases: CaseItem[];
   sobre: SobreData;
   hasChanges: boolean;
@@ -39,6 +42,9 @@ interface CmsContextType {
   exportModalOpen: boolean;
   setExportModalOpen: (val: boolean) => void;
   activeNotification: string | null;
+  showToast: (msg: string) => void;
+  exportCasesJson: () => void;
+  exportCasesTs: () => void;
 }
 
 const CmsContext = createContext<CmsContextType | undefined>(undefined);
@@ -109,17 +115,109 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  // Keyboard shortcut Ctrl+E or Cmd+E to toggle edit mode
+  const iniciarModoEdicao = () => {
+    setIsEditMode(true);
+    showToast('Modo Edição Ativado com sucesso!');
+  };
+
+  // Expor iniciarModoEdicao globalmente no objeto window para acesso direto e infalível
   useEffect(() => {
+    (window as any).iniciarModoEdicao = iniciarModoEdicao;
+    return () => {
+      delete (window as any).iniciarModoEdicao;
+    };
+  }, []);
+
+  const triggerAdminEasterEgg = () => {
+    if (isEditMode) {
+      showToast('O Modo Edição já está ativo.');
+      return;
+    }
+
+    const senhaSalva = localStorage.getItem('editPassword') || 'criadoRJ';
+    const tentativa = window.prompt('Digite a senha para acessar o Modo Edição:');
+    if (tentativa === null) {
+      // Prompt cancelado pelo usuário
+      return;
+    }
+    if (tentativa.trim() === senhaSalva.trim()) {
+      iniciarModoEdicao();
+    } else {
+      alert('Senha incorreta.');
+    }
+  };
+
+  const changePassword = () => {
+    const newPassword = window.prompt('Digite a nova senha para o Modo Edição:');
+    if (newPassword === null) return;
+    if (!newPassword.trim()) {
+      alert('A senha não pode ser vazia.');
+      return;
+    }
+    const confirmPassword = window.prompt('Confirme a nova senha:');
+    if (confirmPassword === null) return;
+    if (newPassword.trim() !== confirmPassword.trim()) {
+      alert('As senhas não coincidem. Nenhuma alteração foi realizada.');
+      return;
+    }
+    localStorage.setItem('editPassword', newPassword.trim());
+    showToast('Senha alterada com sucesso! Guarde-a com segurança.');
+  };
+
+  // Gatilhos Secretos de Acesso ao Modo Edição:
+  // 1. Atalho de teclado: Ctrl + Shift + E (ou Cmd + Shift + E no Mac)
+  // 2. Gatilho por URL: #edit (ex: meudominio.com/#edit)
+  // 3. Clique no elemento trigger-esteves no rodapé
+  useEffect(() => {
+    // 1. Atalho de teclado Ctrl + Shift + E / Cmd + Shift + E
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'e') {
+      const isCmdOrCtrl = e.ctrlKey || e.metaKey;
+      if (isCmdOrCtrl && e.shiftKey && (e.key === 'E' || e.key === 'e' || e.code === 'KeyE')) {
         e.preventDefault();
-        toggleEditMode();
+        e.stopPropagation();
+        triggerAdminEasterEgg();
       }
     };
+
+    // 2. Gatilho por URL hash #edit
+    const checkUrlHash = () => {
+      const hash = window.location.hash;
+      if (hash === '#edit' || hash === '#/edit') {
+        // Limpar o hash da URL para não deixar vestígios na barra de endereços
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        } else {
+          window.location.hash = '';
+        }
+        triggerAdminEasterEgg();
+      }
+    };
+
+    // 3. Clique em trigger-esteves
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      const isTrigger = target.closest('#trigger-esteves, [data-trigger-esteves="true"]');
+      if (isTrigger) {
+        e.preventDefault();
+        e.stopPropagation();
+        triggerAdminEasterEgg();
+      }
+    };
+
+    // Executa verificação inicial de hash na URL
+    checkUrlHash();
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+    window.addEventListener('hashchange', checkUrlHash);
+    document.addEventListener('click', handleClick, true);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('hashchange', checkUrlHash);
+      document.removeEventListener('click', handleClick, true);
+    };
+  }, [isEditMode]);
 
   const updateCaseField = (slug: string, field: keyof CaseItem, value: any) => {
     setCases((prev) =>
@@ -172,6 +270,11 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const newCases = [...prev];
       const [moved] = newCases.splice(fromIndex, 1);
+      
+      // Keep section assignment in sync with target position
+      const targetItem = prev[toIndex];
+      moved.lado = targetItem.lado;
+
       newCases.splice(toIndex, 0, moved);
       return newCases;
     });
@@ -181,14 +284,27 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const moveCaseOrder = (slug: string, direction: 'up' | 'down') => {
     setCases((prev) => {
-      const index = prev.findIndex((c) => c.slug === slug);
-      if (index === -1) return prev;
-      const targetIndex = direction === 'up' ? index - 1 : index + 1;
-      if (targetIndex < 0 || targetIndex >= prev.length) return prev;
+      const currentItem = prev.find((c) => c.slug === slug);
+      if (!currentItem) return prev;
+
+      // Find items in the exact same section (Lado A, Lado B, or Faixa Bonus)
+      const lado = currentItem.lado;
+      const sectionCases = prev.filter((c) => c.lado === lado);
+
+      const sectionIndex = sectionCases.findIndex((c) => c.slug === slug);
+      if (sectionIndex === -1) return prev;
+
+      const targetSectionIndex = direction === 'up' ? sectionIndex - 1 : sectionIndex + 1;
+      if (targetSectionIndex < 0 || targetSectionIndex >= sectionCases.length) return prev;
+
+      const targetItem = sectionCases[targetSectionIndex];
+      const fromGlobalIndex = prev.findIndex((c) => c.slug === slug);
+      const toGlobalIndex = prev.findIndex((c) => c.slug === targetItem.slug);
+      if (fromGlobalIndex === -1 || toGlobalIndex === -1) return prev;
 
       const newCases = [...prev];
-      const [moved] = newCases.splice(index, 1);
-      newCases.splice(targetIndex, 0, moved);
+      const [moved] = newCases.splice(fromGlobalIndex, 1);
+      newCases.splice(toGlobalIndex, 0, moved);
       return newCases;
     });
     setHasChanges(true);
@@ -284,7 +400,9 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCases((prev) =>
       prev.map((c) => {
         if (c.slug !== slug) return c;
-        const text = blocks.filter((b) => b.type === 'text').map((b) => b.value);
+        const text = blocks
+          .filter((b) => b.type === 'text')
+          .flatMap((b) => b.value.split(/\n\s*\n/).filter((p) => p.trim()));
         const yt = blocks.filter((b) => b.type === 'video').map((b) => b.value);
         const imgs = blocks.filter((b) => b.type === 'image').map((b) => b.value);
         return {
@@ -373,6 +491,44 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const exportCasesJson = () => {
+    try {
+      const dataStr = JSON.stringify(cases, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'cases.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast('Ficheiro cases.json descarregado com sucesso!');
+    } catch (e) {
+      console.error(e);
+      showToast('Erro ao gerar ficheiro JSON.');
+    }
+  };
+
+  const exportCasesTs = () => {
+    try {
+      const code = `import { CaseItem } from '../types';\n\nexport const CASES: CaseItem[] = ${JSON.stringify(cases, null, 2)};\n`;
+      const blob = new Blob([code], { type: 'text/typescript;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'cases.ts';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast('Ficheiro cases.ts pronto para substituir em src/data/cases.ts!');
+    } catch (e) {
+      console.error(e);
+      showToast('Erro ao gerar ficheiro TypeScript.');
+    }
+  };
+
   const resetToOriginal = () => {
     if (window.confirm('Tem certeza de que deseja restaurar a ordem e os textos originais do portfólio (incluindo a seção Sobre)?')) {
       localStorage.removeItem(STORAGE_KEY);
@@ -390,6 +546,9 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isEditMode,
         setIsEditMode,
         toggleEditMode,
+        iniciarModoEdicao,
+        triggerAdminEasterEgg,
+        changePassword,
         cases,
         sobre,
         hasChanges,
@@ -418,6 +577,9 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         exportModalOpen,
         setExportModalOpen,
         activeNotification,
+        showToast,
+        exportCasesJson,
+        exportCasesTs,
       }}
     >
       {children}

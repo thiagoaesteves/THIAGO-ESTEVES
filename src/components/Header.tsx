@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Menu, X, Pencil } from 'lucide-react';
-import { useCms } from '../context/CmsContext';
+import { Search, Menu, X } from 'lucide-react';
 
 interface HeaderProps {
   searchQuery: string;
@@ -13,7 +12,6 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { isEditMode, toggleEditMode } = useCms();
 
   return (
     <header className="sticky top-0 z-40 bg-[#2340FF] text-[#F6F7F2] border-b border-[#3b55ff] transition-all shadow-md">
@@ -109,22 +107,6 @@ export const Header: React.FC<HeaderProps> = ({
               aria-label="Buscar"
             >
               <Search className="w-4 h-4" />
-            </button>
-
-            {/* Edit Mode Toggle Button */}
-            <button
-              id="btn-nav-edit-mode"
-              type="button"
-              onClick={toggleEditMode}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-mono-code text-xs font-bold transition-all cursor-pointer ${
-                isEditMode
-                  ? 'bg-[#D4FF3A] text-[#0F1222] border-[#D4FF3A] shadow-md'
-                  : 'bg-white/10 hover:bg-white/20 text-[#F6F7F2] border-white/20'
-              }`}
-              title={isEditMode ? 'Desativar Modo Edição' : 'Ativar Modo Edição (arraste itens e edite textos)'}
-            >
-              <Pencil className="w-3.5 h-3.5" />
-              <span>{isEditMode ? 'Edição Ativa' : 'Modo Edição'}</span>
             </button>
 
             {/* Contact CTA */}
@@ -235,17 +217,6 @@ export const Header: React.FC<HeaderProps> = ({
             >
               Sobre
             </a>
-            <button
-              type="button"
-              onClick={() => {
-                toggleEditMode();
-                setMobileMenuOpen(false);
-              }}
-              className="text-left text-[#D4FF3A] py-2 border-b border-white/10 flex items-center gap-2 font-bold cursor-pointer"
-            >
-              <Pencil className="w-4 h-4" />
-              <span>{isEditMode ? 'Desativar Modo Edição' : 'Ativar Modo Edição Visual'}</span>
-            </button>
             <div className="pt-2">
               <a
                 href="#contato"

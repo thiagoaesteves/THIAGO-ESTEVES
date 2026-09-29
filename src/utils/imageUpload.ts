@@ -68,3 +68,11 @@ export async function processImageUpload(
     reader.readAsDataURL(file);
   });
 }
+
+/**
+ * Converte diretamente o arquivo de imagem do computador em Base64
+ */
+export async function convertFileToBase64(file: File): Promise<string> {
+  return processImageUpload(file, 1600, 1600, 0.82);
+}
+

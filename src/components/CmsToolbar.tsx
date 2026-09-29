@@ -9,17 +9,21 @@ import {
   Type,
   X,
   Sparkles,
+  Key,
+  FileCode,
 } from 'lucide-react';
 
 export const CmsToolbar: React.FC = () => {
   const {
     isEditMode,
     toggleEditMode,
+    changePassword,
     hasChanges,
     saveChanges,
     resetToOriginal,
     setExportModalOpen,
     activeNotification,
+    exportCasesJson,
   } = useCms();
 
   if (!isEditMode && !activeNotification) {
@@ -39,8 +43,9 @@ export const CmsToolbar: React.FC = () => {
       {/* Floating Bottom Toolbar when in Edit Mode */}
       {isEditMode && (
         <aside
+          id="painel-edicao"
           aria-label="Barra do Modo Edição"
-          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-4xl bg-[#0F1222]/95 backdrop-blur-md text-white px-4 sm:px-6 py-3 rounded-2xl shadow-2xl border border-white/20 flex flex-wrap items-center justify-between gap-3 animate-fade-in"
+          className="edit-toolbar fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-4xl bg-[#0F1222]/95 backdrop-blur-md text-white px-4 sm:px-6 py-3 rounded-2xl shadow-2xl border border-white/20 flex flex-wrap items-center justify-between gap-3 animate-fade-in"
         >
           {/* Left badge and hints */}
           <div className="flex items-center gap-3">
@@ -73,18 +78,43 @@ export const CmsToolbar: React.FC = () => {
               title="Salvar alterações no navegador"
             >
               {hasChanges ? <Save className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5 text-[#D4FF3A]" />}
-              {hasChanges ? 'Salvar Alterações' : 'Salvo no navegador'}
+              {hasChanges ? 'Salvar no Navegador' : 'Salvo no navegador'}
             </button>
 
-            {/* Export JSON / Code Button */}
+            {/* Direct Download JSON Button */}
             <button
+              id="btn-baixar-json"
+              type="button"
+              onClick={exportCasesJson}
+              className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-mono-code font-bold bg-[#2340FF] hover:bg-[#1B34D6] text-white shadow-md transition-all hover:scale-105 cursor-pointer"
+              title="Baixar JSON com todos os novos textos e imagens Base64 atualizadas"
+            >
+              <Download className="w-3.5 h-3.5 text-[#D4FF3A]" />
+              <span>Baixar JSON</span>
+            </button>
+
+            {/* Export Code / Full Data Modal Button */}
+            <button
+              id="btn-exportar-dados"
               type="button"
               onClick={() => setExportModalOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-semibold bg-white/10 hover:bg-white/20 text-[#AFC0FF] hover:text-white transition-colors cursor-pointer"
-              title="Exportar código e JSON das alterações"
+              title="Exportar dados atualizados (cases.ts / cases.json) para o Netlify"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Exportar Dados</span>
+              <FileCode className="w-3.5 h-3.5 text-[#D4FF3A]" />
+              <span className="hidden sm:inline">Exportar Dados Atualizados</span>
+            </button>
+
+            {/* Alterar Senha Button */}
+            <button
+              id="btn-alterar-senha"
+              type="button"
+              onClick={changePassword}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-semibold bg-white/10 hover:bg-white/20 text-[#AFC0FF] hover:text-[#D4FF3A] transition-colors cursor-pointer"
+              title="Alterar senha de acesso ao Modo Edição"
+            >
+              <Key className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Alterar Senha</span>
             </button>
 
             {/* Reset to Original Button */}

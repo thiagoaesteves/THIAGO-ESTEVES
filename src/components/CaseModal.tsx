@@ -16,9 +16,12 @@ import {
   Video,
   Image as ImageIcon,
   Columns,
+  Upload,
+  Loader2,
 } from 'lucide-react';
 import { CaseItem, CaseBlock, CaseBlockType } from '../types';
 import { useCms } from '../context/CmsContext';
+import { processImageUpload } from '../utils/imageUpload';
 
 interface CaseModalProps {
   item: CaseItem | null;
@@ -93,6 +96,8 @@ export const CaseModal: React.FC<CaseModalProps> = ({
   const [addColumnsVal, setAddColumnsVal] = useState<number>(1);
   const [addScaleVal, setAddScaleVal] = useState<'original' | 'thumb'>('original');
   const [addVideoColumnsVal, setAddVideoColumnsVal] = useState<number>(1);
+  const [uploadingBlockIdx, setUploadingBlockIdx] = useState<number | null>(null);
+  const [isUploadingNewImage, setIsUploadingNewImage] = useState(false);
 
   // 3. Safe Item Memoization
   const safeItem = useMemo(() => {
@@ -129,13 +134,13 @@ export const CaseModal: React.FC<CaseModalProps> = ({
     ];
 
     const list: CaseBlock[] = [];
-    safeItem.text.forEach((p, idx) => {
+    if (safeItem.text && safeItem.text.length > 0) {
       list.push({
-        id: `text-${safeItem.slug}-${idx}-${p.slice(0, 10)}`,
+        id: `text-${safeItem.slug}-unified`,
         type: 'text',
-        value: p,
+        value: safeItem.text.join('\n\n'),
       });
-    });
+    }
     safeItem.yt.forEach((y, idx) => {
       list.push({
         id: `yt-${safeItem.slug}-${idx}-${y}`,
@@ -331,6 +336,25 @@ export const CaseModal: React.FC<CaseModalProps> = ({
 
   const updateBlockScale = (idx: number, scale: 'original' | 'thumb') => {
     const newBlocks = currentBlocks.map((b, i) => (i === idx ? { ...b, scale } : b));
+    updateCaseBlocks(safeItem.slug, newBlocks);
+  };
+
+  const unifyAllTextBlocks = () => {
+    const textBlocks = currentBlocks.filter((b) => b.type === 'text');
+    if (textBlocks.length <= 1) return;
+    const combinedText = textBlocks.map((b) => b.value).join('\n\n');
+    let firstAdded = false;
+    const newBlocks: CaseBlock[] = [];
+    currentBlocks.forEach((b) => {
+      if (b.type === 'text') {
+        if (!firstAdded) {
+          firstAdded = true;
+          newBlocks.push({ ...b, value: combinedText });
+        }
+      } else {
+        newBlocks.push(b);
+      }
+    });
     updateCaseBlocks(safeItem.slug, newBlocks);
   };
 
@@ -611,23 +635,51 @@ export const CaseModal: React.FC<CaseModalProps> = ({
 
         {/* 1. TEXT BLOCK */}
         {block.type === 'text' && (
-          <div>
+          <div className="w-full">
             {isEditMode ? (
-              <textarea
-                value={block.value}
-                rows={3}
-                onChange={(e) => updateBlockValue(idx, e.target.value)}
-                className="w-full text-lg sm:text-xl md:text-2xl leading-relaxed bg-black/5 dark:bg-white/5 border border-dashed border-[#2340FF] dark:border-[#FF4FA0] p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2340FF] dark:focus:ring-[#FF4FA0] text-[#0F1222] dark:text-[#F6F7F2]"
-                placeholder="Digite o texto do parágrafo..."
-              />
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono-code text-[#2340FF] dark:text-[#D4FF3A] font-bold">
+                    Editor de Texto Unificado (Multilinha):
+                  </span>
+                  {currentBlocks.filter((b) => b.type === 'text').length > 1 && (
+                    <button
+                      type="button"
+                      onClick={unifyAllTextBlocks}
+                      className="px-2 py-0.5 rounded text-[10px] font-mono-code bg-[#D4FF3A] text-[#0F1222] font-bold hover:bg-[#c2ed2c] transition-colors cursor-pointer"
+                      title="Unificar todos os blocos de texto deste case em uma única caixa fluida"
+                    >
+                      Unificar Textos em 1 Caixa
+                    </button>
+                  )}
+                </div>
+                <textarea
+                  value={block.value}
+                  rows={Math.max(5, block.value.split('\n').length + 1)}
+                  onChange={(e) => updateBlockValue(idx, e.target.value)}
+                  className="w-full text-lg sm:text-xl md:text-2xl leading-relaxed bg-black/5 dark:bg-white/5 border border-dashed border-[#2340FF] dark:border-[#FF4FA0] p-4 sm:p-5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2340FF] dark:focus:ring-[#FF4FA0] text-[#0F1222] dark:text-[#F6F7F2] font-normal resize-y min-h-[160px] whitespace-pre-wrap font-sans"
+                  placeholder="Escreva seu texto corrido aqui. Pressione Enter para criar novos parágrafos..."
+                />
+                <span className="text-[11px] font-mono-code text-black/50 dark:text-white/50 block">
+                  Pressione Enter para criar novos parágrafos livremente. A diagramação preserva quebras e espaçamento responsivo automaticamente.
+                </span>
+              </div>
             ) : (
-              <p
-                className={`text-xl sm:text-2xl md:text-3xl leading-relaxed max-w-4xl font-normal ${
-                  isLadoB ? 'text-[#D5DBF5]' : 'text-[#343848]'
-                }`}
-              >
-                {block.value}
-              </p>
+              <div className="space-y-5 sm:space-y-6 max-w-4xl">
+                {block.value
+                  .split(/\n\s*\n/)
+                  .filter((p) => p.trim())
+                  .map((para, pIdx) => (
+                    <p
+                      key={pIdx}
+                      className={`text-xl sm:text-2xl md:text-3xl leading-relaxed font-normal whitespace-pre-line ${
+                        isLadoB ? 'text-[#D5DBF5]' : 'text-[#343848]'
+                      }`}
+                    >
+                      {para}
+                    </p>
+                  ))}
+              </div>
             )}
           </div>
         )}
@@ -785,13 +837,43 @@ export const CaseModal: React.FC<CaseModalProps> = ({
             }
           >
             {isEditMode && (
-              <div className="mb-2">
+              <div className="mb-2 flex flex-wrap items-center gap-2 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-dashed border-black/15 dark:border-white/15">
+                <label className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#2340FF] hover:bg-[#1B34D6] text-white text-[11px] font-mono-code font-bold cursor-pointer transition-colors shadow-sm">
+                  {uploadingBlockIdx === idx ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#D4FF3A]" />
+                  ) : (
+                    <Upload className="w-3.5 h-3.5 text-[#D4FF3A]" />
+                  )}
+                  <span>{uploadingBlockIdx === idx ? 'Convertendo...' : 'Substituir do Computador'}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadingBlockIdx === idx}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      setUploadingBlockIdx(idx);
+                      try {
+                        const base64 = await processImageUpload(file, 2048, 2048, 0.88);
+                        updateBlockValue(idx, base64);
+                      } catch (err) {
+                        console.error('Erro ao converter imagem:', err);
+                        alert('Erro ao processar imagem do computador. Tente outro arquivo.');
+                      } finally {
+                        setUploadingBlockIdx(null);
+                        e.target.value = '';
+                      }
+                    }}
+                  />
+                </label>
+                <span className="text-[11px] font-mono-code text-gray-500">ou URL:</span>
                 <input
                   type="text"
-                  value={block.value}
+                  value={block.value.startsWith('data:') ? '[Imagem Base64 salva localmente]' : block.value}
                   onChange={(e) => updateBlockValue(idx, e.target.value.trim())}
                   placeholder="URL direta da imagem..."
-                  className="w-full px-3 py-1.5 text-xs font-mono-code rounded bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 text-[#0F1222] dark:text-white"
+                  className="flex-1 min-w-[200px] px-2.5 py-1 text-xs font-mono-code rounded bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 text-[#0F1222] dark:text-white"
                 />
               </div>
             )}
@@ -1187,18 +1269,63 @@ export const CaseModal: React.FC<CaseModalProps> = ({
 
               {/* Form: Inserir Imagem */}
               {activeAddForm === 'image' && (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (addInputVal.trim()) {
-                      addBlock('image', addInputVal.trim(), addAspectVal, addColumnsVal, addScaleVal);
-                      setAddInputVal('');
-                      setActiveAddForm(null);
-                    }
-                  }}
-                  className="space-y-3 pt-2 border-t border-black/10 dark:border-white/10"
-                >
-                  <div className="flex flex-wrap gap-2">
+                <div className="space-y-3 pt-2 border-t border-black/10 dark:border-white/10">
+                  {/* File input for direct computer upload */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 bg-black/5 dark:bg-white/5 rounded-lg border border-dashed border-[#2340FF]/40 dark:border-white/20">
+                    <label className="flex items-center gap-2 px-4 py-2 bg-[#2340FF] hover:bg-[#1B34D6] text-white text-xs font-mono-code font-bold rounded cursor-pointer transition-colors shadow-sm">
+                      {isUploadingNewImage ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-[#D4FF3A]" />
+                      ) : (
+                        <Upload className="w-4 h-4 text-[#D4FF3A]" />
+                      )}
+                      <span>
+                        {isUploadingNewImage ? 'Convertendo Imagem...' : 'Escolher Imagem do Computador'}
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={isUploadingNewImage}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setIsUploadingNewImage(true);
+                          try {
+                            const base64 = await processImageUpload(file, 2048, 2048, 0.88);
+                            addBlock('image', base64, addAspectVal, addColumnsVal, addScaleVal);
+                            setActiveAddForm(null);
+                          } catch (err) {
+                            console.error('Erro ao converter imagem:', err);
+                            alert('Erro ao carregar a imagem do computador. Tente novamente.');
+                          } finally {
+                            setIsUploadingNewImage(false);
+                            e.target.value = '';
+                          }
+                        }}
+                      />
+                    </label>
+                    <span className="text-[11px] font-mono-code text-gray-500 dark:text-gray-400">
+                      Converte em Base64 e insere no projeto instantaneamente.
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs font-mono-code text-gray-400">
+                    <span className="h-px bg-gray-300 dark:bg-gray-700 flex-1" />
+                    <span>ou cole a URL</span>
+                    <span className="h-px bg-gray-300 dark:bg-gray-700 flex-1" />
+                  </div>
+
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (addInputVal.trim()) {
+                        addBlock('image', addInputVal.trim(), addAspectVal, addColumnsVal, addScaleVal);
+                        setAddInputVal('');
+                        setActiveAddForm(null);
+                      }
+                    }}
+                    className="flex flex-wrap gap-2"
+                  >
                     <input
                       type="text"
                       value={addInputVal}
@@ -1211,7 +1338,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       type="submit"
                       className="px-4 py-1.5 bg-[#2340FF] text-white text-xs font-mono-code font-bold rounded cursor-pointer"
                     >
-                      Inserir Imagem
+                      Inserir via URL
                     </button>
                     <button
                       type="button"
@@ -1220,7 +1347,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                     >
                       Cancelar
                     </button>
-                  </div>
+                  </form>
                   <div className="flex flex-wrap items-center gap-4 text-xs font-mono-code">
                     <span className="text-gray-500">Formato:</span>
                     <label className="flex items-center gap-1 cursor-pointer">
@@ -1311,7 +1438,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       </div>
                     )}
                   </div>
-                </form>
+                </div>
               )}
             </div>
           )}

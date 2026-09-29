@@ -18,6 +18,9 @@ interface CaseCardProps {
   onSelect: (item: CaseItem) => void;
   dark?: boolean;
   bonus?: boolean;
+  featured?: boolean;
+  positionIndex?: number;
+  columns?: 2 | 3;
 }
 
 export const CaseCard: React.FC<CaseCardProps> = ({
@@ -25,6 +28,9 @@ export const CaseCard: React.FC<CaseCardProps> = ({
   onSelect,
   dark = false,
   bonus = false,
+  featured = true,
+  positionIndex,
+  columns = 2,
 }) => {
   const { isEditMode, reorderCases, moveCaseOrder, updateCaseField } = useCms();
   const isLadoA = item.lado === 'A';
@@ -43,6 +49,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
       if (
         target.closest('button') ||
         target.closest('input') ||
+        target.closest('textarea') ||
         target.closest('[contenteditable="true"]') ||
         target.closest('.cms-control')
       ) {
@@ -58,18 +65,37 @@ export const CaseCard: React.FC<CaseCardProps> = ({
       draggable={isEditMode}
       onDragStart={(e) => {
         if (!isEditMode) return;
+        const target = e.target as HTMLElement;
+        if (
+          target.closest('input') ||
+          target.closest('textarea') ||
+          target.closest('button')
+        ) {
+          e.preventDefault();
+          return;
+        }
         e.dataTransfer.setData('text/plain', item.slug);
+        e.dataTransfer.effectAllowed = 'move';
         setIsDragging(true);
       }}
       onDragOver={(e) => {
         if (!isEditMode) return;
         e.preventDefault();
-        setIsDragOver(true);
+        e.dataTransfer.dropEffect = 'move';
+        if (!isDragOver) setIsDragOver(true);
       }}
-      onDragLeave={() => setIsDragOver(false)}
+      onDragLeave={(e) => {
+        if (!isEditMode) return;
+        const currentTarget = e.currentTarget;
+        const relatedTarget = e.relatedTarget as Node | null;
+        if (!currentTarget.contains(relatedTarget)) {
+          setIsDragOver(false);
+        }
+      }}
       onDrop={(e) => {
         if (!isEditMode) return;
         e.preventDefault();
+        e.stopPropagation();
         setIsDragOver(false);
         setIsDragging(false);
         const draggedSlug = e.dataTransfer.getData('text/plain');
@@ -77,15 +103,18 @@ export const CaseCard: React.FC<CaseCardProps> = ({
           reorderCases(draggedSlug, item.slug);
         }
       }}
-      onDragEnd={() => setIsDragging(false)}
+      onDragEnd={() => {
+        setIsDragging(false);
+        setIsDragOver(false);
+      }}
       onClick={handleCardClick}
       className={`group relative text-left transition-all duration-300 rounded-xl p-3 sm:p-4 ${
         isEditMode ? 'cursor-grab active:cursor-grabbing border-2' : 'cursor-pointer'
       } ${
         isDragging
-          ? 'opacity-40 scale-[0.98]'
+          ? 'opacity-30 scale-[0.98] border-dashed border-[#2340FF]'
           : isDragOver
-          ? 'ring-4 ring-[#2340FF] bg-[#2340FF]/10'
+          ? 'ring-4 ring-[#2340FF] bg-[#2340FF]/15 scale-[1.01] shadow-2xl'
           : bonus
           ? isEditMode
             ? 'border-black/30 bg-black/[0.04] hover:border-[#0F1222]'
@@ -110,12 +139,45 @@ export const CaseCard: React.FC<CaseCardProps> = ({
       }}
       aria-label={`Ver case ${item.name} - ${item.concept}`}
     >
+      {/* Drop Target Interactive Highlight Overlay */}
+      {isEditMode && isDragOver && (
+        <div className="pointer-events-none absolute inset-0 z-30 rounded-xl ring-4 ring-[#2340FF] dark:ring-[#D4FF3A] bg-[#2340FF]/20 dark:bg-[#D4FF3A]/20 backdrop-blur-[1px] flex items-center justify-center transition-all animate-pulse">
+          <span className="px-4 py-2 rounded-lg bg-[#2340FF] text-white dark:bg-[#D4FF3A] dark:text-[#0F1222] font-mono-code font-bold text-xs uppercase tracking-wider shadow-2xl">
+            Soltar aqui para posicionar
+          </span>
+        </div>
+      )}
+
       {/* CMS Drag & Control Bar on top of card */}
       {isEditMode && (
         <div className="cms-control flex flex-wrap items-center justify-between gap-2 mb-3 pb-2.5 border-b border-black/10 dark:border-white/10 select-none">
-          <div className="flex items-center gap-1.5 text-xs font-mono-code font-bold text-[#2340FF] dark:text-[#D4FF3A]">
-            <GripVertical className="w-4 h-4 cursor-grab" />
-            <span>ARRAPSTE PARA REORDENAR</span>
+          <div className="flex items-center gap-2">
+            <div
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono-code font-bold border transition-colors select-none ${
+                bonus
+                  ? 'bg-black/10 text-[#0F1222] border-black/20'
+                  : dark
+                  ? 'bg-white/10 text-[#D4FF3A] border-white/20'
+                  : 'bg-[#2340FF]/10 text-[#2340FF] border-[#2340FF]/25'
+              }`}
+            >
+              <GripVertical className="w-3.5 h-3.5" />
+              <span>ARRASTE PARA REORDENAR</span>
+            </div>
+
+            {positionIndex !== undefined && (
+              <span
+                className={`text-[11px] font-mono-code font-bold px-2 py-0.5 rounded border ${
+                  bonus
+                    ? 'bg-black/5 text-[#0F1222]/80 border-black/15'
+                    : dark
+                    ? 'bg-white/5 text-white/70 border-white/15'
+                    : 'bg-black/5 text-[#343848] border-black/10'
+                }`}
+              >
+                #{String(positionIndex).padStart(2, '0')}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-1">
@@ -269,6 +331,32 @@ export const CaseCard: React.FC<CaseCardProps> = ({
           className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
         />
 
+        {/* Edit Mode: Always Visible Quick Upload Button */}
+        {isEditMode && (
+          <button
+            type="button"
+            disabled={isUploadingCover}
+            onClick={(e) => {
+              e.stopPropagation();
+              document.getElementById(`cover-file-${item.slug}`)?.click();
+            }}
+            className="absolute top-2 left-2 z-30 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#2340FF] hover:bg-[#1B34D6] text-white text-[11px] font-mono-code font-bold shadow-lg transition-transform hover:scale-105 cursor-pointer disabled:opacity-50"
+            title="Upload de imagem do computador para a capa"
+          >
+            {isUploadingCover ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#D4FF3A]" />
+                <span>Carregando...</span>
+              </>
+            ) : (
+              <>
+                <Upload className="w-3.5 h-3.5 text-[#D4FF3A]" />
+                <span>Trocar Capa</span>
+              </>
+            )}
+          </button>
+        )}
+
         {/* Edit Mode: Direct Upload Cover Button Overlay */}
         {isEditMode && (
           <div
@@ -395,7 +483,13 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             type="text"
             value={item.name}
             onChange={(e) => updateCaseField(item.slug, 'name', e.target.value)}
-            className={`w-full font-disp font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight leading-tight border-b-2 border-dashed px-2 py-1 focus:outline-none rounded transition-colors ${
+            className={`w-full font-disp font-bold tracking-tight leading-tight border-b-2 border-dashed px-2 py-1 focus:outline-none rounded transition-colors ${
+              featured
+                ? 'text-3xl sm:text-4xl md:text-5xl'
+                : columns === 3
+                ? 'text-xl sm:text-2xl md:text-[25px]'
+                : 'text-2xl sm:text-3xl md:text-[34px]'
+            } ${
               dark
                 ? 'text-white bg-white/10 border-[#FF4FA0] focus:bg-white/20'
                 : 'text-[#0F1222] bg-white/95 border-[#2340FF] shadow-sm focus:bg-white'
@@ -405,7 +499,13 @@ export const CaseCard: React.FC<CaseCardProps> = ({
         </div>
       ) : (
         <h3
-          className={`font-disp font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight leading-tight mt-1.5 transition-colors ${
+          className={`font-disp font-bold tracking-tight leading-tight mt-1.5 transition-colors ${
+            featured
+              ? 'text-3xl sm:text-4xl md:text-5xl'
+              : columns === 3
+              ? 'text-xl sm:text-2xl md:text-[25px]'
+              : 'text-2xl sm:text-3xl md:text-[34px]'
+          } ${
             bonus
               ? 'text-[#0F1222] group-hover:text-[#2340FF]'
               : dark
@@ -424,7 +524,13 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             value={item.concept}
             rows={2}
             onChange={(e) => updateCaseField(item.slug, 'concept', e.target.value)}
-            className={`w-full text-lg sm:text-xl md:text-2xl leading-snug border-2 border-dashed p-2 focus:outline-none rounded resize-y transition-colors ${
+            className={`w-full leading-snug border-2 border-dashed p-2 focus:outline-none rounded resize-y transition-colors ${
+              featured
+                ? 'text-lg sm:text-xl md:text-2xl'
+                : columns === 3
+                ? 'text-sm sm:text-base'
+                : 'text-base sm:text-lg md:text-xl'
+            } ${
               bonus
                 ? 'text-[#0F1222] bg-white/90 border-[#0F1222] focus:bg-white'
                 : dark
@@ -436,7 +542,13 @@ export const CaseCard: React.FC<CaseCardProps> = ({
         </div>
       ) : (
         <p
-          className={`text-lg sm:text-xl md:text-2xl leading-snug mt-2 ${
+          className={`leading-snug mt-2 ${
+            featured
+              ? 'text-lg sm:text-xl md:text-2xl'
+              : columns === 3
+              ? 'text-sm sm:text-base'
+              : 'text-base sm:text-lg md:text-xl'
+          } ${
             bonus ? 'text-[#1D2611]' : dark ? 'text-[#D5DBF5]' : 'text-[#343848]'
           }`}
         >

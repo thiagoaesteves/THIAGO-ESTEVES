@@ -70,11 +70,14 @@ export const ORIGINAL_SOBRE_DATA: SobreData = ${JSON.stringify(sobre, null, 2)};
         {/* Header */}
         <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
           <div>
-            <h2 className="font-disp text-xl sm:text-2xl font-bold text-white">
-              Exportar Dados do Portfólio
+            <h2 className="font-disp text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+              <span>Exportar Dados Atualizados</span>
+              <span className="text-xs font-mono-code font-normal px-2 py-0.5 rounded bg-[#2340FF] text-white">
+                Para Netlify & Git
+              </span>
             </h2>
             <p className="text-xs text-[#AFC0FF] font-mono-code mt-0.5">
-              Copie o código ou baixe os dados das suas alterações para salvar permanentemente!
+              Baixe os arquivos JSON ou TypeScript contendo todos os novos textos e imagens Base64.
             </p>
           </div>
           <button
@@ -84,6 +87,21 @@ export const ORIGINAL_SOBRE_DATA: SobreData = ${JSON.stringify(sobre, null, 2)};
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* Netlify Deployment Instructions Banner */}
+        <div className="bg-[#2340FF]/20 border-b border-white/10 px-6 py-3.5 flex items-start gap-3 text-xs font-mono-code text-[#AFC0FF]">
+          <span className="text-base select-none">💡</span>
+          <div className="space-y-1">
+            <p className="text-white font-semibold">
+              Como publicar permanentemente no Netlify para qualquer visitante:
+            </p>
+            <ol className="list-decimal list-inside space-y-0.5 text-white/85">
+              <li>Clique em <b>"Baixar cases.ts"</b> (ou <b>"Baixar cases.json"</b>).</li>
+              <li>Substitua o arquivo na pasta <code className="text-[#D4FF3A] bg-black/50 px-1.5 py-0.5 rounded">src/data/cases.ts</code> do seu projeto.</li>
+              <li>Envie para o GitHub (<code className="text-[#D4FF3A] bg-black/50 px-1 py-0.5 rounded">git commit & push</code>). O Netlify reconstruirá o site com todas as suas novidades!</li>
+            </ol>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -141,21 +159,23 @@ export const ORIGINAL_SOBRE_DATA: SobreData = ${JSON.stringify(sobre, null, 2)};
 
         {/* Footer Actions */}
         <div className="px-6 py-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 bg-[#0F1222]">
-          <span className="text-xs text-[#AFC0FF] font-mono-code">
-            Arquivo atual: <b className="text-white">{filename}</b>
-          </span>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[#AFC0FF] font-mono-code">
+              Visualizando: <b className="text-white">{filename}</b>
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2.5">
             <button
               type="button"
               onClick={handleDownload}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono-code text-xs font-semibold transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#2340FF] hover:bg-[#1B34D6] text-white font-mono-code text-xs font-bold transition-all shadow-md cursor-pointer hover:scale-105"
             >
-              <Download className="w-4 h-4" /> Baixar {filename}
+              <Download className="w-4 h-4 text-[#D4FF3A]" /> Baixar {filename}
             </button>
             <button
               type="button"
               onClick={handleCopy}
-              className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#D4FF3A] text-[#0F1222] font-mono-code text-xs font-bold hover:bg-[#e4ff70] transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#D4FF3A] text-[#0F1222] font-mono-code text-xs font-bold hover:bg-[#e4ff70] transition-colors cursor-pointer"
             >
               {copied ? (
                 <>

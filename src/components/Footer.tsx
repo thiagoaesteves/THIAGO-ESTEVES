@@ -1,6 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useCms } from '../context/CmsContext';
 
 export const Footer: React.FC = () => {
+  const { iniciarModoEdicao } = useCms();
+
+  const handleEasterEgg = (e?: React.MouseEvent | MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const senhaSalva = localStorage.getItem('editPassword') || 'criadoRJ';
+    const tentativa = window.prompt('Digite a senha para acessar o Modo Edição:');
+    if (tentativa === null) return;
+    if (tentativa.trim() === senhaSalva.trim()) {
+      if (typeof (window as any).iniciarModoEdicao === 'function') {
+        (window as any).iniciarModoEdicao();
+      } else {
+        iniciarModoEdicao();
+      }
+    } else {
+      alert('Senha incorreta.');
+    }
+  };
+
+  useEffect(() => {
+    const el = document.getElementById('trigger-esteves');
+    if (el) {
+      el.onclick = (e) => handleEasterEgg(e);
+    }
+  }, []);
+
   return (
     <footer className="bg-[#0F1222] text-[#AFC0FF] py-8 border-t border-[#262A3D]">
       <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -23,13 +52,21 @@ export const Footer: React.FC = () => {
                 />
               </g>
             </svg>
-            <span className="text-white font-medium">
-              Thiago Esteves · Creative Copywriter &amp; Storyteller
+            <span className="text-white font-medium select-none">
+              Thiago{' '}
+              <span
+                id="trigger-esteves"
+                className="cursor-pointer select-none"
+                onClick={handleEasterEgg}
+              >
+                Esteves
+              </span>{' '}
+              · Creative Copywriter &amp; Storyteller
             </span>
           </div>
 
           <div className="text-center sm:text-right">
-            <span className="text-[#6B7CBA] text-[11px] font-mono-code">
+            <span className="text-[#6B7CBA] text-[11px] font-mono-code select-none">
               © 2026 Thiago Esteves · All Rights Reserved
             </span>
           </div>
