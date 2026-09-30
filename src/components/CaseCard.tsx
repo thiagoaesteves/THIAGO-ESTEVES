@@ -305,7 +305,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
               value={coverInput}
               onChange={(e) => setCoverInput(e.target.value)}
               placeholder="Cole a URL da capa..."
-              className="flex-1 min-w-[200px] px-2.5 py-1 text-xs font-mono-code bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 rounded text-[#0F1222] dark:text-white"
+              className="w-full sm:flex-1 sm:min-w-0 px-2.5 py-1.5 text-xs font-mono-code bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 rounded text-[#0F1222] dark:text-white"
             />
             <button
               type="button"
@@ -313,7 +313,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
                 updateCaseField(item.slug, 'cover', coverInput);
                 setIsEditingCover(false);
               }}
-              className="px-2.5 py-1 bg-black/20 dark:bg-white/20 hover:bg-black/30 dark:hover:bg-white/30 text-[#0F1222] dark:text-white text-xs font-mono-code rounded font-bold cursor-pointer"
+              className="px-3 py-1.5 bg-black/20 dark:bg-white/20 hover:bg-black/30 dark:hover:bg-white/30 text-[#0F1222] dark:text-white text-xs font-mono-code rounded font-bold cursor-pointer"
             >
               Salvar Link
             </button>
@@ -462,7 +462,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             value={item.deliv}
             onClick={(e) => e.stopPropagation()}
             onChange={(e) => updateCaseField(item.slug, 'deliv', e.target.value)}
-            className={`text-right flex-1 min-w-[150px] border-b-2 border-dashed px-2 py-0.5 text-xs focus:outline-none rounded transition-colors ${
+            className={`text-right flex-1 min-w-0 border-b-2 border-dashed px-2 py-0.5 text-xs focus:outline-none rounded transition-colors ${
               dark
                 ? 'text-[#AFC0FF] bg-white/10 border-[#FF4FA0] focus:bg-white/20'
                 : 'text-[#0F1222] bg-white/90 border-[#2340FF] shadow-sm focus:bg-white'
@@ -483,12 +483,12 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             type="text"
             value={item.name}
             onChange={(e) => updateCaseField(item.slug, 'name', e.target.value)}
-            className={`w-full font-disp font-bold tracking-tight leading-tight border-b-2 border-dashed px-2 py-1 focus:outline-none rounded transition-colors ${
+            className={`w-full font-disp font-bold tracking-tight leading-tight border-b-2 border-dashed px-2 py-1 focus:outline-none rounded transition-colors break-words ${
               featured
-                ? 'text-3xl sm:text-4xl md:text-5xl'
+                ? 'text-2xl sm:text-4xl md:text-5xl'
                 : columns === 3
-                ? 'text-xl sm:text-2xl md:text-[25px]'
-                : 'text-2xl sm:text-3xl md:text-[34px]'
+                ? 'text-lg sm:text-xl md:text-[24px]'
+                : 'text-xl sm:text-2xl md:text-3xl'
             } ${
               dark
                 ? 'text-white bg-white/10 border-[#FF4FA0] focus:bg-white/20'
@@ -499,12 +499,12 @@ export const CaseCard: React.FC<CaseCardProps> = ({
         </div>
       ) : (
         <h3
-          className={`font-disp font-bold tracking-tight leading-tight mt-1.5 transition-colors ${
+          className={`font-disp font-bold tracking-tight leading-tight mt-1.5 transition-colors break-words ${
             featured
-              ? 'text-3xl sm:text-4xl md:text-5xl'
+              ? 'text-2xl sm:text-4xl md:text-5xl'
               : columns === 3
-              ? 'text-xl sm:text-2xl md:text-[25px]'
-              : 'text-2xl sm:text-3xl md:text-[34px]'
+              ? 'text-lg sm:text-xl md:text-[24px]'
+              : 'text-xl sm:text-2xl md:text-3xl'
           } ${
             bonus
               ? 'text-[#0F1222] group-hover:text-[#2340FF]'
@@ -524,12 +524,12 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             value={item.concept}
             rows={2}
             onChange={(e) => updateCaseField(item.slug, 'concept', e.target.value)}
-            className={`w-full leading-snug border-2 border-dashed p-2 focus:outline-none rounded resize-y transition-colors ${
+            className={`w-full leading-snug border-2 border-dashed p-2 focus:outline-none rounded resize-y transition-colors break-words ${
               featured
-                ? 'text-lg sm:text-xl md:text-2xl'
+                ? 'text-base sm:text-lg md:text-xl'
                 : columns === 3
-                ? 'text-sm sm:text-base'
-                : 'text-base sm:text-lg md:text-xl'
+                ? 'text-xs sm:text-sm md:text-base'
+                : 'text-sm sm:text-base md:text-lg'
             } ${
               bonus
                 ? 'text-[#0F1222] bg-white/90 border-[#0F1222] focus:bg-white'
@@ -542,12 +542,12 @@ export const CaseCard: React.FC<CaseCardProps> = ({
         </div>
       ) : (
         <p
-          className={`leading-snug mt-2 ${
+          className={`leading-snug mt-2 break-words ${
             featured
-              ? 'text-lg sm:text-xl md:text-2xl'
+              ? 'text-base sm:text-lg md:text-xl'
               : columns === 3
-              ? 'text-sm sm:text-base'
-              : 'text-base sm:text-lg md:text-xl'
+              ? 'text-xs sm:text-sm md:text-base'
+              : 'text-sm sm:text-base md:text-lg'
           } ${
             bonus ? 'text-[#1D2611]' : dark ? 'text-[#D5DBF5]' : 'text-[#343848]'
           }`}

@@ -1,27 +1,48 @@
 import React, { useState } from 'react';
-import { Search, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
-interface HeaderProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-}
-
-export const Header: React.FC<HeaderProps> = ({
-  searchQuery,
-  setSearchQuery,
-}) => {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+export const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+
+    if (targetId === 'topo') {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+      window.history.pushState(null, '', '#topo');
+      return;
+    }
+
+    const element = document.getElementById(targetId);
+    if (element) {
+      const headerOffset = 70;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+      window.history.pushState(null, '', `#${targetId}`);
+    } else {
+      window.location.hash = targetId;
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-40 bg-[#2340FF] text-[#F6F7F2] border-b border-[#3b55ff] transition-all shadow-md">
-      <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#2340FF] text-[#F6F7F2] border-b border-[#3b55ff] transition-all shadow-md">
+      <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-3 sm:py-3.5">
         <div className="flex items-center justify-between gap-4">
           {/* Brand Logo */}
           <a
             id="brand-logo-link"
             href="#topo"
-            className="flex items-center gap-3 text-xl font-bold tracking-tight text-[#F6F7F2] hover:opacity-95 transition-opacity"
+            onClick={(e) => handleNavClick(e, 'topo')}
+            className="flex items-center gap-3 text-xl font-bold tracking-tight text-[#F6F7F2] hover:opacity-95 transition-opacity cursor-pointer select-none"
+            aria-label="Thiago Esteves - Início"
           >
             <svg
               className="w-8 h-6 flex-shrink-0"
@@ -58,172 +79,120 @@ export const Header: React.FC<HeaderProps> = ({
           </a>
 
           {/* Navigation Links Desktop */}
-          <nav className="hidden md:flex items-center gap-6 font-mono-code text-xs uppercase tracking-wider">
+          <nav className="hidden md:flex items-center gap-5 lg:gap-7 font-mono-code text-xs uppercase tracking-wider">
             <a
               id="nav-lado-a"
               href="#lado-a"
-              className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium"
+              onClick={(e) => handleNavClick(e, 'lado-a')}
+              className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium cursor-pointer py-1"
             >
               Lado A
             </a>
             <a
               id="nav-lado-b"
               href="#lado-b"
-              className="text-[#F6F7F2] hover:text-[#FF4FA0] transition-colors font-medium"
+              onClick={(e) => handleNavClick(e, 'lado-b')}
+              className="text-[#F6F7F2] hover:text-[#FF4FA0] transition-colors font-medium cursor-pointer py-1"
             >
               Lado B
             </a>
             <a
               id="nav-bonus"
               href="#faixa-bonus"
-              className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium"
+              onClick={(e) => handleNavClick(e, 'faixa-bonus')}
+              className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium cursor-pointer py-1"
             >
               Bônus
             </a>
             <a
               id="nav-servicos"
               href="#servicos"
-              className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium"
+              onClick={(e) => handleNavClick(e, 'servicos')}
+              className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium cursor-pointer py-1"
             >
               Serviços
             </a>
             <a
               id="nav-sobre"
               href="#sobre"
-              className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium"
+              onClick={(e) => handleNavClick(e, 'sobre')}
+              className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium cursor-pointer py-1"
             >
               Sobre
             </a>
-
-            {/* Search Toggle */}
-            <button
-              id="btn-nav-search-toggle"
-              type="button"
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className={`p-2 rounded hover:bg-[#1B34D6] transition-colors cursor-pointer ${
-                searchQuery ? 'text-[#D4FF3A]' : 'text-[#F6F7F2]'
-              }`}
-              title="Buscar cases"
-              aria-label="Buscar"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-
-            {/* Contact CTA */}
             <a
               id="nav-contato"
               href="#contato"
-              className="faixa-clip bg-[#D4FF3A] text-[#0F1222] hover:bg-white transition-all transform hover:-translate-y-0.5 font-bold"
+              onClick={(e) => handleNavClick(e, 'contato')}
+              className="faixa-clip bg-[#D4FF3A] text-[#0F1222] hover:bg-white transition-all transform hover:-translate-y-0.5 font-bold cursor-pointer ml-1"
             >
               Contato
             </a>
           </nav>
 
-          {/* Mobile Right Controls */}
-          <div className="flex md:hidden items-center gap-2">
-            <button
-              id="btn-mobile-search-toggle"
-              type="button"
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="p-2 text-[#F6F7F2] hover:bg-[#1B34D6] rounded"
-              title="Buscar"
-            >
-              <Search className="w-5 h-5" />
-            </button>
+          {/* Mobile Menu Button */}
+          <div className="flex md:hidden items-center">
             <button
               id="btn-mobile-menu-toggle"
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-[#F6F7F2] hover:bg-[#1B34D6] rounded"
-              aria-label="Menu"
+              className="p-2 text-[#F6F7F2] hover:bg-[#1B34D6] rounded min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-colors"
+              aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
 
-        {/* Expandable Search Bar */}
-        {isSearchOpen && (
-          <div className="mt-3 pt-3 border-t border-[#6F85FF]/40 flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#AFC0FF]" />
-              <input
-                id="search-input-header"
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar por marca, conceito, formato (ex: Vivo, Roteiro, YAMY)..."
-                className="w-full pl-9 pr-8 py-2 bg-[#1B34D6] border border-[#6F85FF] rounded text-sm text-[#F6F7F2] placeholder-[#AFC0FF] focus:outline-none focus:border-[#D4FF3A]"
-                autoFocus
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#AFC0FF] hover:text-white"
-                >
-                  Limpar
-                </button>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setIsSearchOpen(false);
-                setSearchQuery('');
-              }}
-              className="text-xs text-[#AFC0FF] hover:text-white px-2 py-1"
-            >
-              Fechar
-            </button>
-          </div>
-        )}
-
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
-          <nav className="md:hidden mt-4 pt-4 border-t border-[#6F85FF]/40 flex flex-col gap-3 font-mono-code text-sm">
+          <nav
+            aria-label="Navegação mobile"
+            className="md:hidden mt-3 pt-3 border-t border-[#6F85FF]/40 flex flex-col font-mono-code text-sm animate-fade-in"
+          >
             <a
               href="#lado-a"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-[#F6F7F2] py-2 border-b border-white/10"
+              onClick={(e) => handleNavClick(e, 'lado-a')}
+              className="text-[#F6F7F2] py-3 min-h-[44px] flex items-center border-b border-white/10 active:text-[#D4FF3A]"
             >
-              Lado A (Advertising)
+              Lado A
             </a>
             <a
               href="#lado-b"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-[#F6F7F2] py-2 border-b border-white/10"
+              onClick={(e) => handleNavClick(e, 'lado-b')}
+              className="text-[#F6F7F2] py-3 min-h-[44px] flex items-center border-b border-white/10 active:text-[#FF4FA0]"
             >
-              Lado B (Branding)
+              Lado B
             </a>
             <a
               href="#faixa-bonus"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-[#D4FF3A] py-2 border-b border-white/10 font-bold"
+              onClick={(e) => handleNavClick(e, 'faixa-bonus')}
+              className="text-[#D4FF3A] py-3 min-h-[44px] flex items-center border-b border-white/10 font-bold"
             >
-              Faixa Bônus (Projetos Especiais)
+              Bônus
             </a>
             <a
               href="#servicos"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-[#F6F7F2] py-2 border-b border-white/10"
+              onClick={(e) => handleNavClick(e, 'servicos')}
+              className="text-[#F6F7F2] py-3 min-h-[44px] flex items-center border-b border-white/10 active:text-[#D4FF3A]"
             >
               Serviços
             </a>
             <a
               href="#sobre"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-[#F6F7F2] py-2 border-b border-white/10"
+              onClick={(e) => handleNavClick(e, 'sobre')}
+              className="text-[#F6F7F2] py-3 min-h-[44px] flex items-center border-b border-white/10 active:text-[#D4FF3A]"
             >
               Sobre
             </a>
-            <div className="pt-2">
+            <div className="pt-3 pb-1">
               <a
                 href="#contato"
-                onClick={() => setMobileMenuOpen(false)}
-                className="faixa-clip bg-[#D4FF3A] text-[#0F1222] text-center block w-full py-2.5 font-bold"
+                onClick={(e) => handleNavClick(e, 'contato')}
+                className="faixa-clip bg-[#D4FF3A] text-[#0F1222] text-center block w-full py-3 min-h-[44px] font-bold"
               >
-                Vamos Conversar
+                Contato
               </a>
             </div>
           </nav>

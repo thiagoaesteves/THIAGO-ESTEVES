@@ -12,7 +12,7 @@ import { CaseModal } from './components/CaseModal';
 
 import { LightboxModal } from './components/LightboxModal';
 
-import { ManifestoSection } from './components/ManifestoSection';
+import { ServicosSection } from './components/ServicosSection';
 
 import { SobreSection } from './components/SobreSection';
 
@@ -28,10 +28,6 @@ import { CmsProvider, useCms } from './context/CmsContext';
 
 import { CaseItem } from './types';
 
-import { X } from 'lucide-react';
-
-
-
 function PortfolioApp() {
 
   const { cases } = useCms();
@@ -39,8 +35,6 @@ function PortfolioApp() {
   const [selectedCase, setSelectedCase] = useState<CaseItem | null>(null);
 
   const [lightboxData, setLightboxData] = useState<{ url: string; title: string } | null>(null);
-
-  const [searchQuery, setSearchQuery] = useState('');
 
 
 
@@ -57,11 +51,21 @@ function PortfolioApp() {
         if (hash === 'edit') return;
 
         const found = cases.find((c) => c.slug === hash);
-
         if (found) {
-
           setSelectedCase(found);
-
+        } else {
+          const element = document.getElementById(hash);
+          if (element) {
+            setTimeout(() => {
+              const headerOffset = 70;
+              const elementPosition = element.getBoundingClientRect().top;
+              const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+              window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth',
+              });
+            }, 60);
+          }
         }
 
       }
@@ -116,329 +120,135 @@ function PortfolioApp() {
 
 
 
-  // Filter cases based on search query
-
-  const filteredCases = useMemo(() => {
-
-    if (!searchQuery.trim()) return cases;
-
-    const q = searchQuery.toLowerCase();
-
-    return cases.filter((c) => {
-
-      return (
-
-        c.name.toLowerCase().includes(q) ||
-
-        c.concept.toLowerCase().includes(q) ||
-
-        c.deliv.toLowerCase().includes(q) ||
-
-        c.text.some((t) => t.toLowerCase().includes(q))
-
-      );
-
-    });
-
-  }, [cases, searchQuery]);
-
-
-
   const casesLadoA = useMemo(
-
-    () => filteredCases.filter((c) => c.lado === 'A'),
-
-    [filteredCases]
-
+    () => cases.filter((c) => c.lado === 'A'),
+    [cases]
   );
 
   const casesLadoB = useMemo(
-
-    () => filteredCases.filter((c) => c.lado === 'B'),
-
-    [filteredCases]
-
+    () => cases.filter((c) => c.lado === 'B'),
+    [cases]
   );
 
   const casesBonus = useMemo(
-
-    () => filteredCases.filter((c) => c.lado === 'bonus'),
-
-    [filteredCases]
-
+    () => cases.filter((c) => c.lado === 'bonus'),
+    [cases]
   );
 
-
-
   const totalA = useMemo(() => cases.filter((c) => c.lado === 'A').length, [cases]);
-
   const totalB = useMemo(() => cases.filter((c) => c.lado === 'B').length, [cases]);
-
   const totalBonus = useMemo(() => cases.filter((c) => c.lado === 'bonus').length, [cases]);
 
-
-
   return (
-
     <div className="min-h-screen bg-[#F6F7F2] text-[#0F1222] font-disp antialiased selection:bg-[#D4FF3A] selection:text-[#0F1222]">
-
-      {/* Sticky Header with Edit Mode Button */}
-
-      <Header
-
-        searchQuery={searchQuery}
-
-        setSearchQuery={setSearchQuery}
-
-      />
-
-
+      {/* Fixed Header with Navigation */}
+      <Header />
 
       {/* Hero Section */}
-
       <Hero
-
         caseCountA={totalA}
-
         caseCountB={totalB}
-
         caseCountBonus={totalBonus}
-
       />
 
-
-
       {/* Infinite Brand Marquee */}
-
       <Marquee />
 
-
-
-      {/* Active Search Notification Banner */}
-
-      {searchQuery && (
-
-        <div className="bg-[#EAECE6] border-b border-[#DADCE3] py-2.5">
-
-          <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between text-xs font-mono-code text-[#2340FF]">
-
-            <span>
-
-              Resultados para: <b>"{searchQuery}"</b> ({filteredCases.length} encontrados)
-
-            </span>
-
-            <button
-
-              type="button"
-
-              onClick={() => setSearchQuery('')}
-
-              className="text-[#5B6070] hover:text-black flex items-center gap-1 cursor-pointer font-bold"
-
-            >
-
-              <X className="w-3.5 h-3.5" /> Limpar busca
-
-            </button>
-
-          </div>
-
-        </div>
-
-      )}
-
-
-
       <main>
-
         {/* Lado A: Advertising */}
-
-        <section id="lado-a" className="py-16 md:py-24 bg-[#F6F7F2]">
-
-            <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8">
-
+        <section id="lado-a" className="py-14 sm:py-18 md:py-24 bg-[#F6F7F2]">
+            <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
               {/* Section Header */}
-
-              <div className="max-w-3xl space-y-1 mb-10 md:mb-12">
-
+              <div className="max-w-3xl space-y-1 mb-8 sm:mb-10 md:mb-12">
                 <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block">
-
                   Lado A
-
                 </span>
-
-                <h2 className="font-disp font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-[5.25rem] tracking-[-0.05em] text-[#0F1222] leading-[0.95]">
-
+                <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] 2xl:text-[5.75rem] tracking-[-0.04em] text-[#0F1222] leading-[0.98]">
                   Advertising
-
                 </h2>
-
               </div>
 
-
-
-              {/* Grid of Lado A Cards - Grid Simétrico Perfeito: 2 Colunas x 4 Fileiras (2 x 4) */}
-
+              {/* Grid of Lado A Cards - Grid Simétrico: 1 Coluna em Mobile, 2 Colunas em Tablets e Desktops */}
               {casesLadoA.length === 0 ? (
-
                 <div className="py-12 text-center text-[#5B6070] font-mono-code text-sm">
-
                   Nenhum case do Lado A corresponde à pesquisa atual.
-
                 </div>
-
               ) : (
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 lg:gap-14">
-
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 xl:gap-14">
                   {casesLadoA.map((item, idx) => (
-
                     <div
-
                       key={item.slug}
-
                       className="col-span-1"
-
                     >
-
                       <CaseCard
-
                         item={item}
-
                         onSelect={handleOpenCase}
-
                         featured={false}
-
                         columns={2}
-
                         positionIndex={idx + 1}
-
                       />
-
                     </div>
-
                   ))}
-
                 </div>
-
               )}
-
             </div>
-
           </section>
-
-
 
         {/* Lado B: Branding (Original Dark Visual Style) */}
-
-        {(!searchQuery || casesLadoB.length > 0) && (
-
-          <section id="lado-b" className="py-16 md:py-28 bg-[#0F1222] text-[#F6F7F2] border-t border-[#262A3D]">
-
-            <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8">
-
+        {casesLadoB.length > 0 && (
+          <section id="lado-b" className="py-14 sm:py-18 md:py-24 bg-[#0F1222] text-[#F6F7F2] border-t border-[#262A3D]">
+            <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
               {/* Section Header */}
-
-              <div className="max-w-3xl space-y-1 mb-10 md:mb-12">
-
+              <div className="max-w-3xl space-y-1 mb-8 sm:mb-10 md:mb-12">
                 <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#FF4FA0] font-bold block">
-
                   Lado B
-
                 </span>
-
-                <h2 className="font-disp font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-[5.25rem] tracking-[-0.05em] text-white leading-[0.95]">
-
+                <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] 2xl:text-[5.75rem] tracking-[-0.04em] text-white leading-[0.98]">
                   Branding
-
                 </h2>
-
               </div>
 
-
-
-              {/* Lado B Layout: 3 Colunas Lado a Lado Simétricas (1 x 3) */}
-
+              {/* Lado B Layout: 1 Coluna em Mobile, 2 em Tablets, 3 Colunas em Desktops (grid-cols-1 sm:grid-cols-2 lg:grid-cols-3) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
-
                 {casesLadoB.map((item, idx) => (
-
                   <div
-
                     key={item.slug}
-
                     className="col-span-1"
-
                   >
-
                     <CaseCard
-
                       item={item}
-
                       onSelect={handleOpenCase}
-
                       dark
-
                       featured={false}
-
                       columns={3}
-
                       positionIndex={idx + 1}
-
                     />
-
                   </div>
-
                 ))}
-
               </div>
-
             </div>
-
           </section>
-
         )}
 
-
-
         {/* Faixa Bônus (Acid Green / Electric Lime Backdrop #D4FF3A) */}
-
-        {(!searchQuery || casesBonus.length > 0) && (
-
-          <section id="faixa-bonus" className="py-16 md:py-28 bg-[#D4FF3A] text-[#0F1222] border-t border-black/10">
-
-            <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8">
-
+        {casesBonus.length > 0 && (
+          <section id="faixa-bonus" className="py-14 sm:py-18 md:py-24 bg-[#D4FF3A] text-[#0F1222] border-t border-black/10">
+            <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
               {/* Section Header */}
-
-              <div className="max-w-4xl space-y-1 mb-10 md:mb-12">
-
+              <div className="max-w-4xl space-y-1 mb-8 sm:mb-10 md:mb-12">
                 <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block">
-
                   Faixa Bônus · {totalBonus} faixas
-
                 </span>
-
-                <h2 className="font-disp font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-[5.25rem] tracking-[-0.05em] text-[#0F1222] leading-[0.95]">
-
+                <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] 2xl:text-[5.75rem] tracking-[-0.04em] text-[#0F1222] leading-[0.98]">
                   Especiais
-
                 </h2>
-
                 <p className="font-mono-code text-sm sm:text-base text-[#0F1222]/80 pt-2 font-medium">
-
                   Ideias que eram pra ser só um post
-
                 </p>
-
               </div>
 
-
-
-              {/* Faixa Bônus Layout: Grid Fluido e Simétrico em 2 Colunas (1 Destaque + 2x2) */}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 lg:gap-14">
+              {/* Faixa Bônus Layout: Grid Fluido e Simétrico em 1 Coluna no mobile e 2 Colunas no tablet/desktop */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 xl:gap-14">
 
                 {casesBonus.map((item, idx) => (
 
@@ -482,7 +292,7 @@ function PortfolioApp() {
 
         {/* Entregas & Serviços */}
 
-        <ManifestoSection />
+        <ServicosSection />
 
 
 

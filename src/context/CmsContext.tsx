@@ -2,8 +2,13 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CaseItem, CaseBlock } from '../types';
 import { CASES as ORIGINAL_CASES } from '../data/cases';
 import { SobreData, ORIGINAL_SOBRE_DATA } from '../data/sobre';
+import {
+  fetchCloudPortfolio,
+  saveCloudPortfolio,
+  testFirestoreConnection,
+} from '../lib/firebase';
 
-// Use STORAGE_KEY v19 so that user customized texts, tags and project subtitles are preserved
+// Storage keys for resilient local fallback cache
 const STORAGE_KEY = 'thiago_portfolio_custom_cases_v19';
 const STORAGE_SOBRE_KEY = 'thiago_portfolio_custom_sobre_v2';
 
@@ -17,6 +22,8 @@ interface CmsContextType {
   cases: CaseItem[];
   sobre: SobreData;
   hasChanges: boolean;
+  isSaving: boolean;
+  isCloudLoaded: boolean;
   updateCaseField: (slug: string, field: keyof CaseItem, value: any) => void;
   updateCaseParagraph: (slug: string, index: number, value: string) => void;
   addCaseParagraph: (slug: string) => void;
@@ -37,8 +44,8 @@ interface CmsContextType {
   updateSobreStat: (statKey: keyof SobreData['stats'], value: string) => void;
   addSobreSegment: (segment: string) => void;
   removeSobreSegment: (index: number) => void;
-  saveChanges: () => void;
-  resetToOriginal: () => void;
+  saveChanges: () => Promise<void>;
+  resetToOriginal: () => Promise<void>;
   exportModalOpen: boolean;
   setExportModalOpen: (val: boolean) => void;
   activeNotification: string | null;
@@ -51,20 +58,25 @@ const CmsContext = createContext<CmsContextType | undefined>(undefined);
 
 export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isCloudLoaded, setIsCloudLoaded] = useState<boolean>(false);
+  const [hasChanges, setHasChanges] = useState<boolean>(false);
+  const [exportModalOpen, setExportModalOpen] = useState<boolean>(false);
+  const [activeNotification, setActiveNotification] = useState<string | null>(null);
+
+  // Initial load from local cache fallback
   const [cases, setCases] = useState<CaseItem[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Keep all saved user customized texts, titles, concepts, delivs, and orders
-          // Ensure unicred reflects the complete 24 piece campaign gallery from ORIGINAL_CASES
           const unicredOriginal = ORIGINAL_CASES.find((c) => c.slug === 'unicred');
           return parsed.map((c: CaseItem) => {
             if (c.slug === 'unicred' && unicredOriginal) {
               return {
                 ...c,
-                imgs: unicredOriginal.imgs, // keeps the complete 24 campaign pieces with 4 horizontal + 20 stories
+                imgs: unicredOriginal.imgs,
               };
             }
             return c;
@@ -92,9 +104,35 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return ORIGINAL_SOBRE_DATA;
   });
 
-  const [hasChanges, setHasChanges] = useState<boolean>(false);
-  const [exportModalOpen, setExportModalOpen] = useState<boolean>(false);
-  const [activeNotification, setActiveNotification] = useState<string | null>(null);
+  // Load latest published data directly from Cloud Firestore for all visitors
+  useEffect(() => {
+    testFirestoreConnection();
+
+    fetchCloudPortfolio()
+      .then((cloudData) => {
+        if (cloudData.cases && Array.isArray(cloudData.cases) && cloudData.cases.length > 0) {
+          setCases(cloudData.cases);
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudData.cases));
+          } catch (e) {
+            // ignore local storage quota
+          }
+        }
+        if (cloudData.sobre && typeof cloudData.sobre === 'object') {
+          setSobre(cloudData.sobre);
+          try {
+            localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(cloudData.sobre));
+          } catch (e) {
+            // ignore local storage quota
+          }
+        }
+        setIsCloudLoaded(true);
+      })
+      .catch((err) => {
+        console.warn('Falha na sincronização inicial com a nuvem (usando cache local):', err);
+        setIsCloudLoaded(true);
+      });
+  }, []);
 
   const showToast = (msg: string) => {
     setActiveNotification(msg);
@@ -479,15 +517,26 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Segmento removido.');
   };
 
-  const saveChanges = () => {
+  const saveChanges = async () => {
+    setIsSaving(true);
+
+    // 1. Immediately persist to localStorage as resilient offline cache
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cases));
       localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(sobre));
-      setHasChanges(false);
-      showToast('Alterações salvas com sucesso no seu navegador!');
     } catch (e) {
-      console.error(e);
-      showToast('Erro ao salvar alterações no armazenamento local.');
+      console.warn('Erro ao atualizar cache local:', e);
+    }
+
+    // 2. Publish to Cloud Firestore for all visitors worldwide
+    const cloudRes = await saveCloudPortfolio(cases, sobre);
+    setIsSaving(false);
+
+    if (cloudRes.success) {
+      setHasChanges(false);
+      showToast('Alterações publicadas online com sucesso!');
+    } else {
+      showToast(`Salvo localmente. Erro na nuvem: ${cloudRes.error || 'Falha de conexão'}`);
     }
   };
 
@@ -529,14 +578,22 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const resetToOriginal = () => {
-    if (window.confirm('Tem certeza de que deseja restaurar a ordem e os textos originais do portfólio (incluindo a seção Sobre)?')) {
+  const resetToOriginal = async () => {
+    if (window.confirm('Tem certeza de que deseja restaurar a ordem e os textos originais do portfólio (incluindo a seção Sobre) e sincronizar na nuvem?')) {
+      setIsSaving(true);
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(STORAGE_SOBRE_KEY);
       setCases(ORIGINAL_CASES);
       setSobre(ORIGINAL_SOBRE_DATA);
       setHasChanges(false);
-      showToast('Portfólio restaurado para os dados originais!');
+
+      const cloudRes = await saveCloudPortfolio(ORIGINAL_CASES, ORIGINAL_SOBRE_DATA);
+      setIsSaving(false);
+      if (cloudRes.success) {
+        showToast('Portfólio restaurado e publicado online com sucesso!');
+      } else {
+        showToast('Portfólio restaurado no cache local.');
+      }
     }
   };
 
@@ -552,6 +609,8 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         cases,
         sobre,
         hasChanges,
+        isSaving,
+        isCloudLoaded,
         updateCaseField,
         updateCaseParagraph,
         addCaseParagraph,

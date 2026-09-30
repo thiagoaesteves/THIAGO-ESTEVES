@@ -41,7 +41,7 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
         <button
           type="button"
           onClick={onClose}
-          className="p-1.5 rounded bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer"
           title="Fechar (Esc)"
           aria-label="Fechar modal"
         >

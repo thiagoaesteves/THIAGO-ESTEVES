@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Upload, Loader2 } from 'lucide-react';
+import { Upload, Loader2 } from 'lucide-react';
 import { useCms } from '../context/CmsContext';
 import { convertFileToBase64 } from '../utils/imageUpload';
 
@@ -7,32 +7,32 @@ export const SobreSection: React.FC = () => {
   const { isEditMode, sobre, updateSobreField } = useCms();
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
-  // Let's filter out "Quem é do Méier não bobeia." from the narrative body since it is already the main H2 headline
+  // Let's filter out "Quem é do Méier não bobéia." from the narrative body since it is already the main H2 headline
   const narrativeParagraphs = sobre.bio.filter(
     (p) => !p.toLowerCase().includes('quem é do méier')
   );
 
   return (
-    <section id="sobre" className="py-20 md:py-28 bg-[#2340FF] text-[#F6F7F2] relative overflow-hidden">
+    <section id="sobre" className="py-16 sm:py-20 md:py-28 bg-[#2340FF] text-[#F6F7F2] relative overflow-hidden">
       {/* Editorial background ambient texture */}
       <div 
         className="absolute inset-0 opacity-[0.035] pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:24px_24px]" 
         aria-hidden="true" 
       />
 
-      <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
         
-        {/* TOP ROW: Photo & Narrative Aligned in Height (desktop side-by-side) */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-14 items-stretch">
+        {/* TOP ROW: Photo & Narrative Aligned (desktop side-by-side) */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 sm:gap-10 lg:gap-14 items-start">
           
-          {/* Left Column: Portrait Card fills the height of the narrative */}
+          {/* Left Column: Portrait Card with elegant aspect-[4/5] ratio */}
           <div className="md:col-span-5 flex flex-col">
-            <div className="relative rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.35)] border border-white/20 bg-[#0F1222] group h-full min-h-[480px] lg:min-h-[560px] flex flex-col">
+            <div className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.35)] border border-white/20 bg-[#0F1222] group flex flex-col">
               {/* Author Photo */}
               <img
                 src={sobre.photoUrl}
                 alt={`${sobre.name} · ${sobre.role}`}
-                className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 absolute inset-0"
+                className="w-full h-full object-cover object-top sm:object-center transition-transform duration-700 ease-out group-hover:scale-105 absolute inset-0"
                 loading="lazy"
                 referrerPolicy="no-referrer"
               />
@@ -72,22 +72,24 @@ export const SobreSection: React.FC = () => {
               )}
 
               {/* Gradient overlay for text contrast at the bottom */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0F1222]/95 via-[#0F1222]/30 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0F1222]/95 via-[#0F1222]/45 to-transparent pointer-events-none" />
 
-              {/* Author caption pinned at bottom */}
-              <div className="mt-auto relative z-10 p-6 sm:p-7 space-y-1.5">
-                <span className="inline-flex items-center gap-1.5 font-mono-code text-[11px] uppercase tracking-widest text-[#D4FF3A] font-semibold">
-                  <MapPin className="w-3 h-3 text-[#D4FF3A]" />
-                  {sobre.badge}
-                </span>
-                
-                <div className="font-disp font-extrabold text-2xl sm:text-3xl text-white tracking-tight leading-tight">
+              {/* Author caption pinned at bottom left */}
+              <div className="mt-auto relative z-10 p-5 sm:p-6 lg:p-7 flex flex-col items-start text-left">
+                {/* 1. Nome */}
+                <div className="font-disp font-extrabold text-2xl sm:text-3xl lg:text-[34px] text-white tracking-tight leading-tight">
                   {sobre.name}
                 </div>
-                
-                <p className="font-serif-it text-sm sm:text-base text-[#AFC0FF] italic">
+
+                {/* 2. Cargo: diretamente ligado ao nome, tipografia aumentada */}
+                <p className="font-serif-it text-base sm:text-lg lg:text-[21px] text-[#AFC0FF] italic leading-snug mt-1">
                   {sobre.role}
                 </p>
+
+                {/* 3. Localização / Status: diretamente abaixo do cargo, fonte aumentada para alta legibilidade */}
+                <span className="font-mono-code text-xs sm:text-[13px] uppercase tracking-wider text-[#D4FF3A] font-semibold block leading-normal mt-2.5 sm:mt-3 select-none">
+                  {sobre.badge}
+                </span>
               </div>
             </div>
           </div>
@@ -95,16 +97,11 @@ export const SobreSection: React.FC = () => {
           {/* Right Column: Narrative Body balanced to match photo height */}
           <div className="md:col-span-7 flex flex-col justify-between space-y-6">
             
-            {/* Header: Tag + Stylized Quote Headline (Sem bolinhas/bullets) */}
-            <div className="space-y-3">
-              <span className="font-mono-code text-xs uppercase tracking-widest text-[#D4FF3A] font-bold block">
-                {sobre.tagline}
-              </span>
-
-              {/* Title with Stylized Quote Marks */}
-              <h2 className="font-disp font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-[3.4rem] tracking-[-0.035em] text-white leading-[1.08] relative">
+            {/* Headline with Stylized Quote Marks */}
+            <div>
+              <h2 className="font-disp font-extrabold text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-[3.25rem] tracking-[-0.035em] text-white leading-[1.08] relative break-words">
                 <span className="text-[#D4FF3A] font-serif select-none mr-1 inline-block -translate-y-0.5">“</span>
-                Quem é do Méier não bobeia.
+                Quem é do Méier não bobéia.
                 <span className="text-[#D4FF3A] font-serif select-none ml-1 inline-block -translate-y-0.5">”</span>
               </h2>
             </div>
@@ -158,96 +155,48 @@ export const SobreSection: React.FC = () => {
           </div>
         </div>
 
-        {/* BOTTOM ROW: Clientes (sem box), Stats Cards & Segmentos */}
-        <div className="mt-14 pt-10 border-t border-white/20 space-y-10">
-          
-          {/* Para quem já criei (e vendi)? - Tipografia limpa sem bullets */}
-          <div className="space-y-3">
-            <span className="font-mono-code text-xs uppercase tracking-widest text-[#D4FF3A] font-bold block">
-              {sobre.clientsTitle}
-            </span>
-            {isEditMode ? (
-              <textarea
-                value={sobre.clientsText}
-                rows={3}
-                onChange={(e) => updateSobreField('clientsText', e.target.value)}
-                className="w-full text-sm sm:text-base text-white bg-black/30 border-2 border-dashed border-[#D4FF3A] p-3 rounded-lg font-mono-code focus:outline-none focus:ring-2 focus:ring-[#D4FF3A]"
-                placeholder="Clientes separados por /"
-              />
-            ) : (
-              <p className="text-sm sm:text-base text-[#E0E7FF] leading-relaxed font-mono-code selection:bg-[#D4FF3A] selection:text-[#0F1222] max-w-5xl">
-                {sobre.clientsText.split(' / ').map((client, cIdx, arr) => (
-                  <React.Fragment key={cIdx}>
-                    <span className="hover:text-white transition-colors duration-150">{client}</span>
-                    {cIdx < arr.length - 1 && (
-                      <span className="text-[#D4FF3A] mx-2 font-mono font-bold select-none opacity-80">/</span>
-                    )}
-                  </React.Fragment>
-                ))}
+        {/* BOTTOM ROW: Bloco de Métricas em Grid de 3 Colunas Limpas e Responsivas */}
+        <div className="mt-14 pt-10 border-t border-white/20">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6 lg:gap-10">
+            {/* 1. Anos de Estrada (15+) */}
+            <div className="space-y-1.5">
+              <span className="font-disp text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#D4FF3A] block">
+                15+
+              </span>
+              <p className="text-white text-xs sm:text-sm font-mono-code font-bold uppercase tracking-wider block mt-2">
+                anos de estrada
               </p>
-            )}
-          </div>
-
-          {/* Stats Triad - Sem caixas / sem boxes */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 pt-4 border-t border-white/15">
-            {/* 1. Brands */}
-            <div className="space-y-1">
-              <b className="font-disp text-4xl sm:text-5xl font-extrabold tracking-tight text-white block">
-                {sobre.stats.stat1Number}
-              </b>
-              <span className="text-white text-xs font-mono-code uppercase tracking-wider block mt-2 font-bold">
-                {sobre.stats.stat1Label}
-              </span>
-              <span className="text-[#AFC0FF] text-xs font-mono-code block mt-0.5">
-                {sobre.stats.stat1Sub}
+              <span className="text-[#AFC0FF] text-xs sm:text-sm font-mono-code block mt-0.5">
+                e muita história pra contar
               </span>
             </div>
 
-            {/* 2. States & Countries */}
-            <div className="space-y-1 sm:border-l sm:border-white/15 sm:pl-8">
-              <b className="font-disp text-4xl sm:text-5xl font-extrabold tracking-tight text-white block">
-                {sobre.stats.stat2Number}
-              </b>
-              <span className="text-white text-xs font-mono-code uppercase tracking-wider block mt-2 font-bold">
-                {sobre.stats.stat2Label}
+            {/* 2. Marcas Atendidas (50+) */}
+            <div className="space-y-1.5 sm:border-l sm:border-white/15 sm:pl-8 lg:pl-10">
+              <span className="font-disp text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white block">
+                50+
               </span>
-              <span className="text-[#AFC0FF] text-xs font-mono-code block mt-0.5 leading-snug">
-                {sobre.stats.stat2Sub}
+              <p className="text-white text-xs sm:text-sm font-mono-code font-bold uppercase tracking-wider block mt-2">
+                marcas atendidas
+              </p>
+              <span className="text-[#AFC0FF] text-xs sm:text-sm font-mono-code block mt-0.5">
+                nacionais e multinacionais
               </span>
             </div>
 
-            {/* 3. Experience */}
-            <div className="space-y-1 sm:border-l sm:border-white/15 sm:pl-8">
-              <b className="font-disp text-4xl sm:text-5xl font-extrabold tracking-tight text-[#D4FF3A] block">
-                {sobre.stats.stat3Number}
-              </b>
-              <span className="text-white text-xs font-mono-code uppercase tracking-wider block mt-2 font-bold">
-                {sobre.stats.stat3Label}
+            {/* 3. Praças & Países (3 + 3) */}
+            <div className="space-y-1.5 sm:border-l sm:border-white/15 sm:pl-8 lg:pl-10">
+              <span className="font-disp text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white block">
+                3 + 3
               </span>
-              <span className="text-[#AFC0FF] text-xs font-mono-code block mt-0.5">
-                {sobre.stats.stat3Sub}
+              <p className="text-white text-xs sm:text-sm font-mono-code font-bold uppercase tracking-wider block mt-2">
+                praças &amp; países
+              </p>
+              <span className="text-[#AFC0FF] text-xs sm:text-sm font-mono-code block mt-0.5 leading-snug">
+                RJ, Sul, SP · Brasil, EUA &amp; Espanha
               </span>
             </div>
           </div>
-
-          {/* Segmentos Atendidos (Lista limpa, sem bullets/ícones, puro espaçamento tipográfico) */}
-          <div className="space-y-4 pt-4 border-t border-white/15">
-            <span className="font-mono-code text-xs uppercase tracking-widest text-[#D4FF3A] font-bold block">
-              {sobre.segmentsTitle}
-            </span>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 sm:gap-x-8 gap-y-2.5 sm:gap-y-3">
-              {sobre.segments.map((segmento, idx) => (
-                <div
-                  key={idx}
-                  className="font-mono-code text-xs sm:text-[13px] text-[#D5DBF5] hover:text-white transition-colors duration-150 py-0.5"
-                >
-                  {segmento}
-                </div>
-              ))}
-            </div>
-          </div>
-
         </div>
 
       </div>

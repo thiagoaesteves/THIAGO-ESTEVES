@@ -391,10 +391,10 @@ export const CaseModal: React.FC<CaseModalProps> = ({
       case 3:
         return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
       case 4:
-        return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4';
+        return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
       case 5:
       default:
-        return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5';
+        return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5';
     }
   };
 
@@ -665,14 +665,14 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                 </span>
               </div>
             ) : (
-              <div className="space-y-5 sm:space-y-6 max-w-4xl">
+              <div className="space-y-4 sm:space-y-6 max-w-4xl">
                 {block.value
                   .split(/\n\s*\n/)
                   .filter((p) => p.trim())
                   .map((para, pIdx) => (
                     <p
                       key={pIdx}
-                      className={`text-xl sm:text-2xl md:text-3xl leading-relaxed font-normal whitespace-pre-line ${
+                      className={`text-base sm:text-xl md:text-2xl lg:text-[1.65rem] leading-relaxed font-normal whitespace-pre-line break-words ${
                         isLadoB ? 'text-[#D5DBF5]' : 'text-[#343848]'
                       }`}
                     >
@@ -948,7 +948,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
               : 'bg-[#F6F7F2]/95 border-black/10 text-[#0F1222]'
           }`}
         >
-          <div className="max-w-[1240px] mx-auto px-4 sm:px-8 lg:px-12 py-4 flex justify-between items-center gap-4">
+          <div className="max-w-[1240px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 py-3.5 sm:py-4 flex justify-between items-center gap-4">
             <div className="flex items-center gap-3">
               <span
                 className={`font-mono-code text-xs sm:text-sm uppercase tracking-widest font-semibold ${
@@ -969,7 +969,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
               id="btn-close-case-modal"
               type="button"
               onClick={onClose}
-              className={`font-mono-code text-xs sm:text-sm uppercase tracking-widest font-bold pb-0.5 border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+              className={`font-mono-code text-xs sm:text-sm uppercase tracking-widest font-bold pb-0.5 border-b-2 transition-all flex items-center gap-2 cursor-pointer min-h-[44px] ${
                 isLadoB
                   ? 'border-[#FF4FA0] text-white hover:text-[#FF4FA0]'
                   : 'border-[#2340FF] text-[#0F1222] hover:text-[#2340FF]'
@@ -982,9 +982,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
         </header>
 
         {/* Modal Main Content */}
-        <main className="flex-1 w-full max-w-[1240px] mx-auto px-4 sm:px-8 lg:px-12 py-8 sm:py-12 md:py-16">
+        <main className="flex-1 w-full max-w-[1240px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 py-6 sm:py-10 md:py-14">
           {/* Header Section */}
-          <div className="space-y-5 mb-10 max-w-4xl">
+          <div className="space-y-4 sm:space-y-5 mb-8 sm:mb-10 max-w-4xl">
             <div>
               {isEditMode ? (
                 <div className="flex items-center gap-2">
@@ -1016,12 +1016,12 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                 value={safeItem.concept}
                 rows={2}
                 onChange={(e) => updateCaseField(safeItem.slug, 'concept', e.target.value)}
-                className="w-full font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl tracking-tight leading-[0.98] bg-transparent border-2 border-dashed border-[#2340FF] dark:border-[#FF4FA0] p-2 rounded focus:outline-none focus:bg-black/5 dark:focus:bg-white/5"
+                className="w-full font-disp font-extrabold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[0.98] bg-transparent border-2 border-dashed border-[#2340FF] dark:border-[#FF4FA0] p-2 rounded focus:outline-none focus:bg-black/5 dark:focus:bg-white/5 break-words"
               />
             ) : (
               <h2
                 id="case-modal-title"
-                className="font-disp font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight leading-[0.98] text-balance"
+                className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl tracking-tight leading-[1.02] text-balance break-words"
               >
                 {safeItem.concept}
               </h2>
@@ -1167,7 +1167,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       value={addInputVal}
                       onChange={(e) => setAddInputVal(e.target.value)}
                       placeholder="Cole o link, ID ou código <iframe> do YouTube..."
-                      className="flex-1 min-w-[280px] px-3 py-1.5 text-xs font-mono-code rounded bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 text-[#0F1222] dark:text-white"
+                      className="w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 text-[#0F1222] dark:text-white"
                       autoFocus
                     />
                     <button
@@ -1230,7 +1230,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       value={addInputVal}
                       onChange={(e) => setAddInputVal(e.target.value)}
                       placeholder="Cole o link, ID ou código <iframe> do Vimeo..."
-                      className="flex-1 min-w-[280px] px-3 py-1.5 text-xs font-mono-code rounded bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 text-[#0F1222] dark:text-white"
+                      className="w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 text-[#0F1222] dark:text-white"
                       autoFocus
                     />
                     <button
@@ -1331,7 +1331,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       value={addInputVal}
                       onChange={(e) => setAddInputVal(e.target.value)}
                       placeholder="Cole a URL direta da imagem (ex: https://...)"
-                      className="flex-1 min-w-[280px] px-3 py-1.5 text-xs font-mono-code rounded bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 text-[#0F1222] dark:text-white"
+                      className="w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 text-[#0F1222] dark:text-white"
                       autoFocus
                     />
                     <button
@@ -1444,21 +1444,21 @@ export const CaseModal: React.FC<CaseModalProps> = ({
           )}
 
           {/* Bottom Navigation: Anterior / Próximo */}
-          <div className="pt-12 mt-12 border-t border-black/10 dark:border-white/10 flex flex-wrap items-center justify-between gap-6">
+          <div className="pt-8 sm:pt-12 mt-8 sm:mt-12 border-t border-black/10 dark:border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 sm:gap-6">
             <button
               id="btn-prev-case"
               type="button"
               onClick={() => onSelectCase(prevCase)}
-              className="group flex items-center gap-3 text-left cursor-pointer"
+              className="group flex items-center gap-3 text-left cursor-pointer p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors min-h-[44px]"
             >
               <div
-                className={`p-2.5 sm:p-3 rounded-full transition-transform group-hover:-translate-x-1 ${
+                className={`p-2.5 sm:p-3 rounded-full transition-transform group-hover:-translate-x-1 shrink-0 ${
                   isLadoB ? 'bg-white/10 text-white' : 'bg-black/5 text-[#0F1222]'
                 }`}
               >
                 <ArrowLeft className="w-5 h-5" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <span
                   className={`font-mono-code text-[11px] uppercase tracking-widest block ${
                     isLadoB ? 'text-[#AFC0FF]' : 'text-[#5B6070]'
@@ -1466,7 +1466,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                 >
                   Anterior
                 </span>
-                <span className="font-disp font-bold text-base sm:text-lg group-hover:underline">
+                <span className="font-disp font-bold text-base sm:text-lg group-hover:underline truncate block">
                   {prevCase.name}
                 </span>
               </div>
@@ -1476,9 +1476,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
               id="btn-next-case"
               type="button"
               onClick={() => onSelectCase(nextCase)}
-              className="group flex items-center gap-3 text-right cursor-pointer"
+              className="group flex items-center justify-end gap-3 text-right cursor-pointer p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors min-h-[44px]"
             >
-              <div>
+              <div className="min-w-0">
                 <span
                   className={`font-mono-code text-[11px] uppercase tracking-widest block ${
                     isLadoB ? 'text-[#AFC0FF]' : 'text-[#5B6070]'
@@ -1486,12 +1486,12 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                 >
                   Próximo
                 </span>
-                <span className="font-disp font-bold text-base sm:text-lg group-hover:underline">
+                <span className="font-disp font-bold text-base sm:text-lg group-hover:underline truncate block">
                   {nextCase.name}
                 </span>
               </div>
               <div
-                className={`p-2.5 sm:p-3 rounded-full transition-transform group-hover:translate-x-1 ${
+                className={`p-2.5 sm:p-3 rounded-full transition-transform group-hover:translate-x-1 shrink-0 ${
                   isLadoB ? 'bg-white/10 text-white' : 'bg-black/5 text-[#0F1222]'
                 }`}
               >

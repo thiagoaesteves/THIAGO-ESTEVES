@@ -11,6 +11,7 @@ import {
   Sparkles,
   Key,
   FileCode,
+  Loader2,
 } from 'lucide-react';
 
 export const CmsToolbar: React.FC = () => {
@@ -19,6 +20,7 @@ export const CmsToolbar: React.FC = () => {
     toggleEditMode,
     changePassword,
     hasChanges,
+    isSaving,
     saveChanges,
     resetToOriginal,
     setExportModalOpen,
@@ -45,11 +47,11 @@ export const CmsToolbar: React.FC = () => {
         <aside
           id="painel-edicao"
           aria-label="Barra do Modo Edição"
-          className="edit-toolbar fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-4xl bg-[#0F1222]/95 backdrop-blur-md text-white px-4 sm:px-6 py-3 rounded-2xl shadow-2xl border border-white/20 flex flex-wrap items-center justify-between gap-3 animate-fade-in"
+          className="edit-toolbar fixed bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-[60] w-[96%] sm:w-[92%] max-w-4xl bg-[#0F1222]/95 backdrop-blur-md text-white p-2.5 sm:px-6 sm:py-3 rounded-2xl shadow-2xl border border-white/20 flex flex-wrap items-center justify-between gap-2 sm:gap-3 animate-fade-in"
         >
           {/* Left badge and hints */}
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-2 px-2.5 py-1 rounded bg-[#2340FF] text-white text-xs font-mono-code font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1 rounded bg-[#2340FF] text-white text-[11px] sm:text-xs font-mono-code font-bold uppercase tracking-wider">
               <span className="w-2 h-2 rounded-full bg-[#D4FF3A] animate-pulse" />
               Modo Edição
             </span>
@@ -65,20 +67,31 @@ export const CmsToolbar: React.FC = () => {
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center gap-2">
-            {/* Save Button */}
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            {/* Save / Publish Online Button */}
             <button
               type="button"
+              disabled={isSaving}
               onClick={saveChanges}
-              className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-all ${
-                hasChanges
+              className={`flex items-center gap-1.5 px-2.5 sm:px-4 py-1.5 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-all ${
+                isSaving
+                  ? 'bg-[#2340FF] text-white opacity-90 cursor-wait'
+                  : hasChanges
                   ? 'bg-[#D4FF3A] hover:bg-[#e4ff70] text-[#0F1222] shadow-lg animate-pulse'
                   : 'bg-white/10 hover:bg-white/20 text-white'
               }`}
-              title="Salvar alterações no navegador"
+              title="Publicar alterações permanentemente na nuvem para todos os visitantes"
             >
-              {hasChanges ? <Save className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5 text-[#D4FF3A]" />}
-              {hasChanges ? 'Salvar no Navegador' : 'Salvo no navegador'}
+              {isSaving ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#D4FF3A]" />
+              ) : hasChanges ? (
+                <Save className="w-3.5 h-3.5" />
+              ) : (
+                <Check className="w-3.5 h-3.5 text-[#D4FF3A]" />
+              )}
+              <span className="text-[11px] sm:text-xs">
+                {isSaving ? 'Publicando...' : hasChanges ? 'Salvar' : 'Publicado'}
+              </span>
             </button>
 
             {/* Direct Download JSON Button */}
@@ -121,8 +134,9 @@ export const CmsToolbar: React.FC = () => {
             <button
               type="button"
               onClick={resetToOriginal}
-              className="p-1.5 rounded-lg text-xs text-[#AFC0FF] hover:text-[#FF4FA0] hover:bg-white/10 transition-colors cursor-pointer"
+              className="min-h-[36px] min-w-[36px] flex items-center justify-center p-2 rounded-lg text-xs text-[#AFC0FF] hover:text-[#FF4FA0] hover:bg-white/10 transition-colors cursor-pointer"
               title="Restaurar dados originais"
+              aria-label="Restaurar dados originais"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -131,8 +145,9 @@ export const CmsToolbar: React.FC = () => {
             <button
               type="button"
               onClick={toggleEditMode}
-              className="p-1.5 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer ml-1"
+              className="min-h-[36px] min-w-[36px] flex items-center justify-center p-2 rounded-lg text-xs text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer ml-0.5"
               title="Sair do Modo Edição"
+              aria-label="Sair do Modo Edição"
             >
               <X className="w-4 h-4" />
             </button>

@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /portfolio_content/{documentId} {
+      // Allow all visitors to read portfolio content
+      allow read: if true;
+
+      // Allow writes only with valid data structure and editor verification
+      allow create, update: if request.resource.data.content is string
+        && request.resource.data.updatedAt is string
+        && (request.resource.data.editorSignature == 'criadoRJ_verified' || request.auth != null);
+
+      allow delete: if false;
+    }
+  }
+}

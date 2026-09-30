@@ -16,8 +16,11 @@
 
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
     background-color: var(--espuma);
     color: var(--tinta);
+    overflow-x: hidden;
+    max-width: 100%;
   }
 
   body {
@@ -26,6 +29,8 @@
     font-size: 18px;
     line-height: 1.55;
     background-color: var(--espuma);
+    overflow-x: hidden;
+    max-width: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

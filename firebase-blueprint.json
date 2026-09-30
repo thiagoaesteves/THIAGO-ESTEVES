@@ -1,0 +1,34 @@
+{
+  "entities": {
+    "PortfolioContent": {
+      "title": "PortfolioContent",
+      "description": "Stores portfolio data such as cases list, author bio, and editorial updates.",
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "Serialized JSON string containing portfolio content items."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of the latest publication."
+        },
+        "version": {
+          "type": "string",
+          "description": "Content schema version identifier."
+        },
+        "editorSignature": {
+          "type": "string",
+          "description": "Verification signature of the authorized editor."
+        }
+      },
+      "required": ["content", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/portfolio_content/{documentId}": {
+      "schema": "PortfolioContent",
+      "description": "Collection storing cases and about section documents for public reading and admin updating."
+    }
+  }
+}

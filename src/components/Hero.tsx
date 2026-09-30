@@ -11,13 +11,30 @@ export const Hero: React.FC<HeroProps> = ({
   caseCountB,
   caseCountBonus,
 }) => {
+  const handleDoorClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    const element = document.getElementById(targetId);
+    if (element) {
+      const headerOffset = 70;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+      window.history.pushState(null, '', `#${targetId}`);
+    } else {
+      window.location.hash = targetId;
+    }
+  };
+
   return (
-    <section id="topo" className="relative bg-[#2340FF] text-[#F6F7F2] overflow-hidden min-h-[calc(100dvh-64px)] flex flex-col justify-between pt-6 pb-6 md:pt-10 md:pb-8">
-      <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex-1 flex flex-col justify-between">
+    <section id="topo" className="relative bg-[#2340FF] text-[#F6F7F2] overflow-hidden min-h-screen flex flex-col justify-between pt-20 sm:pt-22 md:pt-24 pb-6 sm:pb-8 md:pb-10 lg:pb-12">
+      <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10 w-full flex-1 flex flex-col justify-between">
         {/* Top Hero Row: Headline on the left, Monumental Watermark Monogram on the right bleeding softly */}
-        <div className="relative pt-2 sm:pt-4 my-auto min-h-[220px] sm:min-h-[260px] md:min-h-[300px] flex items-center">
+        <div className="relative pt-2 sm:pt-4 my-auto min-h-[180px] sm:min-h-[240px] md:min-h-[280px] flex items-center">
           <div className="max-w-4xl relative z-10">
-            <h1 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-[3.75rem] xl:text-[4.4rem] tracking-tight text-white leading-[1.05]">
+            <h1 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-[3.75rem] xl:text-[4.5rem] 2xl:text-[5rem] tracking-tight text-white leading-[1.05] break-words">
               Creative Copywriter <br />
               <span className="font-serif-it italic font-normal text-[#D4FF3A] inline-block sm:whitespace-nowrap">
                 &amp; Storyteller
@@ -27,7 +44,7 @@ export const Hero: React.FC<HeroProps> = ({
 
           {/* Monumental Watermark: Large, architectural bleed off-canvas */}
           <div className="absolute -right-12 sm:-right-8 md:-right-4 lg:right-0 -bottom-16 sm:-bottom-20 md:-bottom-24 lg:-bottom-28 pointer-events-none select-none z-0">
-            <div className="w-[320px] sm:w-[440px] md:w-[580px] lg:w-[680px] xl:w-[740px] aspect-[532/400]">
+            <div className="w-[240px] sm:w-[380px] md:w-[500px] lg:w-[660px] xl:w-[740px] aspect-[532/400]">
               <svg
                 viewBox="0 0 532.13 400"
                 className="w-full h-auto text-white opacity-[0.11] lg:opacity-[0.12] fill-current drop-shadow-sm transition-opacity duration-500"
@@ -45,25 +62,26 @@ export const Hero: React.FC<HeroProps> = ({
         {/* Bottom Section: Doors Grid + Scroll Hint */}
         <div className="mt-auto pt-6 md:pt-10">
           {/* Doors Grid - 3 Columns (Lado A, Lado B, Faixa Bônus) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             {/* Lado A Door */}
             <a
               id="hero-door-lado-a"
               href="#lado-a"
-              className="group flex justify-between items-end gap-3 border-t border-[#6F85FF] pt-4 md:pt-5 hover:border-[#D4FF3A] transition-colors"
+              onClick={(e) => handleDoorClick(e, 'lado-a')}
+              className="group flex justify-between items-end gap-3 border-t border-[#6F85FF] pt-3.5 pb-2.5 sm:pt-4 sm:pb-3 md:pt-5 hover:border-[#D4FF3A] transition-colors cursor-pointer min-h-[48px]"
             >
               <div>
-                <span className="font-mono-code text-xs uppercase tracking-widest text-[#D4FF3A] block mb-1">
+                <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-widest text-[#D4FF3A] block mb-1">
                   Lado A · {caseCountA} faixas
                 </span>
-                <b className="font-disp text-2xl sm:text-3xl tracking-tight block text-white group-hover:text-[#D4FF3A] transition-colors">
+                <b className="font-disp text-xl sm:text-2xl lg:text-3xl tracking-tight block text-white group-hover:text-[#D4FF3A] transition-colors">
                   Advertising
                 </b>
-                <small className="text-[#AFC0FF] text-sm block mt-0.5">
+                <small className="text-[#AFC0FF] text-xs sm:text-sm block mt-0.5">
                   Filmes, campanhas &amp; títulos
                 </small>
               </div>
-              <span className="text-3xl text-[#D4FF3A] transform group-hover:translate-x-2 transition-transform duration-200">
+              <span className="text-2xl sm:text-3xl text-[#D4FF3A] transform group-hover:translate-x-2 transition-transform duration-200 shrink-0">
                 →
               </span>
             </a>
@@ -72,20 +90,21 @@ export const Hero: React.FC<HeroProps> = ({
             <a
               id="hero-door-lado-b"
               href="#lado-b"
-              className="group flex justify-between items-end gap-3 border-t border-[#6F85FF] pt-4 md:pt-5 hover:border-[#FF4FA0] transition-colors"
+              onClick={(e) => handleDoorClick(e, 'lado-b')}
+              className="group flex justify-between items-end gap-3 border-t border-[#6F85FF] pt-3.5 pb-2.5 sm:pt-4 sm:pb-3 md:pt-5 hover:border-[#FF4FA0] transition-colors cursor-pointer min-h-[48px]"
             >
               <div>
-                <span className="font-mono-code text-xs uppercase tracking-widest text-[#FF4FA0] block mb-1">
+                <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-widest text-[#FF4FA0] block mb-1">
                   Lado B · {caseCountB} faixas
                 </span>
-                <b className="font-disp text-2xl sm:text-3xl tracking-tight block text-white group-hover:text-[#FF4FA0] transition-colors">
+                <b className="font-disp text-xl sm:text-2xl lg:text-3xl tracking-tight block text-white group-hover:text-[#FF4FA0] transition-colors">
                   Branding
                 </b>
-                <small className="text-[#AFC0FF] text-sm block mt-0.5">
+                <small className="text-[#AFC0FF] text-xs sm:text-sm block mt-0.5">
                   Posicionamento, naming &amp; tom de voz
                 </small>
               </div>
-              <span className="text-3xl text-[#FF4FA0] transform group-hover:translate-x-2 transition-transform duration-200">
+              <span className="text-2xl sm:text-3xl text-[#FF4FA0] transform group-hover:translate-x-2 transition-transform duration-200 shrink-0">
                 →
               </span>
             </a>
@@ -94,20 +113,21 @@ export const Hero: React.FC<HeroProps> = ({
             <a
               id="hero-door-bonus"
               href="#faixa-bonus"
-              className="group flex justify-between items-end gap-3 border-t border-[#6F85FF] pt-4 md:pt-5 hover:border-[#D4FF3A] transition-colors"
+              onClick={(e) => handleDoorClick(e, 'faixa-bonus')}
+              className="group flex justify-between items-end gap-3 border-t border-[#6F85FF] pt-3.5 pb-2.5 sm:pt-4 sm:pb-3 md:pt-5 hover:border-[#D4FF3A] transition-colors cursor-pointer min-h-[48px]"
             >
               <div>
-                <span className="font-mono-code text-xs uppercase tracking-widest text-[#D4FF3A] block mb-1">
+                <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-widest text-[#D4FF3A] block mb-1">
                   Faixa Bônus · {caseCountBonus} faixas
                 </span>
-                <b className="font-disp text-2xl sm:text-3xl tracking-tight block text-white group-hover:text-[#D4FF3A] transition-colors">
+                <b className="font-disp text-xl sm:text-2xl lg:text-3xl tracking-tight block text-white group-hover:text-[#D4FF3A] transition-colors">
                   Especiais
                 </b>
-                <small className="text-[#AFC0FF] text-sm block mt-0.5">
+                <small className="text-[#AFC0FF] text-xs sm:text-sm block mt-0.5">
                   Ideias que eram pra ser só um post
                 </small>
               </div>
-              <span className="text-3xl text-[#D4FF3A] transform group-hover:translate-x-2 transition-transform duration-200">
+              <span className="text-2xl sm:text-3xl text-[#D4FF3A] transform group-hover:translate-x-2 transition-transform duration-200 shrink-0">
                 →
               </span>
             </a>
