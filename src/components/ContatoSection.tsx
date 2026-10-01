@@ -9,7 +9,7 @@ export const ContatoSection: React.FC = () => {
           {/* Left Column: Headline & Links */}
           <div className="lg:col-span-7">
             <span className="font-mono-code text-xs uppercase tracking-widest text-[#FF4FA0] font-bold block mb-3 sm:mb-4">
-              Contato
+              Curtiu?
             </span>
 
             <h2 className="font-disp font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl tracking-[-0.04em] leading-[0.94] text-white">

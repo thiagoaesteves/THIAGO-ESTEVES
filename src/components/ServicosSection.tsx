@@ -49,7 +49,7 @@ export const ServicosSection: React.FC = () => {
     },
   ];
 
-  // Lista padrão das marcas caso o CMS ainda não tenha sido customizado
+  // Lista consolidada de clientes e marcas atendidas
   const defaultMarcas = [
     'Vivo',
     'Samsung',
@@ -81,25 +81,6 @@ export const ServicosSection: React.FC = () => {
   const marcasArray = sobre?.clientsText
     ? sobre.clientsText.split(/\s*[\/\n]\s*/).filter(Boolean)
     : defaultMarcas;
-
-  const defaultSegmentos = [
-    'Beleza & Cosméticos',
-    'Finanças & Bancos',
-    'Tech & Telecom',
-    'Automotivo & Linha Pesada',
-    'Saúde & Farma',
-    'Alimentos & Bebidas',
-    'Varejo & Moda',
-    'Bens de Consumo & Indústria',
-    'Educação & Idiomas',
-    'Esportes & Futebol',
-    'Imobiliário & Hotelaria',
-    'Governo & Cidadania',
-  ];
-
-  const segmentosArray = sobre?.segments && sobre.segments.length > 0
-    ? sobre.segments
-    : defaultSegmentos;
 
   return (
     <section id="servicos" className="border-t border-[#DADCE3]">
@@ -177,11 +158,11 @@ export const ServicosSection: React.FC = () => {
         </div>
       </div>
 
-      {/* PARTE INFERIOR: Bloco 05 + Bloco Consolidado de Credibilidade (Marcas & Segmentos) */}
-      <div className="py-8 sm:py-10 md:py-12 bg-[#0F1222] text-[#F6F7F2] border-t border-black/15">
-        <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 space-y-10 sm:space-y-12">
-          
-          {/* BLOCO 05: Destaque Isolado */}
+      {/* PARTE INFERIOR: Bloco 05 + Prova Social e Credibilidade (Marquee & Chips) */}
+      <div className="pt-8 sm:pt-10 md:pt-12 pb-10 sm:pb-12 md:pb-14 bg-[#0F1222] text-[#F6F7F2] border-t border-black/15">
+        
+        {/* BLOCO 05: Destaque Isolado */}
+        <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 space-y-2 mb-10 sm:mb-12">
           <div className="max-w-[1140px] space-y-2">
             <div className="flex items-center gap-2.5">
               <span className="font-mono-code text-[10px] sm:text-xs uppercase tracking-widest text-[#D4FF3A] font-bold">
@@ -197,70 +178,80 @@ export const ServicosSection: React.FC = () => {
               </span>”
             </p>
           </div>
+        </div>
 
-          {/* BLOCO CONSOLIDADO DE CREDIBILIDADE: Marcas & Segmentos Atendidos */}
-          <div className="pt-8 sm:pt-10 border-t border-white/15 space-y-8 sm:space-y-10">
-            
-            {/* 1. Título & Lista Completa de Marcas */}
-            <div className="space-y-3 sm:space-y-4 max-w-5xl">
-              <div className="flex items-center gap-2">
-                <span className="font-mono-code text-xs sm:text-[13px] uppercase tracking-widest text-[#D4FF3A] font-bold block">
-                  Para quem já criei (e vendi)?
-                </span>
+        {/* BLOCO DE PROVA SOCIAL E CREDIBILIDADE */}
+        <div className="pt-8 border-t border-white/15">
+          
+          {/* Microcopy / Título */}
+          <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 mb-4 sm:mb-5">
+            <span className="font-mono-code text-xs sm:text-[13px] uppercase tracking-widest text-[#D4FF3A] font-bold block">
+              Para quem já criei (e vendi)?
+            </span>
+          </div>
+
+          {/* Letreiro Animado (Marquee) Contínuo dos Clientes e Marcas */}
+          <div
+            aria-label="Marcas e clientes atendidos"
+            className="overflow-hidden py-4 sm:py-5 border-y border-white/10 select-none bg-black/30 relative"
+          >
+            {/* Gradientes sutis para fade nas extremidades */}
+            <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-r from-[#0F1222] to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-[#0F1222] to-transparent z-10 pointer-events-none" />
+
+            <div className="animate-marquee items-center text-lg sm:text-xl lg:text-2xl font-bold tracking-tight font-disp">
+              {/* Repetição 1 */}
+              <div className="flex items-center gap-6 sm:gap-8 pr-6 sm:pr-8 shrink-0">
+                {marcasArray.map((brand, i) => (
+                  <React.Fragment key={`brand-1-${i}`}>
+                    <span className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors whitespace-nowrap">
+                      {brand}
+                    </span>
+                    <span className="text-[#D4FF3A] text-xs font-serif-it select-none opacity-80" aria-hidden="true">
+                      ✦
+                    </span>
+                  </React.Fragment>
+                ))}
               </div>
-
-              {isEditMode ? (
-                <div className="space-y-1.5">
-                  <textarea
-                    value={sobre?.clientsText || defaultMarcas.join(' / ')}
-                    rows={3}
-                    onChange={(e) => updateSobreField('clientsText', e.target.value)}
-                    className="w-full text-sm sm:text-base text-white bg-black/40 border-2 border-dashed border-[#D4FF3A] p-3 rounded-lg font-mono-code focus:outline-none focus:ring-2 focus:ring-[#D4FF3A]"
-                    placeholder="Marcas separadas por /"
-                  />
-                  <span className="text-[11px] font-mono-code text-[#AFC0FF] block">
-                    Separe as marcas usando a barra "/"
-                  </span>
-                </div>
-              ) : (
-                <p className="text-sm sm:text-base text-[#E0E7FF] leading-relaxed font-mono-code selection:bg-[#D4FF3A] selection:text-[#0F1222]">
-                  {marcasArray.map((marca, mIdx) => (
-                    <React.Fragment key={mIdx}>
-                      <span className="hover:text-white transition-colors duration-150 font-medium">
-                        {marca}
-                      </span>
-                      {mIdx < marcasArray.length - 1 && (
-                        <span className="text-[#D4FF3A] mx-2 font-mono font-bold select-none opacity-80">
-                          /
-                        </span>
-                      )}
-                    </React.Fragment>
-                  ))}
-                </p>
-              )}
-            </div>
-
-            {/* 2. Segmentos Atendidos */}
-            <div className="pt-6 sm:pt-8 border-t border-white/10 space-y-3.5">
-              <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-widest text-[#AFC0FF] font-bold block">
-                Segmentos Atendidos
-              </span>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 sm:gap-x-8 gap-y-2 sm:gap-y-2.5">
-                {segmentosArray.map((segmento, sIdx) => (
-                  <div
-                    key={sIdx}
-                    className="font-mono-code text-xs sm:text-[13px] text-[#C9D4FF] hover:text-[#D4FF3A] transition-colors duration-150 py-0.5"
-                  >
-                    {segmento}
-                  </div>
+              {/* Repetição 2 para looping infinito sem corte */}
+              <div className="flex items-center gap-6 sm:gap-8 pr-6 sm:pr-8 shrink-0">
+                {marcasArray.map((brand, i) => (
+                  <React.Fragment key={`brand-2-${i}`}>
+                    <span className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors whitespace-nowrap">
+                      {brand}
+                    </span>
+                    <span className="text-[#D4FF3A] text-xs font-serif-it select-none opacity-80" aria-hidden="true">
+                      ✦
+                    </span>
+                  </React.Fragment>
                 ))}
               </div>
             </div>
-
           </div>
 
+          {/* Painel opcional de edição rápida caso o usuário esteja no modo CMS */}
+          {isEditMode && (
+            <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 mt-6">
+              <div className="p-4 rounded-xl bg-black/40 border border-[#D4FF3A]/40 space-y-3 max-w-4xl">
+                <span className="text-xs font-mono-code text-[#D4FF3A] font-bold block uppercase tracking-wider">
+                  Edição Rápida de Clientes (CMS):
+                </span>
+                <textarea
+                  value={sobre?.clientsText || defaultMarcas.join(' / ')}
+                  rows={2}
+                  onChange={(e) => updateSobreField('clientsText', e.target.value)}
+                  className="w-full text-xs font-mono-code text-white bg-black/50 border border-white/20 p-2.5 rounded-lg focus:outline-none focus:border-[#D4FF3A]"
+                  placeholder="Clientes separados por /"
+                />
+                <span className="text-[10px] font-mono-code text-[#AFC0FF] block">
+                  As marcas editadas fluem automaticamente no letreiro marquee. Salve pelo painel flutuante.
+                </span>
+              </div>
+            </div>
+          )}
+
         </div>
+
       </div>
     </section>
   );

@@ -20,7 +20,7 @@ interface CaseCardProps {
   bonus?: boolean;
   featured?: boolean;
   positionIndex?: number;
-  columns?: 2 | 3;
+  columns?: 1 | 2 | 3;
 }
 
 export const CaseCard: React.FC<CaseCardProps> = ({
@@ -486,6 +486,8 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             className={`w-full font-disp font-bold tracking-tight leading-tight border-b-2 border-dashed px-2 py-1 focus:outline-none rounded transition-colors break-words ${
               featured
                 ? 'text-2xl sm:text-4xl md:text-5xl'
+                : columns === 1
+                ? 'text-2xl sm:text-3xl md:text-4xl'
                 : columns === 3
                 ? 'text-lg sm:text-xl md:text-[24px]'
                 : 'text-xl sm:text-2xl md:text-3xl'
@@ -502,6 +504,8 @@ export const CaseCard: React.FC<CaseCardProps> = ({
           className={`font-disp font-bold tracking-tight leading-tight mt-1.5 transition-colors break-words ${
             featured
               ? 'text-2xl sm:text-4xl md:text-5xl'
+              : columns === 1
+              ? 'text-2xl sm:text-3xl md:text-4xl'
               : columns === 3
               ? 'text-lg sm:text-xl md:text-[24px]'
               : 'text-xl sm:text-2xl md:text-3xl'
@@ -527,6 +531,8 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             className={`w-full leading-snug border-2 border-dashed p-2 focus:outline-none rounded resize-y transition-colors break-words ${
               featured
                 ? 'text-base sm:text-lg md:text-xl'
+                : columns === 1
+                ? 'text-base sm:text-lg md:text-xl'
                 : columns === 3
                 ? 'text-xs sm:text-sm md:text-base'
                 : 'text-sm sm:text-base md:text-lg'
@@ -544,6 +550,8 @@ export const CaseCard: React.FC<CaseCardProps> = ({
         <p
           className={`leading-snug mt-2 break-words ${
             featured
+              ? 'text-base sm:text-lg md:text-xl'
+              : columns === 1
               ? 'text-base sm:text-lg md:text-xl'
               : columns === 3
               ? 'text-xs sm:text-sm md:text-base'

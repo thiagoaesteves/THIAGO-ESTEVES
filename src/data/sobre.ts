@@ -1,3 +1,9 @@
+export interface SobreTypography {
+  fontSize?: 'sm' | 'base' | 'lg' | 'xl';
+  fontWeight?: 'normal' | 'medium' | 'semibold' | 'bold';
+  titleSize?: 'sm' | 'base' | 'lg' | 'xl' | '2xl';
+}
+
 export interface SobreData {
   photoUrl: string;
   badge: string;
@@ -19,6 +25,7 @@ export interface SobreData {
     stat3Label: string;
     stat3Sub: string;
   };
+  typography?: SobreTypography;
   segmentsTitle: string;
   segments: string[];
 }
@@ -50,6 +57,11 @@ export const ORIGINAL_SOBRE_DATA: SobreData = {
     stat3Number: '3 + 3',
     stat3Label: 'praças & países',
     stat3Sub: 'RJ, Sul, SP · Brasil, EUA & Espanha',
+  },
+  typography: {
+    fontSize: 'base',
+    fontWeight: 'normal',
+    titleSize: 'xl',
   },
   segmentsTitle: 'Segmentos Atendidos',
   segments: [

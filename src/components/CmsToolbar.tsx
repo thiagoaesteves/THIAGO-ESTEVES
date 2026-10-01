@@ -12,6 +12,7 @@ import {
   Key,
   FileCode,
   Loader2,
+  Plus,
 } from 'lucide-react';
 
 export const CmsToolbar: React.FC = () => {
@@ -26,6 +27,9 @@ export const CmsToolbar: React.FC = () => {
     setExportModalOpen,
     activeNotification,
     exportCasesJson,
+    gridColumns,
+    setGridColumns,
+    setIsAddModalOpen,
   } = useCms();
 
   if (!isEditMode && !activeNotification) {
@@ -68,6 +72,26 @@ export const CmsToolbar: React.FC = () => {
 
           {/* Action buttons */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            {/* Grid Columns Control: 1, 2 ou 3 Colunas */}
+            <div className="flex items-center gap-1 bg-white/10 p-1 rounded-lg border border-white/15 text-xs font-mono-code">
+              <span className="text-[10px] text-[#AFC0FF] px-1 font-bold uppercase hidden sm:inline">Grid:</span>
+              {([1, 2, 3] as const).map((cols) => (
+                <button
+                  key={cols}
+                  type="button"
+                  onClick={() => setGridColumns(cols)}
+                  className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
+                    gridColumns === cols
+                      ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
+                      : 'text-white/70 hover:text-white hover:bg-white/10'
+                  }`}
+                  title={`Configurar layout do grid para ${cols} ${cols === 1 ? 'coluna' : 'colunas'}`}
+                >
+                  {cols} {cols === 1 ? 'col' : 'cols'}
+                </button>
+              ))}
+            </div>
+
             {/* Save / Publish Online Button */}
             <button
               type="button"
@@ -92,6 +116,18 @@ export const CmsToolbar: React.FC = () => {
               <span className="text-[11px] sm:text-xs">
                 {isSaving ? 'Publicando...' : hasChanges ? 'Salvar' : 'Publicado'}
               </span>
+            </button>
+
+            {/* Botão de Adição no Painel: [+ Adicionar Projeto] */}
+            <button
+              id="btn-adicionar-projeto"
+              type="button"
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-mono-code font-bold bg-[#D4FF3A] hover:bg-[#e4ff70] text-[#0F1222] shadow-md transition-all hover:scale-105 cursor-pointer"
+              title="Adicionar um novo projeto ao portfólio"
+            >
+              <Plus className="w-3.5 h-3.5 text-[#0F1222]" />
+              <span>+ Adicionar Projeto</span>
             </button>
 
             {/* Direct Download JSON Button */}

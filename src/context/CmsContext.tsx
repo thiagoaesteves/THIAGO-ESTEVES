@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CaseItem, CaseBlock } from '../types';
 import { CASES as ORIGINAL_CASES } from '../data/cases';
-import { SobreData, ORIGINAL_SOBRE_DATA } from '../data/sobre';
+import { SobreData, ORIGINAL_SOBRE_DATA, SobreTypography } from '../data/sobre';
 import {
   fetchCloudPortfolio,
   saveCloudPortfolio,
@@ -11,6 +11,7 @@ import {
 // Storage keys for resilient local fallback cache
 const STORAGE_KEY = 'thiago_portfolio_custom_cases_v19';
 const STORAGE_SOBRE_KEY = 'thiago_portfolio_custom_sobre_v2';
+const STORAGE_LAYOUT_KEY = 'thiago_portfolio_grid_columns';
 
 interface CmsContextType {
   isEditMode: boolean;
@@ -21,6 +22,8 @@ interface CmsContextType {
   changePassword: () => void;
   cases: CaseItem[];
   sobre: SobreData;
+  gridColumns: 1 | 2 | 3;
+  setGridColumns: (cols: 1 | 2 | 3) => void;
   hasChanges: boolean;
   isSaving: boolean;
   isCloudLoaded: boolean;
@@ -42,12 +45,25 @@ interface CmsContextType {
   addSobreBioParagraph: () => void;
   removeSobreBioParagraph: (index: number) => void;
   updateSobreStat: (statKey: keyof SobreData['stats'], value: string) => void;
+  updateSobreTypography: (key: keyof SobreTypography, value: any) => void;
   addSobreSegment: (segment: string) => void;
   removeSobreSegment: (index: number) => void;
   saveChanges: () => Promise<void>;
   resetToOriginal: () => Promise<void>;
   exportModalOpen: boolean;
   setExportModalOpen: (val: boolean) => void;
+  isAddModalOpen: boolean;
+  setIsAddModalOpen: (val: boolean) => void;
+  addNewCase: (caseData: {
+    name: string;
+    concept: string;
+    lado: 'A' | 'B' | 'bonus';
+    deliv?: string;
+    cover: string;
+    text: string[];
+    imgs?: string[];
+    yt?: string[];
+  }) => Promise<CaseItem>;
   activeNotification: string | null;
   showToast: (msg: string) => void;
   exportCasesJson: () => void;
@@ -62,6 +78,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isCloudLoaded, setIsCloudLoaded] = useState<boolean>(false);
   const [hasChanges, setHasChanges] = useState<boolean>(false);
   const [exportModalOpen, setExportModalOpen] = useState<boolean>(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [activeNotification, setActiveNotification] = useState<string | null>(null);
 
   // Initial load from local cache fallback
@@ -104,6 +121,28 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return ORIGINAL_SOBRE_DATA;
   });
 
+  const [gridColumns, setGridColumnsState] = useState<1 | 2 | 3>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_LAYOUT_KEY);
+      if (saved === '1' || saved === '2' || saved === '3') {
+        return Number(saved) as 1 | 2 | 3;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return 2;
+  });
+
+  const setGridColumns = (cols: 1 | 2 | 3) => {
+    setGridColumnsState(cols);
+    setHasChanges(true);
+    try {
+      localStorage.setItem(STORAGE_LAYOUT_KEY, String(cols));
+    } catch (e) {
+      // ignore
+    }
+  };
+
   // Load latest published data directly from Cloud Firestore for all visitors
   useEffect(() => {
     testFirestoreConnection();
@@ -124,6 +163,14 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(cloudData.sobre));
           } catch (e) {
             // ignore local storage quota
+          }
+        }
+        if (cloudData.gridColumns === 1 || cloudData.gridColumns === 2 || cloudData.gridColumns === 3) {
+          setGridColumnsState(cloudData.gridColumns);
+          try {
+            localStorage.setItem(STORAGE_LAYOUT_KEY, String(cloudData.gridColumns));
+          } catch (e) {
+            // ignore
           }
         }
         setIsCloudLoaded(true);
@@ -498,6 +545,17 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setHasChanges(true);
   };
 
+  const updateSobreTypography = (key: keyof SobreTypography, value: any) => {
+    setSobre((prev) => ({
+      ...prev,
+      typography: {
+        ...prev.typography,
+        [key]: value,
+      },
+    }));
+    setHasChanges(true);
+  };
+
   const addSobreSegment = (segment: string) => {
     if (!segment.trim()) return;
     setSobre((prev) => ({
@@ -517,6 +575,83 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Segmento removido.');
   };
 
+  const addNewCase = async (caseData: {
+    name: string;
+    concept: string;
+    lado: 'A' | 'B' | 'bonus';
+    deliv?: string;
+    cover: string;
+    text: string[];
+    imgs?: string[];
+    yt?: string[];
+  }): Promise<CaseItem> => {
+    setIsSaving(true);
+
+    // Helper slug generator
+    const baseSlug = caseData.name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '') || `projeto-${Date.now()}`;
+
+    let finalSlug = baseSlug;
+    let counter = 1;
+    while (cases.some((c) => c.slug === finalSlug)) {
+      finalSlug = `${baseSlug}-${counter++}`;
+    }
+
+    const countOnLado = cases.filter((c) => c.lado === caseData.lado).length;
+    const faixaNum = countOnLado + 1;
+    const faixa = `FAIXA ${faixaNum < 10 ? '0' + faixaNum : faixaNum}`;
+
+    const newCaseItem: CaseItem = {
+      slug: finalSlug,
+      lado: caseData.lado,
+      faixa,
+      name: caseData.name.trim(),
+      concept: caseData.concept.trim(),
+      deliv: caseData.deliv?.trim() || 'PROJETO & CONCEITO',
+      cover:
+        caseData.cover.trim() ||
+        'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80',
+      text: caseData.text.length > 0 ? caseData.text : [caseData.concept],
+      imgs: caseData.imgs || [],
+      yt: caseData.yt || [],
+      blocks: [
+        {
+          id: `block-${Date.now()}-1`,
+          type: 'text',
+          value: caseData.text.join('\n\n') || caseData.concept,
+        },
+      ],
+    };
+
+    const newCasesList = [newCaseItem, ...cases];
+    setCases(newCasesList);
+
+    // Persist to local cache
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newCasesList));
+      localStorage.setItem(STORAGE_LAYOUT_KEY, String(gridColumns));
+    } catch (e) {
+      console.warn('Erro ao atualizar cache local:', e);
+    }
+
+    // Persist directly to Cloud Firestore
+    const cloudRes = await saveCloudPortfolio(newCasesList, sobre, gridColumns);
+    setIsSaving(false);
+
+    if (cloudRes.success) {
+      setHasChanges(false);
+      showToast(`Projeto "${newCaseItem.name}" publicado na nuvem com sucesso!`);
+    } else {
+      showToast(`Projeto criado localmente. Nuvem: ${cloudRes.error || 'Aviso de conexão'}`);
+    }
+
+    return newCaseItem;
+  };
+
   const saveChanges = async () => {
     setIsSaving(true);
 
@@ -524,17 +659,18 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cases));
       localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(sobre));
+      localStorage.setItem(STORAGE_LAYOUT_KEY, String(gridColumns));
     } catch (e) {
       console.warn('Erro ao atualizar cache local:', e);
     }
 
     // 2. Publish to Cloud Firestore for all visitors worldwide
-    const cloudRes = await saveCloudPortfolio(cases, sobre);
+    const cloudRes = await saveCloudPortfolio(cases, sobre, gridColumns);
     setIsSaving(false);
 
     if (cloudRes.success) {
       setHasChanges(false);
-      showToast('Alterações publicadas online com sucesso!');
+      showToast('Alterações salvas e sincronizadas na nuvem com sucesso!');
     } else {
       showToast(`Salvo localmente. Erro na nuvem: ${cloudRes.error || 'Falha de conexão'}`);
     }
@@ -608,6 +744,8 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         changePassword,
         cases,
         sobre,
+        gridColumns,
+        setGridColumns,
         hasChanges,
         isSaving,
         isCloudLoaded,
@@ -629,12 +767,16 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addSobreBioParagraph,
         removeSobreBioParagraph,
         updateSobreStat,
+        updateSobreTypography,
         addSobreSegment,
         removeSobreSegment,
         saveChanges,
         resetToOriginal,
         exportModalOpen,
         setExportModalOpen,
+        isAddModalOpen,
+        setIsAddModalOpen,
+        addNewCase,
         activeNotification,
         showToast,
         exportCasesJson,

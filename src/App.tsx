@@ -15,6 +15,7 @@ import { LightboxModal } from './components/LightboxModal';
 import { ServicosSection } from './components/ServicosSection';
 
 import { SobreSection } from './components/SobreSection';
+import { SegmentosSection } from './components/SegmentosSection';
 
 import { ContatoSection } from './components/ContatoSection';
 
@@ -24,13 +25,15 @@ import { CmsToolbar } from './components/CmsToolbar';
 
 import { CmsExportModal } from './components/CmsExportModal';
 
+import { AddCaseModal } from './components/AddCaseModal';
+
 import { CmsProvider, useCms } from './context/CmsContext';
 
 import { CaseItem } from './types';
 
 function PortfolioApp() {
 
-  const { cases } = useCms();
+  const { cases, gridColumns, isAddModalOpen, setIsAddModalOpen } = useCms();
 
   const [selectedCase, setSelectedCase] = useState<CaseItem | null>(null);
 
@@ -168,13 +171,21 @@ function PortfolioApp() {
                 </h2>
               </div>
 
-              {/* Grid of Lado A Cards - Grid Simétrico: 1 Coluna em Mobile, 2 Colunas em Tablets e Desktops */}
+              {/* Grid of Lado A Cards - Configuração Dinâmica de Colunas (1, 2 ou 3) */}
               {casesLadoA.length === 0 ? (
                 <div className="py-12 text-center text-[#5B6070] font-mono-code text-sm">
                   Nenhum case do Lado A corresponde à pesquisa atual.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 xl:gap-14">
+                <div
+                  className={
+                    gridColumns === 1
+                      ? 'grid grid-cols-1 max-w-4xl mx-auto gap-8 sm:gap-10 md:gap-12'
+                      : gridColumns === 3
+                      ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10'
+                      : 'grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 xl:gap-14'
+                  }
+                >
                   {casesLadoA.map((item, idx) => (
                     <div
                       key={item.slug}
@@ -184,7 +195,7 @@ function PortfolioApp() {
                         item={item}
                         onSelect={handleOpenCase}
                         featured={false}
-                        columns={2}
+                        columns={gridColumns}
                         positionIndex={idx + 1}
                       />
                     </div>
@@ -208,8 +219,16 @@ function PortfolioApp() {
                 </h2>
               </div>
 
-              {/* Lado B Layout: 1 Coluna em Mobile, 2 em Tablets, 3 Colunas em Desktops (grid-cols-1 sm:grid-cols-2 lg:grid-cols-3) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
+              {/* Lado B Layout: Respeita também o gridColumns dinâmico */}
+              <div
+                className={
+                  gridColumns === 1
+                    ? 'grid grid-cols-1 max-w-4xl mx-auto gap-8 sm:gap-10'
+                    : gridColumns === 2
+                    ? 'grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10'
+                    : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10'
+                }
+              >
                 {casesLadoB.map((item, idx) => (
                   <div
                     key={item.slug}
@@ -220,7 +239,7 @@ function PortfolioApp() {
                       onSelect={handleOpenCase}
                       dark
                       featured={false}
-                      columns={3}
+                      columns={gridColumns}
                       positionIndex={idx + 1}
                     />
                   </div>
@@ -300,6 +319,10 @@ function PortfolioApp() {
 
         <SobreSection />
 
+        {/* Segmentos Atendidos */}
+
+        <SegmentosSection />
+
 
 
         {/* Contato */}
@@ -357,6 +380,15 @@ function PortfolioApp() {
       {/* CMS Export JSON / Code Modal */}
 
       <CmsExportModal />
+
+      {/* Modal para Adicionar Novo Projeto (CMS) */}
+      <AddCaseModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onCaseCreated={(newCase) => {
+          handleOpenCase(newCase);
+        }}
+      />
 
     </div>
 
