@@ -70,8 +70,8 @@ export const SobreSection: React.FC = () => {
 
       <div className="max-w-[1280px] 2xl:max-w-[1360px] w-full mx-auto h-full flex flex-col justify-between relative z-10">
         
-        {/* BLOCO CENTRAL COESO: Foto Retrato Ampliada + Copy Editorial com Respiros Laterais */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-14 items-center my-auto flex-1">
+        {/* BLOCO CENTRAL COESO: Foto Retrato Ampliada + Copy Editorial com Espaçamento Ajustado (Aproximado) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 xl:gap-12 items-center my-auto flex-1">
           
           {/* Coluna Esquerda: Fotografia Retrato com Formato Vertical Estrito 4/5 (w-[260px] a w-[320px]) */}
           <div className="lg:col-span-5 flex justify-center lg:justify-start items-center">
@@ -142,7 +142,7 @@ export const SobreSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Coluna Direita: Copy Biográfica Encorpada e Legível (lg:col-span-7) */}
+          {/* Coluna Direita: Copy Biográfica Puxada para a Esquerda (lg:col-span-7) */}
           <div className="lg:col-span-7 flex flex-col justify-center space-y-2 sm:space-y-2.5">
             
             {/* Controles Dinâmicos de Estilo e Tipografia (Exibidos apenas no Modo Edição) */}
@@ -280,7 +280,7 @@ export const SobreSection: React.FC = () => {
           </div>
         </div>
 
-        {/* RODAPÉ DE MÉTRICAS: Vertical empilhado com efeito hover verde neon nos números */}
+        {/* RODAPÉ DE MÉTRICAS: Empilhado verticalmente com efeito hover verde neon */}
         <div className="pt-2.5 sm:pt-3 border-t border-white/20 mt-auto pb-1">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
             
@@ -314,15 +314,12 @@ export const SobreSection: React.FC = () => {
               </div>
             ) : (
               <div className="flex flex-col space-y-1.5">
-                {/* 1. Palavra em destaque isolada no topo */}
                 <span className="font-disp text-xs sm:text-sm lg:text-[15px] text-white uppercase tracking-[0.14em] font-black block leading-none">
                   REPERTÓRIO
                 </span>
-                {/* 2. Número Gigante com Hover em Verde Neon */}
                 <span className="font-disp text-3xl sm:text-4xl lg:text-[38px] xl:text-[42px] font-extrabold tracking-tight text-white transition-colors duration-300 hover:text-[#D4FF3A] cursor-pointer block leading-none pt-0.5">
                   {sobre.stats?.stat2Number || '50+'}
                 </span>
-                {/* 3. Legendas Descritivas Abaixo */}
                 <div className="space-y-0.5 pt-1">
                   <span className="text-white text-[10px] sm:text-[11px] font-mono-code font-bold uppercase tracking-wider block leading-tight">
                     {sobre.stats?.stat2Label || 'marcas atendidas'}
@@ -364,15 +361,12 @@ export const SobreSection: React.FC = () => {
               </div>
             ) : (
               <div className="flex flex-col space-y-1.5">
-                {/* 1. Palavra em destaque isolada no topo */}
                 <span className="font-disp text-xs sm:text-sm lg:text-[15px] text-white uppercase tracking-[0.14em] font-black block leading-none">
                   TURNÊS
                 </span>
-                {/* 2. Número Gigante com Hover em Verde Neon */}
                 <span className="font-disp text-3xl sm:text-4xl lg:text-[38px] xl:text-[42px] font-extrabold tracking-tight text-white transition-colors duration-300 hover:text-[#D4FF3A] cursor-pointer block leading-none pt-0.5">
                   {sobre.stats?.stat3Number || '3 + 3'}
                 </span>
-                {/* 3. Legendas Descritivas Abaixo */}
                 <div className="space-y-0.5 pt-1">
                   <span className="text-white text-[10px] sm:text-[11px] font-mono-code font-bold uppercase tracking-wider block leading-tight">
                     {sobre.stats?.stat3Label || 'praças & países'}
@@ -414,15 +408,12 @@ export const SobreSection: React.FC = () => {
               </div>
             ) : (
               <div className="flex flex-col space-y-1.5">
-                {/* 1. Palavra em destaque isolada no topo */}
                 <span className="font-disp text-xs sm:text-sm lg:text-[15px] text-white uppercase tracking-[0.14em] font-black block leading-none">
                   BAGAGEM
                 </span>
-                {/* 2. Número Gigante com Hover em Verde Neon */}
                 <span className="font-disp text-3xl sm:text-4xl lg:text-[38px] xl:text-[42px] font-extrabold tracking-tight text-white transition-colors duration-300 hover:text-[#D4FF3A] cursor-pointer block leading-none pt-0.5">
                   {sobre.stats?.stat1Number || '15+'}
                 </span>
-                {/* 3. Legendas Descritivas Abaixo */}
                 <div className="space-y-0.5 pt-1">
                   <span className="text-white text-[10px] sm:text-[11px] font-mono-code font-bold uppercase tracking-wider block leading-tight">
                     {sobre.stats?.stat1Label || 'anos de estrada'}
