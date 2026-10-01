@@ -119,7 +119,7 @@ export const Header: React.FC = () => {
               onClick={(e) => handleNavClick(e, 'sobre')}
               className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium cursor-pointer py-1"
             >
-              Sobre
+              Headliner
             </a>
             <a
               id="nav-contato"
