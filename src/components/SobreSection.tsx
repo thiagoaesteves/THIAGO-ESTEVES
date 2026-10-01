@@ -280,57 +280,15 @@ export const SobreSection: React.FC = () => {
           </div>
         </div>
 
-        {/* RODAPÉ DE MÉTRICAS: Edição em Tempo Real (Modo Edição) ou Apresentação Imponente (Pública) */}
+        {/* RODAPÉ DE MÉTRICAS: Ordem ajustada (50+, 3+3, 15+) */}
         <div className="pt-2.5 sm:pt-3 border-t border-white/20 mt-auto pb-1">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
             
-            {/* 1º: Métrica 1 (15+ / ANOS DE ESTRADA / e muita história pra contar) */}
-            {isEditMode ? (
-              <div className="space-y-1 bg-black/40 p-2.5 rounded-xl border border-[#D4FF3A]/40">
-                <span className="text-[9px] font-mono-code text-[#D4FF3A] font-bold block uppercase tracking-wider">
-                  Métrica 1:
-                </span>
-                <input
-                  type="text"
-                  value={sobre.stats?.stat1Number || ''}
-                  onChange={(e) => updateSobreStat('stat1Number', e.target.value)}
-                  className="font-disp text-2xl font-extrabold text-[#D4FF3A] bg-transparent border-b border-[#D4FF3A]/40 focus:outline-none w-full"
-                  placeholder="15+"
-                />
-                <input
-                  type="text"
-                  value={sobre.stats?.stat1Label || ''}
-                  onChange={(e) => updateSobreStat('stat1Label', e.target.value)}
-                  className="text-white text-[11px] font-mono-code font-bold uppercase tracking-wider bg-transparent border-b border-white/20 focus:outline-none w-full"
-                  placeholder="ANOS DE ESTRADA"
-                />
-                <input
-                  type="text"
-                  value={sobre.stats?.stat1Sub || ''}
-                  onChange={(e) => updateSobreStat('stat1Sub', e.target.value)}
-                  className="text-[#AFC0FF] text-[10px] font-mono-code bg-transparent border-b border-white/20 focus:outline-none w-full"
-                  placeholder="e muita história pra contar"
-                />
-              </div>
-            ) : (
-              <div className="space-y-0.5">
-                <span className="font-disp text-3xl sm:text-4xl lg:text-[38px] xl:text-[42px] font-extrabold tracking-tight text-[#D4FF3A] block leading-none">
-                  {sobre.stats?.stat1Number || '15+'}
-                </span>
-                <p className="text-white text-[10px] sm:text-[11px] font-mono-code font-bold uppercase tracking-wider block mt-1 sm:mt-1.5">
-                  {sobre.stats?.stat1Label || 'ANOS DE ESTRADA'}
-                </p>
-                <span className="text-[#AFC0FF] text-[10px] sm:text-[11px] font-mono-code block mt-0.5 leading-snug">
-                  {sobre.stats?.stat1Sub || 'e muita história pra contar'}
-                </span>
-              </div>
-            )}
-
-            {/* 2º: Métrica 2 (50+ / MARCAS ATENDIDAS / nacionais e multinacionais) */}
+            {/* 1º: Métrica 1 (50+ / MARCAS ATENDIDAS / nacionais e multinacionais) */}
             {isEditMode ? (
               <div className="space-y-1 bg-black/40 p-2.5 rounded-xl border border-white/20">
                 <span className="text-[9px] font-mono-code text-[#AFC0FF] font-bold block uppercase tracking-wider">
-                  Métrica 2:
+                  Métrica 1 (50+):
                 </span>
                 <input
                   type="text"
@@ -368,11 +326,11 @@ export const SobreSection: React.FC = () => {
               </div>
             )}
 
-            {/* 3º: Métrica 3 (3 + 3 / PRAÇAS & PAÍSES / RJ, Sul, SP · Brasil, EUA & Espanha) */}
+            {/* 2º: Métrica 2 (3 + 3 / PRAÇAS & PAÍSES / RJ, Sul, SP · Brasil, EUA & Espanha) */}
             {isEditMode ? (
               <div className="space-y-1 bg-black/40 p-2.5 rounded-xl border border-white/20">
                 <span className="text-[9px] font-mono-code text-[#AFC0FF] font-bold block uppercase tracking-wider">
-                  Métrica 3:
+                  Métrica 2 (3 + 3):
                 </span>
                 <input
                   type="text"
@@ -406,6 +364,48 @@ export const SobreSection: React.FC = () => {
                 </p>
                 <span className="text-[#AFC0FF] text-[10px] sm:text-[11px] font-mono-code block mt-0.5 leading-snug">
                   {sobre.stats?.stat3Sub || 'RJ, Sul, SP · Brasil, EUA & Espanha'}
+                </span>
+              </div>
+            )}
+
+            {/* 3º: Métrica 3 (15+ / ANOS DE ESTRADA / e muita história pra contar) */}
+            {isEditMode ? (
+              <div className="space-y-1 bg-black/40 p-2.5 rounded-xl border border-[#D4FF3A]/40">
+                <span className="text-[9px] font-mono-code text-[#D4FF3A] font-bold block uppercase tracking-wider">
+                  Métrica 3 (15+):
+                </span>
+                <input
+                  type="text"
+                  value={sobre.stats?.stat1Number || ''}
+                  onChange={(e) => updateSobreStat('stat1Number', e.target.value)}
+                  className="font-disp text-2xl font-extrabold text-[#D4FF3A] bg-transparent border-b border-[#D4FF3A]/40 focus:outline-none w-full"
+                  placeholder="15+"
+                />
+                <input
+                  type="text"
+                  value={sobre.stats?.stat1Label || ''}
+                  onChange={(e) => updateSobreStat('stat1Label', e.target.value)}
+                  className="text-white text-[11px] font-mono-code font-bold uppercase tracking-wider bg-transparent border-b border-white/20 focus:outline-none w-full"
+                  placeholder="ANOS DE ESTRADA"
+                />
+                <input
+                  type="text"
+                  value={sobre.stats?.stat1Sub || ''}
+                  onChange={(e) => updateSobreStat('stat1Sub', e.target.value)}
+                  className="text-[#AFC0FF] text-[10px] font-mono-code bg-transparent border-b border-white/20 focus:outline-none w-full"
+                  placeholder="e muita história pra contar"
+                />
+              </div>
+            ) : (
+              <div className="space-y-0.5">
+                <span className="font-disp text-3xl sm:text-4xl lg:text-[38px] xl:text-[42px] font-extrabold tracking-tight text-[#D4FF3A] block leading-none">
+                  {sobre.stats?.stat1Number || '15+'}
+                </span>
+                <p className="text-white text-[10px] sm:text-[11px] font-mono-code font-bold uppercase tracking-wider block mt-1 sm:mt-1.5">
+                  {sobre.stats?.stat1Label || 'ANOS DE ESTRADA'}
+                </p>
+                <span className="text-[#AFC0FF] text-[10px] sm:text-[11px] font-mono-code block mt-0.5 leading-snug">
+                  {sobre.stats?.stat1Sub || 'e muita história pra contar'}
                 </span>
               </div>
             )}
