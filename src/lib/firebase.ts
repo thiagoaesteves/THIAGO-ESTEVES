@@ -53,9 +53,16 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   return errInfo;
 }
 
+export interface SectionGridSettings {
+  gridLadoA: 1 | 2 | 3;
+  gridLadoB: 1 | 2 | 3;
+  gridBonus: 1 | 2 | 3;
+}
+
 export interface CloudPortfolioData {
   cases: CaseItem[] | null;
   sobre: SobreData | null;
+  gridSettings?: SectionGridSettings;
   gridColumns?: 1 | 2 | 3;
   lastUpdated?: string;
 }
@@ -79,7 +86,7 @@ export async function testFirestoreConnection(): Promise<boolean> {
 }
 
 /**
- * Loads published portfolio data (cases, about narrative and layout settings) from Firestore
+ * Loads published portfolio data (cases, about narrative and isolated section layout settings) from Firestore
  */
 export async function fetchCloudPortfolio(): Promise<CloudPortfolioData> {
   const casesPath = `${COLLECTION_NAME}/${CASES_DOC_ID}`;
@@ -99,6 +106,7 @@ export async function fetchCloudPortfolio(): Promise<CloudPortfolioData> {
 
     let loadedCases: CaseItem[] | null = null;
     let loadedSobre: SobreData | null = null;
+    let loadedGridSettings: SectionGridSettings | undefined = undefined;
     let loadedGridColumns: 1 | 2 | 3 | undefined = undefined;
     let lastUpdated: string | undefined = undefined;
 
@@ -128,8 +136,23 @@ export async function fetchCloudPortfolio(): Promise<CloudPortfolioData> {
       if (data && typeof data.content === 'string') {
         try {
           const parsed = JSON.parse(data.content);
-          if (parsed && (parsed.gridColumns === 1 || parsed.gridColumns === 2 || parsed.gridColumns === 3)) {
-            loadedGridColumns = parsed.gridColumns;
+          if (parsed && typeof parsed === 'object') {
+            const legacyCol = (parsed.gridColumns === 1 || parsed.gridColumns === 2 || parsed.gridColumns === 3)
+              ? (parsed.gridColumns as 1 | 2 | 3)
+              : undefined;
+
+            loadedGridSettings = {
+              gridLadoA: (parsed.gridLadoA === 1 || parsed.gridLadoA === 2 || parsed.gridLadoA === 3)
+                ? parsed.gridLadoA
+                : (legacyCol || 2),
+              gridLadoB: (parsed.gridLadoB === 1 || parsed.gridLadoB === 2 || parsed.gridLadoB === 3)
+                ? parsed.gridLadoB
+                : (legacyCol || 3),
+              gridBonus: (parsed.gridBonus === 1 || parsed.gridBonus === 2 || parsed.gridBonus === 3)
+                ? parsed.gridBonus
+                : (legacyCol || 2),
+            };
+            loadedGridColumns = loadedGridSettings.gridLadoA;
           }
         } catch (e) {
           // ignore parsing error
@@ -140,6 +163,7 @@ export async function fetchCloudPortfolio(): Promise<CloudPortfolioData> {
     return {
       cases: loadedCases,
       sobre: loadedSobre,
+      gridSettings: loadedGridSettings,
       gridColumns: loadedGridColumns,
       lastUpdated,
     };
@@ -153,12 +177,12 @@ export async function fetchCloudPortfolio(): Promise<CloudPortfolioData> {
 }
 
 /**
- * Saves published portfolio data and layout preferences to cloud Firestore
+ * Saves published portfolio data and isolated section layout preferences to cloud Firestore
  */
 export async function saveCloudPortfolio(
   cases: CaseItem[],
   sobre: SobreData,
-  gridColumns: 1 | 2 | 3 = 2
+  gridSettings: SectionGridSettings = { gridLadoA: 2, gridLadoB: 3, gridBonus: 2 }
 ): Promise<{ success: boolean; error?: string }> {
   const writePath = `${COLLECTION_NAME}/[cases, sobre, layout]`;
   try {
@@ -181,7 +205,12 @@ export async function saveCloudPortfolio(
         editorSignature: EDITOR_SIGNATURE,
       }),
       setDoc(layoutRef, {
-        content: JSON.stringify({ gridColumns }),
+        content: JSON.stringify({
+          gridLadoA: gridSettings.gridLadoA,
+          gridLadoB: gridSettings.gridLadoB,
+          gridBonus: gridSettings.gridBonus,
+          gridColumns: gridSettings.gridLadoA,
+        }),
         updatedAt: timestamp,
         version: '1.0',
         editorSignature: EDITOR_SIGNATURE,

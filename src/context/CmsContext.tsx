@@ -6,12 +6,14 @@ import {
   fetchCloudPortfolio,
   saveCloudPortfolio,
   testFirestoreConnection,
+  SectionGridSettings,
 } from '../lib/firebase';
 
 // Storage keys for resilient local fallback cache
 const STORAGE_KEY = 'thiago_portfolio_custom_cases_v19';
 const STORAGE_SOBRE_KEY = 'thiago_portfolio_custom_sobre_v2';
 const STORAGE_LAYOUT_KEY = 'thiago_portfolio_grid_columns';
+const STORAGE_GRIDS_KEY = 'thiago_portfolio_section_grids_v1';
 
 interface CmsContextType {
   isEditMode: boolean;
@@ -22,6 +24,12 @@ interface CmsContextType {
   changePassword: () => void;
   cases: CaseItem[];
   sobre: SobreData;
+  gridLadoA: 1 | 2 | 3;
+  gridLadoB: 1 | 2 | 3;
+  gridBonus: 1 | 2 | 3;
+  setGridLadoA: (cols: 1 | 2 | 3) => void;
+  setGridLadoB: (cols: 1 | 2 | 3) => void;
+  setGridBonus: (cols: 1 | 2 | 3) => void;
   gridColumns: 1 | 2 | 3;
   setGridColumns: (cols: 1 | 2 | 3) => void;
   hasChanges: boolean;
@@ -121,26 +129,61 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return ORIGINAL_SOBRE_DATA;
   });
 
-  const [gridColumns, setGridColumnsState] = useState<1 | 2 | 3>(() => {
+  const [gridSettings, setGridSettings] = useState<SectionGridSettings>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_LAYOUT_KEY);
-      if (saved === '1' || saved === '2' || saved === '3') {
-        return Number(saved) as 1 | 2 | 3;
+      const saved = localStorage.getItem(STORAGE_GRIDS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          return {
+            gridLadoA: (parsed.gridLadoA === 1 || parsed.gridLadoA === 2 || parsed.gridLadoA === 3) ? parsed.gridLadoA : 2,
+            gridLadoB: (parsed.gridLadoB === 1 || parsed.gridLadoB === 2 || parsed.gridLadoB === 3) ? parsed.gridLadoB : 3,
+            gridBonus: (parsed.gridBonus === 1 || parsed.gridBonus === 2 || parsed.gridBonus === 3) ? parsed.gridBonus : 2,
+          };
+        }
       }
     } catch (e) {
       // ignore
     }
-    return 2;
+    return { gridLadoA: 2, gridLadoB: 3, gridBonus: 2 };
   });
 
-  const setGridColumns = (cols: 1 | 2 | 3) => {
-    setGridColumnsState(cols);
+  const setGridLadoA = (cols: 1 | 2 | 3) => {
+    setGridSettings((prev) => {
+      const updated = { ...prev, gridLadoA: cols };
+      try {
+        localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(updated));
+        localStorage.setItem(STORAGE_LAYOUT_KEY, String(cols));
+      } catch (e) {}
+      return updated;
+    });
     setHasChanges(true);
-    try {
-      localStorage.setItem(STORAGE_LAYOUT_KEY, String(cols));
-    } catch (e) {
-      // ignore
-    }
+  };
+
+  const setGridLadoB = (cols: 1 | 2 | 3) => {
+    setGridSettings((prev) => {
+      const updated = { ...prev, gridLadoB: cols };
+      try {
+        localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+    setHasChanges(true);
+  };
+
+  const setGridBonus = (cols: 1 | 2 | 3) => {
+    setGridSettings((prev) => {
+      const updated = { ...prev, gridBonus: cols };
+      try {
+        localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+    setHasChanges(true);
+  };
+
+  const setGridColumns = (cols: 1 | 2 | 3) => {
+    setGridLadoA(cols);
   };
 
   // Load latest published data directly from Cloud Firestore for all visitors
@@ -165,13 +208,20 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             // ignore local storage quota
           }
         }
-        if (cloudData.gridColumns === 1 || cloudData.gridColumns === 2 || cloudData.gridColumns === 3) {
-          setGridColumnsState(cloudData.gridColumns);
+        if (cloudData.gridSettings) {
+          setGridSettings(cloudData.gridSettings);
           try {
-            localStorage.setItem(STORAGE_LAYOUT_KEY, String(cloudData.gridColumns));
+            localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(cloudData.gridSettings));
+            localStorage.setItem(STORAGE_LAYOUT_KEY, String(cloudData.gridSettings.gridLadoA));
           } catch (e) {
             // ignore
           }
+        } else if (cloudData.gridColumns === 1 || cloudData.gridColumns === 2 || cloudData.gridColumns === 3) {
+          setGridSettings({
+            gridLadoA: cloudData.gridColumns,
+            gridLadoB: cloudData.gridColumns === 1 ? 1 : 3,
+            gridBonus: cloudData.gridColumns,
+          });
         }
         setIsCloudLoaded(true);
       })
@@ -633,13 +683,14 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Persist to local cache
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newCasesList));
-      localStorage.setItem(STORAGE_LAYOUT_KEY, String(gridColumns));
+      localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(gridSettings));
+      localStorage.setItem(STORAGE_LAYOUT_KEY, String(gridSettings.gridLadoA));
     } catch (e) {
       console.warn('Erro ao atualizar cache local:', e);
     }
 
     // Persist directly to Cloud Firestore
-    const cloudRes = await saveCloudPortfolio(newCasesList, sobre, gridColumns);
+    const cloudRes = await saveCloudPortfolio(newCasesList, sobre, gridSettings);
     setIsSaving(false);
 
     if (cloudRes.success) {
@@ -659,13 +710,14 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cases));
       localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(sobre));
-      localStorage.setItem(STORAGE_LAYOUT_KEY, String(gridColumns));
+      localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(gridSettings));
+      localStorage.setItem(STORAGE_LAYOUT_KEY, String(gridSettings.gridLadoA));
     } catch (e) {
       console.warn('Erro ao atualizar cache local:', e);
     }
 
     // 2. Publish to Cloud Firestore for all visitors worldwide
-    const cloudRes = await saveCloudPortfolio(cases, sobre, gridColumns);
+    const cloudRes = await saveCloudPortfolio(cases, sobre, gridSettings);
     setIsSaving(false);
 
     if (cloudRes.success) {
@@ -744,7 +796,13 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         changePassword,
         cases,
         sobre,
-        gridColumns,
+        gridLadoA: gridSettings.gridLadoA,
+        gridLadoB: gridSettings.gridLadoB,
+        gridBonus: gridSettings.gridBonus,
+        setGridLadoA,
+        setGridLadoB,
+        setGridBonus,
+        gridColumns: gridSettings.gridLadoA,
         setGridColumns,
         hasChanges,
         isSaving,
