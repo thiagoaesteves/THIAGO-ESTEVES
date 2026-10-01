@@ -280,15 +280,15 @@ export const SobreSection: React.FC = () => {
           </div>
         </div>
 
-        {/* RODAPÉ DE MÉTRICAS: Ordem ajustada (50+, 3+3, 15+) */}
+        {/* RODAPÉ DE MÉTRICAS: Vertical empilhado com efeito hover verde neon nos números */}
         <div className="pt-2.5 sm:pt-3 border-t border-white/20 mt-auto pb-1">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
             
-            {/* 1º: Métrica 1 (50+ / MARCAS ATENDIDAS / nacionais e multinacionais) */}
+            {/* 1º: REPERTÓRIO */}
             {isEditMode ? (
               <div className="space-y-1 bg-black/40 p-2.5 rounded-xl border border-white/20">
-                <span className="text-[9px] font-mono-code text-[#AFC0FF] font-bold block uppercase tracking-wider">
-                  Métrica 1 (50+):
+                <span className="text-[9px] font-mono-code text-[#D4FF3A] font-bold block uppercase tracking-wider">
+                  Repertório (50+):
                 </span>
                 <input
                   type="text"
@@ -302,7 +302,7 @@ export const SobreSection: React.FC = () => {
                   value={sobre.stats?.stat2Label || ''}
                   onChange={(e) => updateSobreStat('stat2Label', e.target.value)}
                   className="text-white text-[11px] font-mono-code font-bold uppercase tracking-wider bg-transparent border-b border-white/20 focus:outline-none w-full"
-                  placeholder="MARCAS ATENDIDAS"
+                  placeholder="marcas atendidas"
                 />
                 <input
                   type="text"
@@ -313,24 +313,32 @@ export const SobreSection: React.FC = () => {
                 />
               </div>
             ) : (
-              <div className="space-y-0.5">
-                <span className="font-disp text-3xl sm:text-4xl lg:text-[38px] xl:text-[42px] font-extrabold tracking-tight text-white block leading-none">
+              <div className="flex flex-col space-y-1.5">
+                {/* 1. Palavra em destaque isolada no topo */}
+                <span className="font-disp text-xs sm:text-sm lg:text-[15px] text-white uppercase tracking-[0.14em] font-black block leading-none">
+                  REPERTÓRIO
+                </span>
+                {/* 2. Número Gigante com Hover em Verde Neon */}
+                <span className="font-disp text-3xl sm:text-4xl lg:text-[38px] xl:text-[42px] font-extrabold tracking-tight text-white transition-colors duration-300 hover:text-[#D4FF3A] cursor-pointer block leading-none pt-0.5">
                   {sobre.stats?.stat2Number || '50+'}
                 </span>
-                <p className="text-white text-[10px] sm:text-[11px] font-mono-code font-bold uppercase tracking-wider block mt-1 sm:mt-1.5">
-                  {sobre.stats?.stat2Label || 'MARCAS ATENDIDAS'}
-                </p>
-                <span className="text-[#AFC0FF] text-[10px] sm:text-[11px] font-mono-code block mt-0.5 leading-snug">
-                  {sobre.stats?.stat2Sub || 'nacionais e multinacionais'}
-                </span>
+                {/* 3. Legendas Descritivas Abaixo */}
+                <div className="space-y-0.5 pt-1">
+                  <span className="text-white text-[10px] sm:text-[11px] font-mono-code font-bold uppercase tracking-wider block leading-tight">
+                    {sobre.stats?.stat2Label || 'marcas atendidas'}
+                  </span>
+                  <span className="text-[#AFC0FF] text-[10px] sm:text-[11px] font-mono-code block leading-tight">
+                    {sobre.stats?.stat2Sub || 'nacionais e multinacionais'}
+                  </span>
+                </div>
               </div>
             )}
 
-            {/* 2º: Métrica 2 (3 + 3 / PRAÇAS & PAÍSES / RJ, Sul, SP · Brasil, EUA & Espanha) */}
+            {/* 2º: TURNÊS */}
             {isEditMode ? (
               <div className="space-y-1 bg-black/40 p-2.5 rounded-xl border border-white/20">
-                <span className="text-[9px] font-mono-code text-[#AFC0FF] font-bold block uppercase tracking-wider">
-                  Métrica 2 (3 + 3):
+                <span className="text-[9px] font-mono-code text-[#D4FF3A] font-bold block uppercase tracking-wider">
+                  Turnês (3 + 3):
                 </span>
                 <input
                   type="text"
@@ -344,7 +352,7 @@ export const SobreSection: React.FC = () => {
                   value={sobre.stats?.stat3Label || ''}
                   onChange={(e) => updateSobreStat('stat3Label', e.target.value)}
                   className="text-white text-[11px] font-mono-code font-bold uppercase tracking-wider bg-transparent border-b border-white/20 focus:outline-none w-full"
-                  placeholder="PRAÇAS & PAÍSES"
+                  placeholder="praças & países"
                 />
                 <input
                   type="text"
@@ -355,30 +363,38 @@ export const SobreSection: React.FC = () => {
                 />
               </div>
             ) : (
-              <div className="space-y-0.5">
-                <span className="font-disp text-3xl sm:text-4xl lg:text-[38px] xl:text-[42px] font-extrabold tracking-tight text-white block leading-none">
+              <div className="flex flex-col space-y-1.5">
+                {/* 1. Palavra em destaque isolada no topo */}
+                <span className="font-disp text-xs sm:text-sm lg:text-[15px] text-white uppercase tracking-[0.14em] font-black block leading-none">
+                  TURNÊS
+                </span>
+                {/* 2. Número Gigante com Hover em Verde Neon */}
+                <span className="font-disp text-3xl sm:text-4xl lg:text-[38px] xl:text-[42px] font-extrabold tracking-tight text-white transition-colors duration-300 hover:text-[#D4FF3A] cursor-pointer block leading-none pt-0.5">
                   {sobre.stats?.stat3Number || '3 + 3'}
                 </span>
-                <p className="text-white text-[10px] sm:text-[11px] font-mono-code font-bold uppercase tracking-wider block mt-1 sm:mt-1.5">
-                  {sobre.stats?.stat3Label || 'PRAÇAS & PAÍSES'}
-                </p>
-                <span className="text-[#AFC0FF] text-[10px] sm:text-[11px] font-mono-code block mt-0.5 leading-snug">
-                  {sobre.stats?.stat3Sub || 'RJ, Sul, SP · Brasil, EUA & Espanha'}
-                </span>
+                {/* 3. Legendas Descritivas Abaixo */}
+                <div className="space-y-0.5 pt-1">
+                  <span className="text-white text-[10px] sm:text-[11px] font-mono-code font-bold uppercase tracking-wider block leading-tight">
+                    {sobre.stats?.stat3Label || 'praças & países'}
+                  </span>
+                  <span className="text-[#AFC0FF] text-[10px] sm:text-[11px] font-mono-code block leading-tight">
+                    {sobre.stats?.stat3Sub || 'RJ, Sul, SP · Brasil, EUA & Espanha'}
+                  </span>
+                </div>
               </div>
             )}
 
-            {/* 3º: Métrica 3 (15+ / ANOS DE ESTRADA / e muita história pra contar) */}
+            {/* 3º: BAGAGEM */}
             {isEditMode ? (
               <div className="space-y-1 bg-black/40 p-2.5 rounded-xl border border-[#D4FF3A]/40">
                 <span className="text-[9px] font-mono-code text-[#D4FF3A] font-bold block uppercase tracking-wider">
-                  Métrica 3 (15+):
+                  Bagagem (15+):
                 </span>
                 <input
                   type="text"
                   value={sobre.stats?.stat1Number || ''}
                   onChange={(e) => updateSobreStat('stat1Number', e.target.value)}
-                  className="font-disp text-2xl font-extrabold text-[#D4FF3A] bg-transparent border-b border-[#D4FF3A]/40 focus:outline-none w-full"
+                  className="font-disp text-2xl font-extrabold text-white bg-transparent border-b border-[#D4FF3A]/40 focus:outline-none w-full"
                   placeholder="15+"
                 />
                 <input
@@ -386,7 +402,7 @@ export const SobreSection: React.FC = () => {
                   value={sobre.stats?.stat1Label || ''}
                   onChange={(e) => updateSobreStat('stat1Label', e.target.value)}
                   className="text-white text-[11px] font-mono-code font-bold uppercase tracking-wider bg-transparent border-b border-white/20 focus:outline-none w-full"
-                  placeholder="ANOS DE ESTRADA"
+                  placeholder="anos de estrada"
                 />
                 <input
                   type="text"
@@ -397,16 +413,24 @@ export const SobreSection: React.FC = () => {
                 />
               </div>
             ) : (
-              <div className="space-y-0.5">
-                <span className="font-disp text-3xl sm:text-4xl lg:text-[38px] xl:text-[42px] font-extrabold tracking-tight text-[#D4FF3A] block leading-none">
+              <div className="flex flex-col space-y-1.5">
+                {/* 1. Palavra em destaque isolada no topo */}
+                <span className="font-disp text-xs sm:text-sm lg:text-[15px] text-white uppercase tracking-[0.14em] font-black block leading-none">
+                  BAGAGEM
+                </span>
+                {/* 2. Número Gigante com Hover em Verde Neon */}
+                <span className="font-disp text-3xl sm:text-4xl lg:text-[38px] xl:text-[42px] font-extrabold tracking-tight text-white transition-colors duration-300 hover:text-[#D4FF3A] cursor-pointer block leading-none pt-0.5">
                   {sobre.stats?.stat1Number || '15+'}
                 </span>
-                <p className="text-white text-[10px] sm:text-[11px] font-mono-code font-bold uppercase tracking-wider block mt-1 sm:mt-1.5">
-                  {sobre.stats?.stat1Label || 'ANOS DE ESTRADA'}
-                </p>
-                <span className="text-[#AFC0FF] text-[10px] sm:text-[11px] font-mono-code block mt-0.5 leading-snug">
-                  {sobre.stats?.stat1Sub || 'e muita história pra contar'}
-                </span>
+                {/* 3. Legendas Descritivas Abaixo */}
+                <div className="space-y-0.5 pt-1">
+                  <span className="text-white text-[10px] sm:text-[11px] font-mono-code font-bold uppercase tracking-wider block leading-tight">
+                    {sobre.stats?.stat1Label || 'anos de estrada'}
+                  </span>
+                  <span className="text-[#AFC0FF] text-[10px] sm:text-[11px] font-mono-code block leading-tight">
+                    {sobre.stats?.stat1Sub || 'e muita história pra contar'}
+                  </span>
+                </div>
               </div>
             )}
 
