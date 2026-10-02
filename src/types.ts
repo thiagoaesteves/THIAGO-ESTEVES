@@ -2,6 +2,8 @@ export type LadoType = 'A' | 'B' | 'bonus';
 
 export type CaseBlockType = 'text' | 'video' | 'image';
 
+export type GridSpanType = 'full' | 'half' | 'third';
+
 export interface CaseBlock {
   id: string;
   type: CaseBlockType;
@@ -23,4 +25,5 @@ export interface CaseItem {
   imgs: string[];
   yt: string[];
   blocks?: CaseBlock[];
+  gridSpan?: GridSpanType;
 }

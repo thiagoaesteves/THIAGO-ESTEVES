@@ -12,7 +12,7 @@ import {
   Video,
 } from 'lucide-react';
 import { useCms } from '../context/CmsContext';
-import { CaseItem, LadoType } from '../types';
+import { CaseItem, LadoType, GridSpanType } from '../types';
 import { processImageUpload } from '../utils/imageUpload';
 
 interface AddCaseModalProps {
@@ -31,6 +31,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
   const [name, setName] = useState('');
   const [concept, setConcept] = useState('');
   const [lado, setLado] = useState<LadoType>('A');
+  const [gridSpan, setGridSpan] = useState<GridSpanType>('half');
   const [deliv, setDeliv] = useState('');
   const [cover, setCover] = useState('');
   const [text, setText] = useState('');
@@ -96,6 +97,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
         name: name.trim(),
         concept: concept.trim(),
         lado,
+        gridSpan,
         deliv: deliv.trim() || 'PROJETO & CONCEITO',
         cover:
           cover.trim() ||
@@ -219,10 +221,57 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
             </div>
           </div>
 
+          {/* Formato de Exibição no Grid (Mosaico Editorial) */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono-code text-[#AFC0FF] font-bold uppercase tracking-wider block">
+              2. Formato de Exibição no Grid (Mosaico):
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setGridSpan('full')}
+                className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-xs font-mono-code font-bold transition-all cursor-pointer ${
+                  gridSpan === 'full'
+                    ? 'bg-[#D4FF3A] border-black text-[#0F1222] shadow-lg ring-2 ring-[#2340FF]/50'
+                    : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <span className="text-xs sm:text-sm font-black">Destaque (Full)</span>
+                <span className="text-[10px] opacity-80 font-normal">100% da linha</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setGridSpan('half')}
+                className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-xs font-mono-code font-bold transition-all cursor-pointer ${
+                  gridSpan === 'half'
+                    ? 'bg-[#D4FF3A] border-black text-[#0F1222] shadow-lg ring-2 ring-[#2340FF]/50'
+                    : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <span className="text-xs sm:text-sm font-black">Médio (Metade)</span>
+                <span className="text-[10px] opacity-80 font-normal">50% (2 por linha)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setGridSpan('third')}
+                className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-xs font-mono-code font-bold transition-all cursor-pointer ${
+                  gridSpan === 'third'
+                    ? 'bg-[#D4FF3A] border-black text-[#0F1222] shadow-lg ring-2 ring-[#2340FF]/50'
+                    : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <span className="text-xs sm:text-sm font-black">Compacto (Terço)</span>
+                <span className="text-[10px] opacity-80 font-normal">33% (3 por linha)</span>
+              </button>
+            </div>
+          </div>
+
           {/* Título do Projeto */}
           <div className="space-y-1.5">
             <label className="text-xs font-mono-code text-[#AFC0FF] font-bold uppercase tracking-wider block">
-              2. Título do Projeto:
+              3. Título do Projeto:
             </label>
             <input
               type="text"

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { CaseItem, CaseBlock } from '../types';
+import { CaseItem, CaseBlock, GridSpanType } from '../types';
 import { CASES as ORIGINAL_CASES } from '../data/cases';
 import { SobreData, ORIGINAL_SOBRE_DATA, SobreTypography } from '../data/sobre';
 import {
@@ -36,6 +36,7 @@ interface CmsContextType {
   isSaving: boolean;
   isCloudLoaded: boolean;
   updateCaseField: (slug: string, field: keyof CaseItem, value: any) => void;
+  updateCaseGridSpan: (slug: string, span: GridSpanType) => Promise<void>;
   updateCaseParagraph: (slug: string, index: number, value: string) => void;
   addCaseParagraph: (slug: string) => void;
   removeCaseParagraph: (slug: string, index: number) => void;
@@ -71,6 +72,7 @@ interface CmsContextType {
     text: string[];
     imgs?: string[];
     yt?: string[];
+    gridSpan?: GridSpanType;
   }) => Promise<CaseItem>;
   activeNotification: string | null;
   showToast: (msg: string) => void;
@@ -361,6 +363,35 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setHasChanges(true);
   };
 
+  const updateCaseGridSpan = async (slug: string, span: GridSpanType) => {
+    let updatedCasesList: CaseItem[] = [];
+    setCases((prev) => {
+      updatedCasesList = prev.map((c) => (c.slug === slug ? { ...c, gridSpan: span } : c));
+      return updatedCasesList;
+    });
+
+    const spanLabel =
+      span === 'full'
+        ? 'Destaque (100% da linha)'
+        : span === 'half'
+        ? 'Médio (50% da linha)'
+        : 'Compacto (33% da linha)';
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedCasesList));
+    } catch (e) {
+      console.warn('Erro ao atualizar cache local:', e);
+    }
+
+    const cloudRes = await saveCloudPortfolio(updatedCasesList, sobre, gridSettings);
+    if (cloudRes.success) {
+      setHasChanges(false);
+      showToast(`Layout alterado para ${spanLabel} e salvo na nuvem.`);
+    } else {
+      showToast(`Layout alterado localmente. Nuvem: ${cloudRes.error || 'Aviso de sincronização'}`);
+    }
+  };
+
   const updateCaseParagraph = (slug: string, index: number, value: string) => {
     setCases((prev) =>
       prev.map((c) => {
@@ -634,6 +665,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     text: string[];
     imgs?: string[];
     yt?: string[];
+    gridSpan?: GridSpanType;
   }): Promise<CaseItem> => {
     setIsSaving(true);
 
@@ -662,6 +694,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       name: caseData.name.trim(),
       concept: caseData.concept.trim(),
       deliv: caseData.deliv?.trim() || 'PROJETO & CONCEITO',
+      gridSpan: caseData.gridSpan || 'half',
       cover:
         caseData.cover.trim() ||
         'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80',
@@ -808,6 +841,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isSaving,
         isCloudLoaded,
         updateCaseField,
+        updateCaseGridSpan,
         updateCaseParagraph,
         addCaseParagraph,
         removeCaseParagraph,

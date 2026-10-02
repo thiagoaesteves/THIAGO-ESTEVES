@@ -19,7 +19,7 @@ import {
   Upload,
   Loader2,
 } from 'lucide-react';
-import { CaseItem, CaseBlock, CaseBlockType } from '../types';
+import { CaseItem, CaseBlock, CaseBlockType, GridSpanType } from '../types';
 import { useCms } from '../context/CmsContext';
 import { processImageUpload } from '../utils/imageUpload';
 
@@ -83,7 +83,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
   onOpenLightbox,
 }) => {
   // 1. CMS Hook
-  const { isEditMode, cases, updateCaseField, updateCaseBlocks } = useCms();
+  const { isEditMode, cases, updateCaseField, updateCaseGridSpan, updateCaseBlocks } = useCms();
 
   // 2. Component States (All hooks strictly declared at the top before any early return)
   const [playingVideos, setPlayingVideos] = useState<Record<string, boolean>>({});
@@ -111,6 +111,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
       deliv: merged.deliv || '',
       lado: merged.lado || 'A',
       faixa: merged.faixa || '',
+      gridSpan: (merged.gridSpan || 'half') as GridSpanType,
       text: Array.isArray(merged.text) ? merged.text : [],
       yt: Array.isArray(merged.yt) ? merged.yt : [],
       imgs: Array.isArray(merged.imgs) ? merged.imgs : [],
@@ -1027,7 +1028,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
               </h2>
             )}
 
-            <div>
+            <div className="flex flex-wrap items-center gap-3">
               {isEditMode ? (
                 <input
                   type="text"
@@ -1045,6 +1046,50 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                 >
                   {safeItem.deliv}
                 </span>
+              )}
+
+              {isEditMode && (
+                <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl border border-dashed border-[#2340FF] dark:border-[#D4FF3A] bg-black/5 dark:bg-white/5 font-mono-code text-xs">
+                  <span className="text-[10px] text-gray-500 dark:text-[#AFC0FF] px-1 font-bold uppercase">
+                    Formato no Grid:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => updateCaseGridSpan(safeItem.slug, 'full')}
+                    className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
+                      (safeItem.gridSpan || 'half') === 'full'
+                        ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
+                        : 'text-gray-700 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/10'
+                    }`}
+                    title="Destaque: O projeto ocupa 100% da largura da linha (Full)"
+                  >
+                    Full (100%)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateCaseGridSpan(safeItem.slug, 'half')}
+                    className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
+                      (safeItem.gridSpan || 'half') === 'half'
+                        ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
+                        : 'text-gray-700 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/10'
+                    }`}
+                    title="Médio: O projeto ocupa 50% da largura da linha (Metade)"
+                  >
+                    Médio (50%)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateCaseGridSpan(safeItem.slug, 'third')}
+                    className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
+                      (safeItem.gridSpan || 'half') === 'third'
+                        ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
+                        : 'text-gray-700 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/10'
+                    }`}
+                    title="Compacto: O projeto ocupa 33% da largura da linha (Terço)"
+                  >
+                    Compacto (33%)
+                  </button>
+                </div>
               )}
             </div>
           </div>

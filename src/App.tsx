@@ -31,6 +31,19 @@ import { CmsProvider, useCms } from './context/CmsContext';
 
 import { CaseItem } from './types';
 
+const getCaseSpanClass = (item: CaseItem, idx: number, isSectionBonus = false) => {
+  const span = item.gridSpan || (isSectionBonus && idx === 0 ? 'full' : idx === 0 ? 'full' : 'half');
+  switch (span) {
+    case 'full':
+      return 'col-span-1 md:col-span-12';
+    case 'third':
+      return 'col-span-1 sm:col-span-6 md:col-span-4';
+    case 'half':
+    default:
+      return 'col-span-1 sm:col-span-6 md:col-span-6';
+  }
+};
+
 function PortfolioApp() {
 
   const { cases, gridColumns, isAddModalOpen, setIsAddModalOpen } = useCms();
@@ -171,31 +184,22 @@ function PortfolioApp() {
                 </h2>
               </div>
 
-              {/* Grid of Lado A Cards - Configuração Dinâmica de Colunas (1, 2 ou 3) */}
+              {/* Grid of Lado A Cards - Mosaico Editorial Assimétrico (12 Colunas) */}
               {casesLadoA.length === 0 ? (
                 <div className="py-12 text-center text-[#5B6070] font-mono-code text-sm">
                   Nenhum case do Lado A corresponde à pesquisa atual.
                 </div>
               ) : (
-                <div
-                  className={
-                    gridColumns === 1
-                      ? 'grid grid-cols-1 max-w-4xl mx-auto gap-8 sm:gap-10 md:gap-12'
-                      : gridColumns === 3
-                      ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10'
-                      : 'grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 xl:gap-14'
-                  }
-                >
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-start">
                   {casesLadoA.map((item, idx) => (
                     <div
                       key={item.slug}
-                      className="col-span-1"
+                      className={getCaseSpanClass(item, idx, false)}
                     >
                       <CaseCard
                         item={item}
                         onSelect={handleOpenCase}
-                        featured={false}
-                        columns={gridColumns}
+                        featured={item.gridSpan === 'full' || (!item.gridSpan && idx === 0)}
                         positionIndex={idx + 1}
                       />
                     </div>
@@ -219,27 +223,18 @@ function PortfolioApp() {
                 </h2>
               </div>
 
-              {/* Lado B Layout: Respeita também o gridColumns dinâmico */}
-              <div
-                className={
-                  gridColumns === 1
-                    ? 'grid grid-cols-1 max-w-4xl mx-auto gap-8 sm:gap-10'
-                    : gridColumns === 2
-                    ? 'grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10'
-                    : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10'
-                }
-              >
+              {/* Lado B Layout: Mosaico Editorial Assimétrico (12 Colunas) */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-start">
                 {casesLadoB.map((item, idx) => (
                   <div
                     key={item.slug}
-                    className="col-span-1"
+                    className={getCaseSpanClass(item, idx, false)}
                   >
                     <CaseCard
                       item={item}
                       onSelect={handleOpenCase}
                       dark
-                      featured={false}
-                      columns={gridColumns}
+                      featured={item.gridSpan === 'full'}
                       positionIndex={idx + 1}
                     />
                   </div>
@@ -266,45 +261,25 @@ function PortfolioApp() {
                 </p>
               </div>
 
-              {/* Faixa Bônus Layout: Grid Fluido e Simétrico em 1 Coluna no mobile e 2 Colunas no tablet/desktop */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 xl:gap-14">
-
+              {/* Faixa Bônus Layout: Mosaico Editorial Assimétrico (12 Colunas) */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-start">
                 {casesBonus.map((item, idx) => (
-
                   <div
-
                     key={item.slug}
-
-                    className={idx === 0 ? 'md:col-span-2' : 'col-span-1'}
-
+                    className={getCaseSpanClass(item, idx, true)}
                   >
-
                     <CaseCard
-
                       item={item}
-
                       onSelect={handleOpenCase}
-
                       bonus
-
-                      featured={idx === 0}
-
-                      columns={2}
-
+                      featured={item.gridSpan === 'full' || (!item.gridSpan && idx === 0)}
                       positionIndex={idx + 1}
-
                     />
-
                   </div>
-
                 ))}
-
               </div>
-
             </div>
-
           </section>
-
         )}
 
 

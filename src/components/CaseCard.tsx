@@ -9,7 +9,7 @@ import {
   Link as LinkIcon,
   Loader2,
 } from 'lucide-react';
-import { CaseItem } from '../types';
+import { CaseItem, GridSpanType } from '../types';
 import { useCms } from '../context/CmsContext';
 import { processImageUpload } from '../utils/imageUpload';
 
@@ -32,8 +32,9 @@ export const CaseCard: React.FC<CaseCardProps> = ({
   positionIndex,
   columns = 2,
 }) => {
-  const { isEditMode, reorderCases, moveCaseOrder, updateCaseField } = useCms();
+  const { isEditMode, reorderCases, moveCaseOrder, updateCaseField, updateCaseGridSpan } = useCms();
   const isLadoA = item.lado === 'A';
+  const currentSpan: GridSpanType = item.gridSpan || (featured ? 'full' : 'half');
 
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -180,7 +181,59 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            {/* Format / Grid Span Selector (Mosaico Editorial) */}
+            <div className="flex items-center gap-0.5 bg-black/5 dark:bg-white/10 p-0.5 rounded-lg border border-black/10 dark:border-white/15 text-[11px] font-mono-code">
+              <span className="text-[10px] text-gray-500 dark:text-[#AFC0FF] px-1 font-bold uppercase hidden xs:inline">
+                Layout:
+              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateCaseGridSpan(item.slug, 'full');
+                }}
+                className={`px-1.5 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer ${
+                  currentSpan === 'full'
+                    ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
+                    : 'text-gray-700 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/10'
+                }`}
+                title="Destaque: O projeto ocupa 100% da largura da linha (Full)"
+              >
+                100% Full
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateCaseGridSpan(item.slug, 'half');
+                }}
+                className={`px-1.5 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer ${
+                  currentSpan === 'half'
+                    ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
+                    : 'text-gray-700 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/10'
+                }`}
+                title="Médio: O projeto ocupa 50% da largura da linha (Metade / 2 por linha)"
+              >
+                50% Médio
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateCaseGridSpan(item.slug, 'third');
+                }}
+                className={`px-1.5 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer ${
+                  currentSpan === 'third'
+                    ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
+                    : 'text-gray-700 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/10'
+                }`}
+                title="Compacto: O projeto ocupa 33% da largura da linha (Terço / 3 por linha)"
+              >
+                33% Compacto
+              </button>
+            </div>
+
             {/* Move Up Button */}
             <button
               type="button"
@@ -484,12 +537,10 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             value={item.name}
             onChange={(e) => updateCaseField(item.slug, 'name', e.target.value)}
             className={`w-full font-disp font-bold tracking-tight leading-tight border-b-2 border-dashed px-2 py-1 focus:outline-none rounded transition-colors break-words ${
-              featured
-                ? 'text-2xl sm:text-4xl md:text-5xl'
-                : columns === 1
-                ? 'text-2xl sm:text-3xl md:text-4xl'
-                : columns === 3
-                ? 'text-lg sm:text-xl md:text-[24px]'
+              currentSpan === 'full'
+                ? 'text-2xl sm:text-3xl md:text-4xl lg:text-[40px]'
+                : currentSpan === 'third'
+                ? 'text-lg sm:text-xl md:text-[22px]'
                 : 'text-xl sm:text-2xl md:text-3xl'
             } ${
               dark
@@ -502,12 +553,10 @@ export const CaseCard: React.FC<CaseCardProps> = ({
       ) : (
         <h3
           className={`font-disp font-bold tracking-tight leading-tight mt-1.5 transition-colors break-words ${
-            featured
-              ? 'text-2xl sm:text-4xl md:text-5xl'
-              : columns === 1
-              ? 'text-2xl sm:text-3xl md:text-4xl'
-              : columns === 3
-              ? 'text-lg sm:text-xl md:text-[24px]'
+            currentSpan === 'full'
+              ? 'text-2xl sm:text-3xl md:text-4xl lg:text-[40px]'
+              : currentSpan === 'third'
+              ? 'text-lg sm:text-xl md:text-[22px]'
               : 'text-xl sm:text-2xl md:text-3xl'
           } ${
             bonus
@@ -529,13 +578,11 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             rows={2}
             onChange={(e) => updateCaseField(item.slug, 'concept', e.target.value)}
             className={`w-full leading-snug border-2 border-dashed p-2 focus:outline-none rounded resize-y transition-colors break-words ${
-              featured
-                ? 'text-base sm:text-lg md:text-xl'
-                : columns === 1
-                ? 'text-base sm:text-lg md:text-xl'
-                : columns === 3
-                ? 'text-xs sm:text-sm md:text-base'
-                : 'text-sm sm:text-base md:text-lg'
+              currentSpan === 'full'
+                ? 'text-sm sm:text-base md:text-lg'
+                : currentSpan === 'third'
+                ? 'text-xs sm:text-sm'
+                : 'text-xs sm:text-sm md:text-base'
             } ${
               bonus
                 ? 'text-[#0F1222] bg-white/90 border-[#0F1222] focus:bg-white'
@@ -549,13 +596,11 @@ export const CaseCard: React.FC<CaseCardProps> = ({
       ) : (
         <p
           className={`leading-snug mt-2 break-words ${
-            featured
-              ? 'text-base sm:text-lg md:text-xl'
-              : columns === 1
-              ? 'text-base sm:text-lg md:text-xl'
-              : columns === 3
-              ? 'text-xs sm:text-sm md:text-base'
-              : 'text-sm sm:text-base md:text-lg'
+            currentSpan === 'full'
+              ? 'text-sm sm:text-base md:text-lg'
+              : currentSpan === 'third'
+              ? 'text-xs sm:text-sm'
+              : 'text-xs sm:text-sm md:text-base'
           } ${
             bonus ? 'text-[#1D2611]' : dark ? 'text-[#D5DBF5]' : 'text-[#343848]'
           }`}
