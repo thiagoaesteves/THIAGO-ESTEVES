@@ -4,6 +4,14 @@ import { Mail, Linkedin, Instagram, ArrowUpRight } from 'lucide-react';
 export const ContatoSection: React.FC = () => {
   return (
     <section id="contato" className="py-20 sm:py-28 md:py-36 bg-[#0F1222] text-[#F6F7F2] relative overflow-hidden">
+      {/* Importação da fonte manuscrita para o efeito de caligrafia */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap');
+        .font-handwriting {
+          font-family: 'Caveat', cursive;
+        }
+      `}</style>
+
       <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           
@@ -97,9 +105,20 @@ export const ContatoSection: React.FC = () => {
                 Open for full-time opportunities &amp; freelance projects.
               </p>
 
-              {/* Caixa alta (uppercase) garantida com a cor #AFC0FF */}
-              <p className="font-mono-code text-xs text-[#AFC0FF] tracking-wider uppercase">
-                Born to errejota · Available worldwide
+              {/* Retorno à font-disp original com escala ajustada para uma única linha */}
+              <p className="font-disp font-semibold text-base sm:text-lg md:text-xl tracking-tight uppercase flex items-center flex-nowrap whitespace-nowrap gap-x-2" style={{ color: '#AFC0FF' }}>
+                <span>BORN TO ERREJOTA · OPEN TO</span>
+                
+                {/* WORK em azul exato com risco manual em rosa */}
+                <span className="relative inline-block font-semibold px-1" style={{ color: '#AFC0FF' }}>
+                  WORK
+                  <span className="absolute inset-x-[-3px] top-1/2 -translate-y-1/2 h-[2.5px] bg-[#FF4FA0] -rotate-6 rounded-full pointer-events-none"></span>
+                </span>
+                
+                {/* WORLD em fonte caligráfica manuscrita rosa */}
+                <span className="font-handwriting text-2xl sm:text-3xl md:text-4xl text-[#FF4FA0] font-bold normal-case tracking-normal rotate-3 transform inline-block translate-y-[-1px]">
+                  world
+                </span>
               </p>
             </div>
           </div>

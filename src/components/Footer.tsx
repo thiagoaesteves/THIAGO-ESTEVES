@@ -66,7 +66,7 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="text-center sm:text-right">
-            <span className="text-[#6B7CBA] text-[11px] font-mono-code select-none">
+            <span className="text-[#AFC0FF] text-[11px] font-mono-code select-none">
               © 2026 Thiago Esteves · All Rights Reserved
             </span>
           </div>
