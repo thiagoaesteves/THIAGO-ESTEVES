@@ -20,7 +20,7 @@ export const ContatoSection: React.FC = () => {
             {/* CTA Container */}
             <div className="flex flex-col items-start gap-5 sm:gap-6 mt-8 sm:mt-10">
               
-              {/* WhatsApp Button (Ícone ao lado de AGORA, tamanho w-fit, sem trocar cor no hover) */}
+              {/* WhatsApp Button */}
               <a
                 id="link-contato-whatsapp"
                 href="https://wa.me/5521988871110?text=Olá%20Thiago,%20vi%20seu%20portfólio%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto."
@@ -97,18 +97,13 @@ export const ContatoSection: React.FC = () => {
                 Open for full-time opportunities &amp; freelance projects.
               </p>
 
-              {/* Location with exact blue color #AFC0FF */}
-              <p className="font-mono-code text-xs text-[#AFC0FF] uppercase tracking-wider">
+              {/* Caixa alta (uppercase) garantida com a cor #AFC0FF */}
+              <p className="font-mono-code text-xs text-[#AFC0FF] tracking-wider uppercase">
                 Born to errejota · Available worldwide
               </p>
             </div>
           </div>
 
-        </div>
-
-        {/* Bottom Copyright Bar with exact blue color #AFC0FF */}
-        <div className="mt-16 sm:mt-20 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono-code text-xs text-[#AFC0FF] uppercase tracking-wider">
-          <p>© 2026 Thiago Esteves · All Rights Reserved</p>
         </div>
       </div>
     </section>
