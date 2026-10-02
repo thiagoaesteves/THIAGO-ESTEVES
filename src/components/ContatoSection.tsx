@@ -20,13 +20,13 @@ export const ContatoSection: React.FC = () => {
             {/* CTA Container */}
             <div className="flex flex-col items-start gap-5 sm:gap-6 mt-8 sm:mt-10">
               
-              {/* WhatsApp Button */}
+              {/* WhatsApp Button (Ícone ao lado de AGORA, tamanho w-fit, sem trocar cor no hover) */}
               <a
                 id="link-contato-whatsapp"
                 href="https://wa.me/5521988871110?text=Olá%20Thiago,%20vi%20seu%20portfólio%20e%20gostaria%20de%20conversar%20sobre%20um%20projeto."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="faixa-clip bg-[#D4FF3A] text-[#0F1222] text-sm sm:text-base md:text-lg lg:text-xl font-bold py-2.5 sm:py-3 px-4 sm:px-6 shadow-xl transition-all transform hover:-translate-y-1 inline-flex items-center justify-between gap-4 cursor-pointer w-full sm:w-auto"
+                className="faixa-clip bg-[#D4FF3A] text-[#0F1222] text-sm sm:text-base md:text-lg lg:text-xl font-bold py-2.5 sm:py-3 px-5 sm:px-7 shadow-xl transition-all transform hover:-translate-y-1 inline-flex items-center gap-2.5 cursor-pointer w-fit"
               >
                 <span>DESENROLAR AGORA</span>
                 <svg className="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24">
@@ -97,13 +97,18 @@ export const ContatoSection: React.FC = () => {
                 Open for full-time opportunities &amp; freelance projects.
               </p>
 
-              {/* Location */}
-              <p className="font-mono-code text-xs text-[#60A5FA] uppercase tracking-wider">
-                Based in Brazil · Available worldwide
+              {/* Location with exact blue color #AFC0FF */}
+              <p className="font-mono-code text-xs text-[#AFC0FF] uppercase tracking-wider">
+                Born to errejota · Available worldwide
               </p>
             </div>
           </div>
 
+        </div>
+
+        {/* Bottom Copyright Bar with exact blue color #AFC0FF */}
+        <div className="mt-16 sm:mt-20 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono-code text-xs text-[#AFC0FF] uppercase tracking-wider">
+          <p>© 2026 Thiago Esteves · All Rights Reserved</p>
         </div>
       </div>
     </section>
