@@ -658,7 +658,11 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                   value={block.value}
                   rows={Math.max(5, block.value.split('\n').length + 1)}
                   onChange={(e) => updateBlockValue(idx, e.target.value)}
-                  className="w-full text-lg sm:text-xl md:text-2xl leading-relaxed bg-black/5 dark:bg-white/5 border border-dashed border-[#2340FF] dark:border-[#FF4FA0] p-4 sm:p-5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2340FF] dark:focus:ring-[#FF4FA0] text-[#0F1222] dark:text-[#F6F7F2] font-normal resize-y min-h-[160px] whitespace-pre-wrap font-sans"
+                  className={`w-full text-lg sm:text-xl md:text-2xl leading-relaxed border border-dashed p-4 sm:p-5 rounded-xl focus:outline-none focus:ring-2 resize-y min-h-[160px] whitespace-pre-wrap font-sans transition-colors ${
+                    isLadoB
+                      ? 'bg-white/5 border-[#FF4FA0] focus:ring-[#FF4FA0] text-[#F6F7F2] placeholder:text-white/40'
+                      : 'bg-white border-[#2340FF] focus:ring-[#2340FF] text-gray-900 placeholder:text-gray-400 shadow-sm'
+                  }`}
                   placeholder="Escreva seu texto corrido aqui. Pressione Enter para criar novos parágrafos..."
                 />
                 <span className="text-[11px] font-mono-code text-black/50 dark:text-white/50 block">
@@ -707,7 +711,11 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                     }
                   }}
                   placeholder="ID, link ou <iframe> do YouTube ou Vimeo..."
-                  className="flex-1 px-3 py-1.5 text-xs font-mono-code rounded bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 text-[#0F1222] dark:text-white"
+                  className={`flex-1 px-3 py-1.5 text-xs font-mono-code rounded border ${
+                    isLadoB
+                      ? 'bg-[#0F1222] border-white/20 text-white placeholder:text-white/40'
+                      : 'bg-white border-black/20 text-gray-900 placeholder:text-gray-400'
+                  }`}
                 />
                 <a
                   href={
@@ -874,7 +882,11 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                   value={block.value.startsWith('data:') ? '[Imagem Base64 salva localmente]' : block.value}
                   onChange={(e) => updateBlockValue(idx, e.target.value.trim())}
                   placeholder="URL direta da imagem..."
-                  className="flex-1 min-w-[200px] px-2.5 py-1 text-xs font-mono-code rounded bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 text-[#0F1222] dark:text-white"
+                  className={`flex-1 min-w-[200px] px-2.5 py-1 text-xs font-mono-code rounded border ${
+                    isLadoB
+                      ? 'bg-[#0F1222] border-white/20 text-white placeholder:text-white/40'
+                      : 'bg-white border-black/20 text-gray-900 placeholder:text-gray-400 shadow-sm'
+                  }`}
                 />
               </div>
             )}
@@ -1017,7 +1029,11 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                 value={safeItem.concept}
                 rows={2}
                 onChange={(e) => updateCaseField(safeItem.slug, 'concept', e.target.value)}
-                className="w-full font-disp font-extrabold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[0.98] bg-transparent border-2 border-dashed border-[#2340FF] dark:border-[#FF4FA0] p-2 rounded focus:outline-none focus:bg-black/5 dark:focus:bg-white/5 break-words"
+                className={`w-full font-disp font-extrabold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[0.98] bg-transparent border-2 border-dashed p-2 rounded focus:outline-none break-words ${
+                  isLadoB
+                    ? 'border-[#FF4FA0] text-white focus:bg-white/5'
+                    : 'border-[#2340FF] text-gray-900 focus:bg-black/5'
+                }`}
               />
             ) : (
               <h2
@@ -1034,8 +1050,10 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                   type="text"
                   value={safeItem.deliv}
                   onChange={(e) => updateCaseField(safeItem.slug, 'deliv', e.target.value)}
-                  className={`font-mono-code text-xs sm:text-sm uppercase tracking-wider py-1.5 px-3 rounded border border-dashed border-[#2340FF] dark:border-[#FF4FA0] ${
-                    isLadoB ? 'bg-white/10 text-[#AFC0FF]' : 'bg-black/5 text-[#5B6070]'
+                  className={`font-mono-code text-xs sm:text-sm uppercase tracking-wider py-1.5 px-3 rounded border border-dashed ${
+                    isLadoB
+                      ? 'border-[#FF4FA0] bg-white/10 text-[#AFC0FF]'
+                      : 'border-[#2340FF] bg-white text-gray-900 shadow-sm'
                   }`}
                 />
               ) : (
@@ -1049,8 +1067,14 @@ export const CaseModal: React.FC<CaseModalProps> = ({
               )}
 
               {isEditMode && (
-                <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl border border-dashed border-[#2340FF] dark:border-[#D4FF3A] bg-black/5 dark:bg-white/5 font-mono-code text-xs">
-                  <span className="text-[10px] text-gray-500 dark:text-[#AFC0FF] px-1 font-bold uppercase">
+                <div className={`flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl border border-dashed font-mono-code text-xs ${
+                  isLadoB
+                    ? 'border-[#D4FF3A] bg-white/5'
+                    : 'border-[#2340FF] bg-black/5'
+                }`}>
+                  <span className={`text-[10px] px-1 font-bold uppercase ${
+                    isLadoB ? 'text-[#AFC0FF]' : 'text-gray-600'
+                  }`}>
                     Formato no Grid:
                   </span>
                   <button
@@ -1059,7 +1083,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                     className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
                       (safeItem.gridSpan || 'half') === 'full'
                         ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
-                        : 'text-gray-700 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/10'
+                        : isLadoB
+                        ? 'text-white/70 hover:bg-white/10'
+                        : 'text-gray-800 hover:bg-black/10'
                     }`}
                     title="Destaque: O projeto ocupa 100% da largura da linha (Full)"
                   >
@@ -1071,7 +1097,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                     className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
                       (safeItem.gridSpan || 'half') === 'half'
                         ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
-                        : 'text-gray-700 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/10'
+                        : isLadoB
+                        ? 'text-white/70 hover:bg-white/10'
+                        : 'text-gray-800 hover:bg-black/10'
                     }`}
                     title="Médio: O projeto ocupa 50% da largura da linha (Metade)"
                   >
@@ -1083,7 +1111,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                     className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
                       (safeItem.gridSpan || 'half') === 'third'
                         ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
-                        : 'text-gray-700 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/10'
+                        : isLadoB
+                        ? 'text-white/70 hover:bg-white/10'
+                        : 'text-gray-800 hover:bg-black/10'
                     }`}
                     title="Compacto: O projeto ocupa 33% da largura da linha (Terço)"
                   >
@@ -1148,7 +1178,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-colors shadow-sm ${
                       activeAddForm === 'youtube'
                         ? 'bg-[#FF4FA0] text-white'
-                        : 'bg-black/10 dark:bg-white/10 hover:bg-black/20 text-[#0F1222] dark:text-white'
+                        : isLadoB
+                        ? 'bg-white/10 hover:bg-white/20 text-white'
+                        : 'bg-black/10 hover:bg-black/20 text-gray-900'
                     }`}
                   >
                     <Video className="w-3.5 h-3.5" /> + Vídeo YouTube
@@ -1163,7 +1195,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-colors shadow-sm ${
                       activeAddForm === 'vimeo'
                         ? 'bg-[#00ADEF] text-white'
-                        : 'bg-black/10 dark:bg-white/10 hover:bg-black/20 text-[#0F1222] dark:text-white'
+                        : isLadoB
+                        ? 'bg-white/10 hover:bg-white/20 text-white'
+                        : 'bg-black/10 hover:bg-black/20 text-gray-900'
                     }`}
                   >
                     <Video className="w-3.5 h-3.5" /> + Vídeo Vimeo
@@ -1178,7 +1212,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-colors shadow-sm ${
                       activeAddForm === 'image'
                         ? 'bg-[#2340FF] text-white'
-                        : 'bg-black/10 dark:bg-white/10 hover:bg-black/20 text-[#0F1222] dark:text-white'
+                        : isLadoB
+                        ? 'bg-white/10 hover:bg-white/20 text-white'
+                        : 'bg-black/10 hover:bg-black/20 text-gray-900'
                     }`}
                   >
                     <ImageIcon className="w-3.5 h-3.5" /> + Imagem
@@ -1212,7 +1248,11 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       value={addInputVal}
                       onChange={(e) => setAddInputVal(e.target.value)}
                       placeholder="Cole o link, ID ou código <iframe> do YouTube..."
-                      className="w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 text-[#0F1222] dark:text-white"
+                      className={`w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded border ${
+                        isLadoB
+                          ? 'bg-[#0F1222] border-white/20 text-white placeholder:text-white/40'
+                          : 'bg-white border-black/20 text-gray-900 placeholder:text-gray-400 shadow-sm'
+                      }`}
                       autoFocus
                     />
                     <button
@@ -1239,7 +1279,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                         className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
                           addVideoColumnsVal === cols
                             ? 'bg-[#FF4FA0] text-white font-bold'
-                            : 'bg-black/10 dark:bg-white/10 hover:bg-black/20'
+                            : isLadoB
+                            ? 'bg-white/10 hover:bg-white/20 text-white'
+                            : 'bg-black/10 hover:bg-black/20 text-gray-800'
                         }`}
                       >
                         {cols}
@@ -1275,7 +1317,11 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       value={addInputVal}
                       onChange={(e) => setAddInputVal(e.target.value)}
                       placeholder="Cole o link, ID ou código <iframe> do Vimeo..."
-                      className="w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 text-[#0F1222] dark:text-white"
+                      className={`w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded border ${
+                        isLadoB
+                          ? 'bg-[#0F1222] border-white/20 text-white placeholder:text-white/40'
+                          : 'bg-white border-black/20 text-gray-900 placeholder:text-gray-400 shadow-sm'
+                      }`}
                       autoFocus
                     />
                     <button
@@ -1302,7 +1348,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                         className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
                           addVideoColumnsVal === cols
                             ? 'bg-[#00ADEF] text-white font-bold'
-                            : 'bg-black/10 dark:bg-white/10 hover:bg-black/20'
+                            : isLadoB
+                            ? 'bg-white/10 hover:bg-white/20 text-white'
+                            : 'bg-black/10 hover:bg-black/20 text-gray-800'
                         }`}
                       >
                         {cols}
@@ -1376,7 +1424,11 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       value={addInputVal}
                       onChange={(e) => setAddInputVal(e.target.value)}
                       placeholder="Cole a URL direta da imagem (ex: https://...)"
-                      className="w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 text-[#0F1222] dark:text-white"
+                      className={`w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded border ${
+                        isLadoB
+                          ? 'bg-[#0F1222] border-white/20 text-white placeholder:text-white/40'
+                          : 'bg-white border-black/20 text-gray-900 placeholder:text-gray-400 shadow-sm'
+                      }`}
                       autoFocus
                     />
                     <button
@@ -1447,7 +1499,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                           className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
                             addColumnsVal === cols
                               ? 'bg-[#2340FF] text-white font-bold'
-                              : 'bg-black/10 dark:bg-white/10 hover:bg-black/20'
+                              : isLadoB
+                              ? 'bg-white/10 hover:bg-white/20 text-white'
+                              : 'bg-black/10 hover:bg-black/20 text-gray-800'
                           }`}
                         >
                           {cols}
@@ -1464,7 +1518,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                           className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
                             addScaleVal === 'original'
                               ? 'bg-[#2340FF] text-white font-bold'
-                              : 'bg-black/10 dark:bg-white/10 hover:bg-black/20'
+                              : isLadoB
+                              ? 'bg-white/10 hover:bg-white/20 text-white'
+                              : 'bg-black/10 hover:bg-black/20 text-gray-800'
                           }`}
                         >
                           Original
@@ -1475,7 +1531,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                           className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
                             addScaleVal === 'thumb'
                               ? 'bg-[#2340FF] text-white font-bold'
-                              : 'bg-black/10 dark:bg-white/10 hover:bg-black/20'
+                              : isLadoB
+                              ? 'bg-white/10 hover:bg-white/20 text-white'
+                              : 'bg-black/10 hover:bg-black/20 text-gray-800'
                           }`}
                         >
                           Miniatura

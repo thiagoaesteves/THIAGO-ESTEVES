@@ -190,7 +190,7 @@ function PortfolioApp() {
                   Nenhum case do Lado A corresponde à pesquisa atual.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-start">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 gap-y-6 sm:gap-y-8 items-start">
                   {casesLadoA.map((item, idx) => (
                     <div
                       key={item.slug}
@@ -224,7 +224,7 @@ function PortfolioApp() {
               </div>
 
               {/* Lado B Layout: Mosaico Editorial Assimétrico (12 Colunas) */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 gap-y-6 sm:gap-y-8 items-start">
                 {casesLadoB.map((item, idx) => (
                   <div
                     key={item.slug}
@@ -262,7 +262,7 @@ function PortfolioApp() {
               </div>
 
               {/* Faixa Bônus Layout: Mosaico Editorial Assimétrico (12 Colunas) */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 gap-y-6 sm:gap-y-8 items-start">
                 {casesBonus.map((item, idx) => (
                   <div
                     key={item.slug}

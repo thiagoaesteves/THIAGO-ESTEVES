@@ -183,8 +183,14 @@ export const CaseCard: React.FC<CaseCardProps> = ({
 
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             {/* Format / Grid Span Selector (Mosaico Editorial) */}
-            <div className="flex items-center gap-0.5 bg-black/5 dark:bg-white/10 p-0.5 rounded-lg border border-black/10 dark:border-white/15 text-[11px] font-mono-code">
-              <span className="text-[10px] text-gray-500 dark:text-[#AFC0FF] px-1 font-bold uppercase hidden xs:inline">
+            <div className={`flex items-center gap-0.5 p-0.5 rounded-lg border text-[11px] font-mono-code ${
+              dark
+                ? 'bg-white/10 border-white/15'
+                : 'bg-black/5 border-black/10'
+            }`}>
+              <span className={`text-[10px] px-1 font-bold uppercase hidden xs:inline ${
+                dark ? 'text-[#AFC0FF]' : 'text-gray-600'
+              }`}>
                 Layout:
               </span>
               <button
@@ -196,7 +202,9 @@ export const CaseCard: React.FC<CaseCardProps> = ({
                 className={`px-1.5 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer ${
                   currentSpan === 'full'
                     ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
-                    : 'text-gray-700 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/10'
+                    : dark
+                    ? 'text-white/80 hover:bg-white/10'
+                    : 'text-gray-800 hover:bg-black/10'
                 }`}
                 title="Destaque: O projeto ocupa 100% da largura da linha (Full)"
               >
@@ -211,7 +219,9 @@ export const CaseCard: React.FC<CaseCardProps> = ({
                 className={`px-1.5 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer ${
                   currentSpan === 'half'
                     ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
-                    : 'text-gray-700 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/10'
+                    : dark
+                    ? 'text-white/80 hover:bg-white/10'
+                    : 'text-gray-800 hover:bg-black/10'
                 }`}
                 title="Médio: O projeto ocupa 50% da largura da linha (Metade / 2 por linha)"
               >
@@ -226,7 +236,9 @@ export const CaseCard: React.FC<CaseCardProps> = ({
                 className={`px-1.5 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer ${
                   currentSpan === 'third'
                     ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
-                    : 'text-gray-700 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/10'
+                    : dark
+                    ? 'text-white/80 hover:bg-white/10'
+                    : 'text-gray-800 hover:bg-black/10'
                 }`}
                 title="Compacto: O projeto ocupa 33% da largura da linha (Terço / 3 por linha)"
               >
@@ -241,7 +253,11 @@ export const CaseCard: React.FC<CaseCardProps> = ({
                 e.stopPropagation();
                 moveCaseOrder(item.slug, 'up');
               }}
-              className="p-1 rounded bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[#343848] dark:text-white"
+              className={`p-1 rounded ${
+                dark
+                  ? 'bg-white/10 hover:bg-white/20 text-white'
+                  : 'bg-black/5 hover:bg-black/10 text-gray-800'
+              }`}
               title="Mover para cima"
             >
               <ChevronUp className="w-4 h-4" />
@@ -254,7 +270,11 @@ export const CaseCard: React.FC<CaseCardProps> = ({
                 e.stopPropagation();
                 moveCaseOrder(item.slug, 'down');
               }}
-              className="p-1 rounded bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[#343848] dark:text-white"
+              className={`p-1 rounded ${
+                dark
+                  ? 'bg-white/10 hover:bg-white/20 text-white'
+                  : 'bg-black/5 hover:bg-black/10 text-gray-800'
+              }`}
               title="Mover para baixo"
             >
               <ChevronDown className="w-4 h-4" />
@@ -267,10 +287,14 @@ export const CaseCard: React.FC<CaseCardProps> = ({
                 e.stopPropagation();
                 setIsEditingCover(!isEditingCover);
               }}
-              className="px-2 py-1 rounded bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[#343848] dark:text-white text-xs font-mono-code font-bold flex items-center gap-1 cursor-pointer"
+              className={`px-2 py-1 rounded text-xs font-mono-code font-bold flex items-center gap-1 cursor-pointer ${
+                dark
+                  ? 'bg-white/10 hover:bg-white/20 text-white'
+                  : 'bg-black/5 hover:bg-black/10 text-gray-800'
+              }`}
               title="Trocar imagem de capa do projeto"
             >
-              <Upload className="w-3.5 h-3.5 text-[#2340FF] dark:text-[#D4FF3A]" />
+              <Upload className={`w-3.5 h-3.5 ${dark ? 'text-[#D4FF3A]' : 'text-[#2340FF]'}`} />
               <span className="hidden sm:inline">Trocar Capa</span>
             </button>
 
@@ -292,11 +316,15 @@ export const CaseCard: React.FC<CaseCardProps> = ({
       {/* Edit Cover URL / Upload Dropdown */}
       {isEditMode && isEditingCover && (
         <div
-          className="cms-control mb-3 p-3 rounded-lg bg-black/10 dark:bg-white/10 border border-black/15 dark:border-white/20 space-y-2"
+          className={`cms-control mb-3 p-3 rounded-lg border space-y-2 ${
+            dark
+              ? 'bg-white/10 border-white/20'
+              : 'bg-black/5 border-black/15'
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono-code font-bold text-[#0F1222] dark:text-white">
+            <span className={`text-xs font-mono-code font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>
               Alterar Capa do Projeto
             </span>
             <button
@@ -358,7 +386,11 @@ export const CaseCard: React.FC<CaseCardProps> = ({
               value={coverInput}
               onChange={(e) => setCoverInput(e.target.value)}
               placeholder="Cole a URL da capa..."
-              className="w-full sm:flex-1 sm:min-w-0 px-2.5 py-1.5 text-xs font-mono-code bg-white dark:bg-[#0F1222] border border-black/20 dark:border-white/20 rounded text-[#0F1222] dark:text-white"
+              className={`w-full sm:flex-1 sm:min-w-0 px-2.5 py-1.5 text-xs font-mono-code rounded border ${
+                dark
+                  ? 'bg-[#0F1222] border-white/20 text-white placeholder:text-white/40'
+                  : 'bg-white border-black/20 text-gray-900 placeholder:text-gray-400'
+              }`}
             />
             <button
               type="button"
@@ -366,7 +398,11 @@ export const CaseCard: React.FC<CaseCardProps> = ({
                 updateCaseField(item.slug, 'cover', coverInput);
                 setIsEditingCover(false);
               }}
-              className="px-3 py-1.5 bg-black/20 dark:bg-white/20 hover:bg-black/30 dark:hover:bg-white/30 text-[#0F1222] dark:text-white text-xs font-mono-code rounded font-bold cursor-pointer"
+              className={`px-3 py-1.5 text-xs font-mono-code rounded font-bold cursor-pointer transition-colors ${
+                dark
+                  ? 'bg-white/20 hover:bg-white/30 text-white'
+                  : 'bg-black/10 hover:bg-black/20 text-gray-900'
+              }`}
             >
               Salvar Link
             </button>
@@ -501,7 +537,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             className={`font-semibold border-b-2 border-dashed px-1.5 py-0.5 text-xs shrink-0 w-28 focus:outline-none rounded transition-colors ${
               dark
                 ? 'text-[#D4FF3A] bg-white/10 border-[#FF4FA0] focus:bg-white/20'
-                : 'text-[#0F1222] bg-white/90 border-[#2340FF] shadow-sm focus:bg-white'
+                : 'text-gray-900 bg-white border-[#2340FF] shadow-sm focus:bg-white'
             }`}
             title="Editar texto da Faixa"
           />
@@ -518,7 +554,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             className={`text-right flex-1 min-w-0 border-b-2 border-dashed px-2 py-0.5 text-xs focus:outline-none rounded transition-colors ${
               dark
                 ? 'text-[#AFC0FF] bg-white/10 border-[#FF4FA0] focus:bg-white/20'
-                : 'text-[#0F1222] bg-white/90 border-[#2340FF] shadow-sm focus:bg-white'
+                : 'text-gray-900 bg-white border-[#2340FF] shadow-sm focus:bg-white'
             }`}
             title="Editar Entregas / Tag da Capa"
           />
@@ -529,85 +565,88 @@ export const CaseCard: React.FC<CaseCardProps> = ({
         )}
       </div>
 
-      {/* Title */}
-      {isEditMode ? (
-        <div className="mt-1.5" onClick={(e) => e.stopPropagation()}>
-          <input
-            type="text"
-            value={item.name}
-            onChange={(e) => updateCaseField(item.slug, 'name', e.target.value)}
-            className={`w-full font-disp font-bold tracking-tight leading-tight border-b-2 border-dashed px-2 py-1 focus:outline-none rounded transition-colors break-words ${
+      {/* Title & Subtitle (Concept) */}
+      <div className="space-y-0.5 mt-1.5">
+        {/* Title */}
+        {isEditMode ? (
+          <div onClick={(e) => e.stopPropagation()}>
+            <input
+              type="text"
+              value={item.name}
+              onChange={(e) => updateCaseField(item.slug, 'name', e.target.value)}
+              className={`w-full font-disp font-bold tracking-tight leading-tight border-b-2 border-dashed px-2 py-1 focus:outline-none rounded transition-colors break-words ${
+                currentSpan === 'full'
+                  ? 'text-2xl sm:text-3xl md:text-4xl lg:text-[40px]'
+                  : currentSpan === 'third'
+                  ? 'text-lg sm:text-xl md:text-[22px]'
+                  : 'text-xl sm:text-2xl md:text-3xl'
+              } ${
+                dark
+                  ? 'text-white bg-white/10 border-[#FF4FA0] focus:bg-white/20'
+                  : 'text-gray-900 bg-white border-[#2340FF] shadow-sm focus:bg-white'
+              }`}
+              title="Clique para editar o título do projeto"
+            />
+          </div>
+        ) : (
+          <h3
+            className={`font-disp font-bold tracking-tight leading-tight transition-colors break-words ${
               currentSpan === 'full'
                 ? 'text-2xl sm:text-3xl md:text-4xl lg:text-[40px]'
                 : currentSpan === 'third'
                 ? 'text-lg sm:text-xl md:text-[22px]'
                 : 'text-xl sm:text-2xl md:text-3xl'
             } ${
-              dark
-                ? 'text-white bg-white/10 border-[#FF4FA0] focus:bg-white/20'
-                : 'text-[#0F1222] bg-white/95 border-[#2340FF] shadow-sm focus:bg-white'
+              bonus
+                ? 'text-[#0F1222] group-hover:text-[#2340FF]'
+                : dark
+                ? 'text-white group-hover:text-[#FF4FA0]'
+                : 'text-[#0F1222] group-hover:text-[#2340FF]'
             }`}
-            title="Clique para editar o título do projeto"
-          />
-        </div>
-      ) : (
-        <h3
-          className={`font-disp font-bold tracking-tight leading-tight mt-1.5 transition-colors break-words ${
-            currentSpan === 'full'
-              ? 'text-2xl sm:text-3xl md:text-4xl lg:text-[40px]'
-              : currentSpan === 'third'
-              ? 'text-lg sm:text-xl md:text-[22px]'
-              : 'text-xl sm:text-2xl md:text-3xl'
-          } ${
-            bonus
-              ? 'text-[#0F1222] group-hover:text-[#2340FF]'
-              : dark
-              ? 'text-white group-hover:text-[#FF4FA0]'
-              : 'text-[#0F1222] group-hover:text-[#2340FF]'
-          }`}
-        >
-          {item.name}
-        </h3>
-      )}
+          >
+            {item.name}
+          </h3>
+        )}
 
-      {/* Concept */}
-      {isEditMode ? (
-        <div className="mt-2" onClick={(e) => e.stopPropagation()}>
-          <textarea
-            value={item.concept}
-            rows={2}
-            onChange={(e) => updateCaseField(item.slug, 'concept', e.target.value)}
-            className={`w-full leading-snug border-2 border-dashed p-2 focus:outline-none rounded resize-y transition-colors break-words ${
+        {/* Concept / Subtitle */}
+        {isEditMode ? (
+          <div onClick={(e) => e.stopPropagation()}>
+            <textarea
+              value={item.concept}
+              rows={2}
+              onChange={(e) => updateCaseField(item.slug, 'concept', e.target.value)}
+              className={`w-full leading-snug border-2 border-dashed p-2 focus:outline-none rounded resize-y transition-colors break-words ${
+                currentSpan === 'full'
+                  ? 'text-sm sm:text-base md:text-lg'
+                  : currentSpan === 'third'
+                  ? 'text-xs sm:text-sm'
+                  : 'text-xs sm:text-sm md:text-base'
+              } ${
+                bonus
+                  ? 'text-gray-900 bg-white border-[#0F1222] focus:bg-white'
+                  : dark
+                  ? 'text-white bg-white/10 border-[#FF4FA0] focus:bg-white/20'
+                  : 'text-gray-900 bg-white border-[#2340FF] shadow-sm focus:bg-white'
+              }`}
+              title="Clique para editar o conceito do projeto"
+            />
+          </div>
+        ) : (
+          <p
+            className={`leading-snug break-words ${
               currentSpan === 'full'
                 ? 'text-sm sm:text-base md:text-lg'
                 : currentSpan === 'third'
                 ? 'text-xs sm:text-sm'
                 : 'text-xs sm:text-sm md:text-base'
             } ${
-              bonus
-                ? 'text-[#0F1222] bg-white/90 border-[#0F1222] focus:bg-white'
-                : dark
-                ? 'text-white bg-white/10 border-[#FF4FA0] focus:bg-white/20'
-                : 'text-[#0F1222] bg-white/95 border-[#2340FF] shadow-sm focus:bg-white'
+              bonus ? 'text-[#1D2611]' : dark ? 'text-[#D5DBF5]' : 'text-[#343848]'
             }`}
-            title="Clique para editar o conceito do projeto"
-          />
-        </div>
-      ) : (
-        <p
-          className={`leading-snug mt-2 break-words ${
-            currentSpan === 'full'
-              ? 'text-sm sm:text-base md:text-lg'
-              : currentSpan === 'third'
-              ? 'text-xs sm:text-sm'
-              : 'text-xs sm:text-sm md:text-base'
-          } ${
-            bonus ? 'text-[#1D2611]' : dark ? 'text-[#D5DBF5]' : 'text-[#343848]'
-          }`}
-        >
-          {item.concept}
-        </p>
-      )}
+          >
+            {item.concept}
+          </p>
+        )}
+      </div>
     </div>
   );
 };
