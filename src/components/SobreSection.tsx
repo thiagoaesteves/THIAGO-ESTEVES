@@ -53,7 +53,7 @@ export const SobreSection: React.FC = () => {
   return (
     <section
       id="sobre"
-      className="w-full bg-[#2340FF] text-white flex flex-col justify-between py-4 sm:py-6 lg:py-8 px-6 sm:px-10 lg:px-16 xl:px-20 scroll-mt-[60px] relative min-h-[calc(100vh-60px)] overflow-hidden"
+      className="w-full bg-[#2340FF] text-white flex flex-col justify-between py-4 sm:py-6 lg:py-8 px-6 sm:px-10 lg:px-16 xl:px-20 scroll-mt-[54px] sm:scroll-mt-[58px] relative min-h-[calc(100vh-54px)] sm:min-h-[calc(100vh-58px)] min-h-[calc(100dvh-54px)] sm:min-h-[calc(100dvh-58px)] overflow-hidden"
     >
       {/* Editorial background ambient texture */}
       <div 

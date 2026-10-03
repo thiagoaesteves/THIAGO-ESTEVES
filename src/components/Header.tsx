@@ -20,7 +20,7 @@ export const Header: React.FC = () => {
     const element = document.getElementById(targetId);
     if (element) {
       const headerEl = document.querySelector('header');
-      const headerOffset = headerEl ? headerEl.offsetHeight : 60;
+      const headerOffset = headerEl ? headerEl.offsetHeight : 56;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
       window.scrollTo({

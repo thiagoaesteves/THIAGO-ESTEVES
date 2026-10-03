@@ -15,7 +15,8 @@ export const Hero: React.FC<HeroProps> = ({
     e.preventDefault();
     const element = document.getElementById(targetId);
     if (element) {
-      const headerOffset = 70;
+      const headerEl = document.querySelector('header');
+      const headerOffset = headerEl ? headerEl.offsetHeight : 56;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
       window.scrollTo({

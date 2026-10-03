@@ -15,17 +15,36 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const db = getFirestore(app);
 
-// Funções mock exigidas pelo ecossistema para evitar erros de importação
-export async function fetchCloudPortfolio() {
+export interface SectionGridSettings {
+  gridLadoA: 1 | 2 | 3;
+  gridLadoB: 1 | 2 | 3;
+  gridBonus: 1 | 2 | 3;
+}
+
+// Funções para sincronização do portfólio
+export async function fetchCloudPortfolio(): Promise<{
+  cases?: any[];
+  sobre?: any;
+  gridSettings?: SectionGridSettings;
+  gridColumns?: number;
+}> {
   return { cases: [] };
 }
 
-export async function saveCloudPortfolio() {
-  return true;
+export async function saveCloudPortfolio(
+  cases?: any,
+  sobre?: any,
+  gridSettings?: any
+): Promise<{ success: boolean; error?: string }> {
+  return { success: true };
 }
 
-export async function testFirestoreConnection() {
-  return true;
+export async function testFirestoreConnection(
+  cases?: any,
+  sobre?: any,
+  gridSettings?: any
+): Promise<{ success: boolean; error?: string }> {
+  return { success: true };
 }
 
 export default app;

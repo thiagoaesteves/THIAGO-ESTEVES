@@ -52,7 +52,8 @@ function PortfolioApp() {
           const element = document.getElementById(hash);
           if (element) {
             setTimeout(() => {
-              const headerOffset = 70;
+              const headerEl = document.querySelector('header');
+              const headerOffset = headerEl ? headerEl.offsetHeight : 56;
               const elementPosition = element.getBoundingClientRect().top;
               const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
               window.scrollTo({
