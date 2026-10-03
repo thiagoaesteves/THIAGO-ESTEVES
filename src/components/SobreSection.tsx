@@ -50,6 +50,14 @@ export const SobreSection: React.FC = () => {
   const bodyWeightClass = FONT_WEIGHT_MAP[fontWeightKey] || FONT_WEIGHT_MAP.normal;
   const titleSizeClass = TITLE_SIZE_MAP[titleSizeKey] || TITLE_SIZE_MAP.lg;
 
+  // Quebra cirúrgica do título exatamente a seguir a "Méier"
+  const titleParts = currentTitle.includes('Méier')
+    ? [
+        currentTitle.substring(0, currentTitle.indexOf('Méier') + 5), // "Quem é do Méier"
+        currentTitle.substring(currentTitle.indexOf('Méier') + 5).trim(), // "não bobéia."
+      ]
+    : [currentTitle, ''];
+
   return (
     <section
       id="sobre"
@@ -170,7 +178,11 @@ export const SobreSection: React.FC = () => {
               <div>
                 <h2 className={`font-disp font-extrabold ${titleSizeClass} tracking-[-0.03em] text-white leading-[1.08] relative break-words`}>
                   <span className="text-[#D4FF3A] font-serif select-none mr-1.5 inline-block -translate-y-0.5">“</span>
-                  {currentTitle}
+                  {titleParts[0]}
+                  <br />
+                  <span className="font-disp font-extrabold text-white">
+                    {titleParts[1]}
+                  </span>
                   <span className="text-[#D4FF3A] font-serif select-none ml-1.5 inline-block -translate-y-0.5">”</span>
                 </h2>
               </div>

@@ -6,6 +6,8 @@ import {
   Edit3,
   Upload,
   Loader2,
+  Maximize2,
+  Columns,
 } from 'lucide-react';
 import { CaseItem, GridSpanType } from '../types';
 import { useCms } from '../context/CmsContext';
@@ -31,8 +33,8 @@ export const CaseCard: React.FC<CaseCardProps> = ({
   columns = 2,
 }) => {
   const { isEditMode, reorderCases, moveCaseOrder, updateCaseField, updateCaseGridSpan } = useCms();
-  const isLadoA = item.lado === 'A';
   const currentSpan: GridSpanType = item.gridSpan || (featured ? 'full' : 'half');
+  const currentFormat = item.format || 'landscape'; // 'landscape' | 'square' | 'vertical'
 
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -56,6 +58,12 @@ export const CaseCard: React.FC<CaseCardProps> = ({
     }
     onSelect(item);
   };
+
+  // Mapeamento dinâmico de proporção da imagem mantendo o design original
+  const formatAspectClass = 
+    currentFormat === 'square' ? 'aspect-square' :
+    currentFormat === 'vertical' ? 'aspect-[4/5]' : 
+    'aspect-[16/10] sm:aspect-[16/9]';
 
   return (
     <div
@@ -136,93 +144,89 @@ export const CaseCard: React.FC<CaseCardProps> = ({
         </div>
       )}
 
-      {/* CMS Drag & Control Bar (Visível apenas em modo edição no topo) */}
+      {/* CMS Bar: Controle Completo de Grid (1, 2 ou 3 projetos por linha) & Formatos */}
       {isEditMode && (
-        <div className="cms-control bg-[#181C32] text-white p-3 border-b border-white/20 flex flex-wrap items-center justify-between gap-2 select-none z-30 relative">
+        <div className="cms-control bg-[#181C32] text-white p-3 border-b border-white/25 flex flex-wrap items-center justify-between gap-2 select-none z-30 relative shadow-xl">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono-code font-bold bg-[#2340FF]/20 text-[#D4FF3A] border border-[#2340FF]/40 rounded-none">
               <GripVertical className="w-3.5 h-3.5" />
-              <span>ARRASTE PARA REORDENAR</span>
+              <span>#{positionIndex !== undefined ? String(positionIndex).padStart(2, '0') : '00'}</span>
             </div>
-            {positionIndex !== undefined && (
-              <span className="text-[11px] font-mono-code font-bold px-2 py-0.5 border border-white/20 bg-white/10 rounded-none">
-                #{String(positionIndex).padStart(2, '0')}
-              </span>
-            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <div className="flex items-center gap-0.5 p-0.5 border border-white/20 bg-black/40 text-[11px] font-mono-code rounded-none">
-              <span className="text-[10px] px-1 font-bold uppercase hidden xs:inline text-[#AFC0FF]">Layout:</span>
+            
+            {/* SELETOR DE COLUNAS / LARGURA NO GRID */}
+            <div className="flex items-center gap-0.5 p-0.5 border border-white/20 bg-black/50 text-[11px] font-mono-code rounded-none">
+              <span className="text-[10px] px-1 font-bold uppercase text-[#AFC0FF] hidden xs:inline">Linha:</span>
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); updateCaseGridSpan(item.slug, 'full'); }}
-                className={`px-1.5 py-0.5 text-[11px] font-bold transition-all cursor-pointer rounded-none ${
-                  currentSpan === 'full' ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black' : 'text-white/80 hover:bg-white/10'
+                className={`px-2 py-0.5 text-[11px] font-bold transition-all cursor-pointer rounded-none ${
+                  currentSpan === 'full' ? 'bg-[#D4FF3A] text-[#0F1222] font-black shadow' : 'text-white/80 hover:bg-white/10'
                 }`}
+                title="1 Projeto na linha (Largura Total 100%)"
               >
-                100% Full
-              </button>
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); updateCaseGridSpan(item.slug, 'centered'); }}
-                className={`px-1.5 py-0.5 text-[11px] font-bold transition-all cursor-pointer rounded-none ${
-                  currentSpan === 'centered' ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black' : 'text-white/80 hover:bg-white/10'
-                }`}
-              >
-                Centralizado
+                1 por linha
               </button>
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); updateCaseGridSpan(item.slug, 'half'); }}
-                className={`px-1.5 py-0.5 text-[11px] font-bold transition-all cursor-pointer rounded-none ${
-                  currentSpan === 'half' ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black' : 'text-white/80 hover:bg-white/10'
+                className={`px-2 py-0.5 text-[11px] font-bold transition-all cursor-pointer rounded-none ${
+                  currentSpan === 'half' ? 'bg-[#D4FF3A] text-[#0F1222] font-black shadow' : 'text-white/80 hover:bg-white/10'
                 }`}
+                title="2 Projetos na linha (50% cada)"
               >
-                50% Médio
+                2 por linha
               </button>
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); updateCaseGridSpan(item.slug, 'third'); }}
-                className={`px-1.5 py-0.5 text-[11px] font-bold transition-all cursor-pointer rounded-none ${
-                  currentSpan === 'third' ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black' : 'text-white/80 hover:bg-white/10'
+                className={`px-2 py-0.5 text-[11px] font-bold transition-all cursor-pointer rounded-none ${
+                  currentSpan === 'third' ? 'bg-[#D4FF3A] text-[#0F1222] font-black shadow' : 'text-white/80 hover:bg-white/10'
                 }`}
+                title="3 Projetos na linha (Grid Artístico)"
               >
-                33% Compacto
+                3 por linha
               </button>
             </div>
 
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); moveCaseOrder(item.slug, 'up'); }}
-              className="p-1 border border-white/20 bg-white/10 hover:bg-white/20 rounded-none"
-              title="Mover para cima"
-            >
-              <ChevronUp className="w-4 h-4 text-white" />
-            </button>
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); moveCaseOrder(item.slug, 'down'); }}
-              className="p-1 border border-white/20 bg-white/10 hover:bg-white/20 rounded-none"
-              title="Mover para baixo"
-            >
-              <ChevronDown className="w-4 h-4 text-white" />
-            </button>
+            {/* SETAS DE ORDEM */}
+            <div className="flex items-center gap-0.5">
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); moveCaseOrder(item.slug, 'up'); }}
+                className="p-1 border border-white/20 bg-white/10 hover:bg-white/20 rounded-none cursor-pointer"
+                title="Mover para cima"
+              >
+                <ChevronUp className="w-3.5 h-3.5 text-white" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); moveCaseOrder(item.slug, 'down'); }}
+                className="p-1 border border-white/20 bg-white/10 hover:bg-white/20 rounded-none cursor-pointer"
+                title="Mover para baixo"
+              >
+                <ChevronDown className="w-3.5 h-3.5 text-white" />
+              </button>
+            </div>
 
+            {/* BOTÃO DE CAPA */}
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setIsEditingCover(!isEditingCover); }}
-              className="px-2 py-1 text-xs font-mono-code font-bold flex items-center gap-1 border border-white/20 bg-white/10 hover:bg-white/20 rounded-none cursor-pointer text-white"
+              className="px-2.5 py-1 text-xs font-mono-code font-bold flex items-center gap-1 border border-white/20 bg-white/10 hover:bg-white/20 rounded-none cursor-pointer text-white"
             >
-              <Upload className="w-3.5 h-3.5" /> Capa
+              <Upload className="w-3.5 h-3.5 text-[#D4FF3A]" /> Capa
             </button>
 
+            {/* BOTÃO EDITAR PEÇAS */}
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onSelect(item); }}
-              className="flex items-center gap-1 px-2.5 py-1 bg-[#2340FF] text-white hover:bg-[#1B34D6] text-xs font-mono-code font-semibold rounded-none cursor-pointer"
+              className="flex items-center gap-1 px-2.5 py-1 bg-[#2340FF] text-white hover:bg-[#1B34D6] text-xs font-mono-code font-semibold rounded-none cursor-pointer border border-white/20"
             >
-              <Edit3 className="w-3 h-3" /> Editar Peças
+              <Edit3 className="w-3 h-3" /> Peças
             </button>
           </div>
         </div>
@@ -231,12 +235,12 @@ export const CaseCard: React.FC<CaseCardProps> = ({
       {/* Edit Cover Dropdown */}
       {isEditMode && isEditingCover && (
         <div
-          className="cms-control p-3 border-2 border-white bg-[#0F1222] text-white space-y-2 rounded-none z-30 relative"
+          className="cms-control p-3 border-2 border-white bg-[#0F1222] text-white space-y-2 rounded-none z-30 relative shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono-code font-bold">Alterar Capa do Projeto</span>
-            <button type="button" onClick={() => setIsEditingCover(false)} className="text-xs text-gray-400 hover:text-red-400">Fechar</button>
+            <span className="text-xs font-mono-code font-bold text-[#D4FF3A]">Alterar Imagem de Capa</span>
+            <button type="button" onClick={() => setIsEditingCover(false)} className="text-xs text-gray-400 hover:text-red-400 cursor-pointer">Fechar</button>
           </div>
           <div className="flex flex-wrap gap-2 items-center">
             <input
@@ -286,9 +290,8 @@ export const CaseCard: React.FC<CaseCardProps> = ({
         </div>
       )}
 
-      {/* Container Principal: Imagem Edge-to-Edge com Texto Integrado sobre a Imagem */}
-      <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden bg-black">
-        {/* Imagem de Fundo */}
+      {/* Container Principal: Imagem Edge-to-Edge com Proporção Dinâmica */}
+      <div className={`relative ${formatAspectClass} w-full overflow-hidden bg-black`}>
         <img
           src={item.cover}
           alt={`Capa do case ${item.name}`}
@@ -300,7 +303,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
         {/* Textura de Impressão / Ruído Serigráfico */}
         <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-15 pointer-events-none mix-blend-overlay" />
 
-        {/* Gradiente Escuro na Base para Legibilidade dos Textos Integrados */}
+        {/* Gradiente Escuro na Base */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
 
         {/* Botão de Upload Rápido (Modo Edição) */}
@@ -340,9 +343,8 @@ export const CaseCard: React.FC<CaseCardProps> = ({
           }}
         />
 
-        {/* Bloco de Metadados e Título Integrado (Estilo Manifesto / Cartaz Urbano) */}
+        {/* Bloco de Metadados e Título */}
         <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 z-10 flex flex-col justify-end">
-          {/* Tag de Faixa & Entregas */}
           <div className="flex justify-between items-baseline gap-2 mb-2 font-mono-code text-[11px] sm:text-xs uppercase tracking-widest text-[#D4FF3A] font-bold drop-shadow">
             {isEditMode ? (
               <input
@@ -369,7 +371,6 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             )}
           </div>
 
-          {/* Título Principal */}
           {isEditMode ? (
             <input
               type="text"
@@ -384,7 +385,6 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             </h3>
           )}
 
-          {/* Conceito / Manifesto Curto */}
           {isEditMode ? (
             <textarea
               value={item.concept}
