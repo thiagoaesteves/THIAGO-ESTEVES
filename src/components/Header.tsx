@@ -35,7 +35,7 @@ export const Header: React.FC = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#2340FF] text-[#F6F7F2] border-b border-[#3b55ff] transition-all shadow-md">
-      <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-3 sm:py-3.5">
+      <div className="max-w-[1320px] 2xl:max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-12 2xl:px-16 py-3 sm:py-3.5">
         <div className="flex items-center justify-between gap-4">
           {/* Brand Logo */}
           <a
@@ -85,7 +85,7 @@ export const Header: React.FC = () => {
               id="nav-lado-a"
               href="#lado-a"
               onClick={(e) => handleNavClick(e, 'lado-a')}
-              className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium cursor-pointer py-1"
+              className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium cursor-pointer py-1 mr-[-12px] lg:mr-[-16px]"
             >
               Lado A
             </a>

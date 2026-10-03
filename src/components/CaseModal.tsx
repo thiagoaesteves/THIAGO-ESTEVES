@@ -996,8 +996,8 @@ export const CaseModal: React.FC<CaseModalProps> = ({
 
         {/* Modal Main Content */}
         <main className="flex-1 w-full max-w-[1240px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 py-6 sm:py-10 md:py-14">
-          {/* Header Section */}
-          <div className="space-y-4 sm:space-y-5 mb-8 sm:mb-10 max-w-4xl">
+          {/* Header Section - Ajustado para aproximar títulos e tags/advertising sem colar */}
+          <div className="space-y-2.5 sm:space-y-3.5 mb-8 sm:mb-10 max-w-4xl">
             <div>
               {isEditMode ? (
                 <div className="flex items-center gap-2">
