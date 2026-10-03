@@ -47,16 +47,16 @@ export const ServicosSection: React.FC = () => {
   ];
 
   return (
-    <div id="servicos" className="border-t border-[#DADCE3]">
+    <div id="servicos" className="border-t border-[#DADCE3] bg-[#0F1222]">
       
       {/* =========================================================
-          SEÇÃO 1: BACKSTAGE (Sem altura travada, eliminando o espaço morto)
+          SEÇÃO 1: BACKSTAGE (Altura mínima garantida e fluxo coeso)
           ========================================================= */}
-      <section className="bg-[#F6F7F2] text-[#0F1222] flex flex-col">
+      <section className="min-h-[calc(100vh-74px)] flex flex-col justify-between bg-[#F6F7F2] text-[#0F1222]">
         
-        {/* Conteúdo Principal Superior (tamanhos e paddings originais intocados) */}
-        <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 w-full pt-4 sm:pt-6 pb-6 sm:pb-8">
-          <div className="max-w-[1140px] space-y-3 sm:space-y-4">
+        {/* Conteúdo Principal Superior */}
+        <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 w-full pt-3 sm:pt-5 pb-6 sm:pb-8">
+          <div className="max-w-[1140px] space-y-2.5 sm:space-y-4">
             
             {/* Header & Manifesto Intro */}
             <div className="space-y-2 sm:space-y-2.5">
@@ -128,9 +128,9 @@ export const ServicosSection: React.FC = () => {
           </div>
         </div>
 
-        {/* BARRA DE RODAPÉ ESCURA (Subiu e colou perfeitamente logo abaixo do item 04) */}
-        <div className="bg-[#0F1222] text-[#F6F7F2] w-full border-t border-white/15">
-          <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 w-full py-6 sm:py-7">
+        {/* BARRA DE RODAPÉ ESCURA (Preenche o restante do espaço com flex-1, eliminando vazamentos) */}
+        <div className="bg-[#0F1222] text-[#F6F7F2] w-full border-t border-white/15 flex-1 flex items-center">
+          <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 w-full py-6 sm:py-8">
             <div className="max-w-[1140px] space-y-2 sm:space-y-2.5">
               <div className="flex items-center gap-2.5">
                 <span className="font-mono-code text-[10px] sm:text-xs uppercase tracking-widest text-[#D4FF3A] font-bold">
