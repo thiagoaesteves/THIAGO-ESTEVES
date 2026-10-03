@@ -125,7 +125,7 @@ export const Header: React.FC = () => {
               id="nav-contato"
               href="#contato"
               onClick={(e) => handleNavClick(e, 'contato')}
-              className="faixa-clip bg-[#D4FF3A] text-[#0F1222] hover:bg-white transition-all transform hover:-translate-y-0.5 font-bold cursor-pointer ml-1"
+              className="faixa-clip bg-[#D4FF3A] text-[#0F1222] transition-all transform hover:-translate-y-0.5 font-bold cursor-pointer ml-1"
             >
               Contato
             </a>
@@ -202,3 +202,5 @@ export const Header: React.FC = () => {
     </header>
   );
 };
+
+export default Header;

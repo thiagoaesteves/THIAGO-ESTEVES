@@ -7,7 +7,6 @@ import { CaseModal } from './components/CaseModal';
 import { LightboxModal } from './components/LightboxModal';
 import { ServicosSection } from './components/ServicosSection';
 import { SobreSection } from './components/SobreSection';
-import { SegmentosSection } from './components/SegmentosSection';
 import { ContatoSection } from './components/ContatoSection';
 import { Footer } from './components/Footer';
 import { CmsToolbar } from './components/CmsToolbar';
@@ -35,14 +34,12 @@ function PortfolioApp() {
   const [selectedCase, setSelectedCase] = useState<CaseItem | null>(null);
   const [lightboxData, setLightboxData] = useState<{ url: string; title: string } | null>(null);
 
-  // Estado local opcional para pré-visualizar colunas na grelha do CMS
   const [sectionCols, setSectionCols] = useState<{ [key: string]: number }>({
     ladoA: 2,
     ladoB: 2,
     bonus: 2,
   });
 
-  // Hash deep linking: check if hash matches a case slug
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.replace('#', '');
@@ -91,20 +88,9 @@ function PortfolioApp() {
     setLightboxData(null);
   };
 
-  const casesLadoA = useMemo(
-    () => cases.filter((c) => c.lado === 'A'),
-    [cases]
-  );
-
-  const casesLadoB = useMemo(
-    () => cases.filter((c) => c.lado === 'B'),
-    [cases]
-  );
-
-  const casesBonus = useMemo(
-    () => cases.filter((c) => c.lado === 'bonus'),
-    [cases]
-  );
+  const casesLadoA = useMemo(() => cases.filter((c) => c.lado === 'A'), [cases]);
+  const casesLadoB = useMemo(() => cases.filter((c) => c.lado === 'B'), [cases]);
+  const casesBonus = useMemo(() => cases.filter((c) => c.lado === 'bonus'), [cases]);
 
   const totalA = useMemo(() => cases.filter((c) => c.lado === 'A').length, [cases]);
   const totalB = useMemo(() => cases.filter((c) => c.lado === 'B').length, [cases]);
@@ -112,25 +98,14 @@ function PortfolioApp() {
 
   return (
     <div className="min-h-screen bg-[#F6F7F2] text-[#0F1222] font-disp antialiased selection:bg-[#D4FF3A] selection:text-[#0F1222]">
-      {/* Fixed Header with Navigation */}
       <Header />
-
-      {/* Hero Section */}
-      <Hero
-        caseCountA={totalA}
-        caseCountB={totalB}
-        caseCountBonus={totalBonus}
-      />
-
-      {/* Infinite Brand Marquee */}
+      <Hero caseCountA={totalA} caseCountB={totalB} caseCountBonus={totalBonus} />
       <Marquee />
 
       <main>
-        {/* Lado A: Advertising */}
-        <section id="lado-a" className="py-14 sm:py-18 md:py-24 bg-[#F6F7F2]">
+        {/* Lado A */}
+        <section id="lado-a" className="pt-8 pb-14 sm:pt-12 sm:pb-18 md:pt-16 md:pb-24 bg-[#F6F7F2]">
           <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
-            
-            {/* CMS Toolbar de Controlo de Grelha para o Lado A (Visível apenas em modo edição) */}
             {isEditMode && (
               <div className="mb-6 flex items-center justify-between bg-[#181C32] text-white border border-white/10 rounded-xl px-4 py-2.5 shadow-xl">
                 <div className="flex items-center gap-2">
@@ -161,7 +136,6 @@ function PortfolioApp() {
               </div>
             )}
 
-            {/* Section Header */}
             <div className="max-w-3xl space-y-1 mb-8 sm:mb-10 md:mb-12">
               <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block">
                 Lado A
@@ -171,7 +145,6 @@ function PortfolioApp() {
               </h2>
             </div>
 
-            {/* Grid of Lado A Cards */}
             {casesLadoA.length === 0 ? (
               <div className="py-12 text-center text-[#5B6070] font-mono-code text-sm">
                 Nenhum case do Lado A corresponde à pesquisa atual.
@@ -179,10 +152,7 @@ function PortfolioApp() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 gap-y-6 sm:gap-y-8 items-start">
                 {casesLadoA.map((item, idx) => (
-                  <div
-                    key={item.slug}
-                    className={getCaseSpanClass(item, idx, false)}
-                  >
+                  <div key={item.slug} className={getCaseSpanClass(item, idx, false)}>
                     <CaseCard
                       item={item}
                       onSelect={handleOpenCase}
@@ -196,11 +166,10 @@ function PortfolioApp() {
           </div>
         </section>
 
-        {/* Lado B: Branding */}
+        {/* Lado B */}
         {casesLadoB.length > 0 && (
-          <section id="lado-b" className="py-14 sm:py-18 md:py-24 bg-[#0F1222] text-[#F6F7F2] border-t border-[#262A3D]">
+          <section id="lado-b" className="pt-8 pb-14 sm:pt-12 sm:pb-18 md:pt-16 md:pb-24 bg-[#0F1222] text-[#F6F7F2] border-t border-[#262A3D]">
             <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
-              
               {isEditMode && (
                 <div className="mb-6 flex items-center justify-between bg-[#181C32] text-white border border-white/10 rounded-xl px-4 py-2.5 shadow-xl">
                   <div className="flex items-center gap-2">
@@ -231,7 +200,6 @@ function PortfolioApp() {
                 </div>
               )}
 
-              {/* Section Header */}
               <div className="max-w-3xl space-y-1 mb-8 sm:mb-10 md:mb-12">
                 <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#FF4FA0] font-bold block">
                   Lado B
@@ -243,10 +211,7 @@ function PortfolioApp() {
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 gap-y-6 sm:gap-y-8 items-start">
                 {casesLadoB.map((item, idx) => (
-                  <div
-                    key={item.slug}
-                    className={getCaseSpanClass(item, idx, false)}
-                  >
+                  <div key={item.slug} className={getCaseSpanClass(item, idx, false)}>
                     <CaseCard
                       item={item}
                       onSelect={handleOpenCase}
@@ -263,9 +228,8 @@ function PortfolioApp() {
 
         {/* Faixa Bônus */}
         {casesBonus.length > 0 && (
-          <section id="faixa-bonus" className="py-14 sm:py-18 md:py-24 bg-[#D4FF3A] text-[#0F1222] border-t border-black/10">
+          <section id="faixa-bonus" className="pt-8 pb-14 sm:pt-12 sm:pb-18 md:pt-16 md:pb-24 bg-[#D4FF3A] text-[#0F1222] border-t border-black/10">
             <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
-              
               {isEditMode && (
                 <div className="mb-6 flex items-center justify-between bg-[#0F1222] text-white border border-black/10 rounded-xl px-4 py-2.5 shadow-xl">
                   <div className="flex items-center gap-2">
@@ -296,7 +260,6 @@ function PortfolioApp() {
                 </div>
               )}
 
-              {/* Section Header */}
               <div className="max-w-4xl space-y-1 mb-8 sm:mb-10 md:mb-12">
                 <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block">
                   Faixa Bônus · {totalBonus} faixas
@@ -311,10 +274,7 @@ function PortfolioApp() {
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 gap-y-6 sm:gap-y-8 items-start">
                 {casesBonus.map((item, idx) => (
-                  <div
-                    key={item.slug}
-                    className={getCaseSpanClass(item, idx, true)}
-                  >
+                  <div key={item.slug} className={getCaseSpanClass(item, idx, true)}>
                     <CaseCard
                       item={item}
                       onSelect={handleOpenCase}
@@ -331,7 +291,6 @@ function PortfolioApp() {
 
         <ServicosSection />
         <SobreSection />
-        <SegmentosSection />
         <ContatoSection />
       </main>
 

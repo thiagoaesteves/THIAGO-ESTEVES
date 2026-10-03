@@ -27,13 +27,6 @@ export const SegmentosSection: React.FC = () => {
       aria-label="Segmentos atendidos"
       className="bg-[#0F1222] text-[#F6F7F2] py-8 sm:py-10 border-b border-[#262A3D] select-none relative z-20"
     >
-      {/* Título / Microcopy exatamente com tipografia, cor verde limão (#D4FF3A) e espaçamento da seção de marcas */}
-      <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 mb-4 sm:mb-5">
-        <span className="font-mono-code text-xs sm:text-[13px] uppercase tracking-widest text-[#D4FF3A] font-bold block">
-          Quais segmentos já atendi (e vendi)?
-        </span>
-      </div>
-
       {/* Letreiro Animado (Marquee) Contínuo dos Segmentos */}
       <div
         aria-label="Lista de segmentos atendidos"

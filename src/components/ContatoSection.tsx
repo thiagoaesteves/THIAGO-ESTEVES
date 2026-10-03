@@ -3,7 +3,7 @@ import { Mail, Linkedin, Instagram, ArrowUpRight } from 'lucide-react';
 
 export const ContatoSection: React.FC = () => {
   return (
-    <section id="contato" className="py-20 sm:py-28 md:py-36 bg-[#0F1222] text-[#F6F7F2] relative overflow-hidden">
+    <section id="contato" className="pt-10 pb-16 sm:pt-14 sm:pb-20 md:pt-16 md:pb-24 bg-[#0F1222] text-[#F6F7F2] relative overflow-hidden">
       {/* Importação da fonte manuscrita para o efeito de caligrafia */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap');
@@ -17,7 +17,7 @@ export const ContatoSection: React.FC = () => {
           
           {/* Left Column: Headline & Links */}
           <div className="lg:col-span-7">
-            <span className="font-mono-code text-xs uppercase tracking-widest text-[#FF4FA0] font-bold block mb-3 sm:mb-4">
+            <span className="font-mono-code text-xs uppercase tracking-widest text-[#FF4FA0] font-bold block mb-2 sm:mb-3">
               Curtiu?
             </span>
 
@@ -26,7 +26,7 @@ export const ContatoSection: React.FC = () => {
             </h2>
 
             {/* CTA Container */}
-            <div className="flex flex-col items-start gap-5 sm:gap-6 mt-8 sm:mt-10">
+            <div className="flex flex-col items-start gap-4 sm:gap-5 mt-6 sm:mt-8">
               
               {/* WhatsApp Button */}
               <a
@@ -43,7 +43,7 @@ export const ContatoSection: React.FC = () => {
               </a>
 
               {/* Email, LinkedIn e Instagram lado a lado */}
-              <div className="flex flex-wrap items-center gap-5 sm:gap-6 font-mono-code text-xs sm:text-sm tracking-widest pt-2">
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 font-mono-code text-xs sm:text-sm tracking-widest pt-1">
                 <a
                   id="link-contato-email"
                   href="mailto:desenrola@thiagoesteves.com"
@@ -83,7 +83,7 @@ export const ContatoSection: React.FC = () => {
 
           {/* Right Column */}
           <div className="lg:col-span-5 flex lg:justify-end mt-4 lg:mt-0">
-            <div className="max-w-md space-y-4 sm:space-y-6">
+            <div className="max-w-md space-y-3 sm:space-y-5">
               
               {/* Live Status Indicator */}
               <div className="flex items-center gap-2.5">

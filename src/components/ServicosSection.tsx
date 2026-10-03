@@ -1,9 +1,6 @@
 import React from 'react';
-import { useCms } from '../context/CmsContext';
 
 export const ServicosSection: React.FC = () => {
-  const { isEditMode, sobre, updateSobreField } = useCms();
-
   const especialidades = [
     {
       num: '01',
@@ -49,45 +46,12 @@ export const ServicosSection: React.FC = () => {
     },
   ];
 
-  // Lista consolidada de clientes e marcas atendidas
-  const defaultMarcas = [
-    'Vivo',
-    'Samsung',
-    'Unicred',
-    'GSK / GlaxoSmithKline',
-    'Grupo Boticário',
-    'Senai',
-    'BEAUTYCOLOR',
-    'Frimesa',
-    'Chilli Beans',
-    'Jasmine Alimentos',
-    'Dunlop Pneus',
-    'BR Malls',
-    'Unimed RJ',
-    'Detran-RJ',
-    'Nipponflex Brasil & USA',
-    'WEG Motores',
-    'Volvo Trucks Corporation',
-    'John Deere Brasil & Espanha',
-    'Electrolux',
-    'Tintas Verginia',
-    'Coritiba Football Club',
-    'Paraná Banco',
-    'Hortifruti e Natural da Terra',
-    'CBF',
-    'entre outras',
-  ];
-
-  const marcasArray = sobre?.clientsText
-    ? sobre.clientsText.split(/\s*[\/\n]\s*/).filter(Boolean)
-    : defaultMarcas;
-
   return (
     <div id="servicos" className="border-t border-[#DADCE3]">
       
       {/* =========================================================
           SEÇÃO 1: BACKSTAGE (Rigidez de Grid e Hierarquia Tipográfica)
-         ========================================================= */}
+          ========================================================= */}
       <section className="h-[calc(100vh-74px)] flex flex-col justify-between bg-[#F6F7F2] text-[#0F1222] overflow-hidden">
         
         {/* Conteúdo Principal Superior */}
@@ -164,10 +128,10 @@ export const ServicosSection: React.FC = () => {
           </div>
         </div>
 
-        {/* BARRA DE RODAPÉ ESCURA */}
+        {/* BARRA DE RODAPÉ ESCURA (Espaçamento inferior ampliado e quebra limpa) */}
         <div className="bg-[#0F1222] text-[#F6F7F2] w-full border-t border-white/15">
-          <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 w-full py-4 sm:py-5">
-            <div className="max-w-[1140px] space-y-1.5 sm:space-y-2">
+          <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 w-full py-6 sm:py-7">
+            <div className="max-w-[1140px] space-y-2 sm:space-y-2.5">
               <div className="flex items-center gap-2.5">
                 <span className="font-mono-code text-[10px] sm:text-xs uppercase tracking-widest text-[#D4FF3A] font-bold">
                   05 // E O QUE MAIS FOR PRECISO
@@ -176,82 +140,13 @@ export const ServicosSection: React.FC = () => {
               </div>
 
               <p className="font-disp font-extrabold text-sm sm:text-base md:text-lg lg:text-[21px] leading-tight tracking-tight text-white">
-                “Especialista cascudo, ponta firme, sangue<br />
-                nos olhos <span className="font-serif-it italic font-normal text-[#AFC0FF]">sem nunca abrir mão da criatividade.</span>”
+                “Especialista cascudo, ponta firme, sangue nos olhos<br />
+                <span className="font-serif-it italic font-normal text-[#AFC0FF]">sem nunca abrir mão da criatividade.</span>”
               </p>
             </div>
           </div>
         </div>
 
-      </section>
-
-      {/* =========================================================
-          SEÇÃO 2: DIVISOR DE SEÇÕES (Marquee de Clientes - Abaixo da Dobra)
-         ========================================================= */}
-      <section className="py-6 sm:py-8 bg-[#0F1222] text-[#F6F7F2] border-t border-black/20">
-        <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 mb-3 w-full">
-          <div className="max-w-[1140px]">
-            <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-widest text-[#D4FF3A] font-bold block leading-tight">
-              Para quem já criei?<br />
-              <span className="text-[#AFC0FF] font-normal normal-case font-serif-it text-sm sm:text-base">(e vendi)</span>
-            </span>
-          </div>
-        </div>
-
-        <div
-          aria-label="Marcas e clientes atendidos"
-          className="overflow-hidden py-3 sm:py-4 border-y border-white/10 select-none bg-black/40 relative"
-        >
-          <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-r from-[#0F1222] to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-[#0F1222] to-transparent z-10 pointer-events-none" />
-
-          <div className="animate-marquee items-center text-sm sm:text-base lg:text-lg font-bold tracking-tight font-disp">
-            {/* Repetição 1 */}
-            <div className="flex items-center gap-6 sm:gap-8 pr-6 sm:pr-8 shrink-0">
-              {marcasArray.map((brand, i) => (
-                <React.Fragment key={`brand-1-${i}`}>
-                  <span className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors whitespace-nowrap">
-                    {brand}
-                  </span>
-                  <span className="text-[#D4FF3A] text-xs font-serif-it select-none opacity-80" aria-hidden="true">
-                    ✦
-                  </span>
-                </React.Fragment>
-              ))}
-            </div>
-            {/* Repetição 2 */}
-            <div className="flex items-center gap-6 sm:gap-8 pr-6 sm:pr-8 shrink-0">
-              {marcasArray.map((brand, i) => (
-                <React.Fragment key={`brand-2-${i}`}>
-                  <span className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors whitespace-nowrap">
-                    {brand}
-                  </span>
-                  <span className="text-[#D4FF3A] text-xs font-serif-it select-none opacity-80" aria-hidden="true">
-                    ✦
-                  </span>
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Painel opcional de edição rápida (CMS) */}
-        {isEditMode && (
-          <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 mt-4">
-            <div className="p-3 rounded-xl bg-black/40 border border-[#D4FF3A]/40 space-y-2 max-w-4xl">
-              <span className="text-xs font-mono-code text-[#D4FF3A] font-bold block uppercase tracking-wider">
-                Edição Rápida de Clientes (CMS):
-              </span>
-              <textarea
-                value={sobre?.clientsText || defaultMarcas.join(' / ')}
-                rows={2}
-                onChange={(e) => updateSobreField('clientsText', e.target.value)}
-                className="w-full text-xs font-mono-code text-white bg-black/50 border border-white/20 p-2 rounded-lg focus:outline-none focus:border-[#D4FF3A]"
-                placeholder="Clientes separados por /"
-              />
-            </div>
-          </div>
-        )}
       </section>
 
     </div>
