@@ -46,6 +46,13 @@ export const ServicosSection: React.FC = () => {
     },
   ];
 
+  const itemMinHeight: Record<string, string> = {
+    '01': 'min-h-[69.35px]',
+    '02': 'min-h-[69.35px]',
+    '03': 'min-h-[46.0375px]',
+    '04': 'min-h-[69.35px]',
+  };
+
   return (
     <div
       id="servicos"
@@ -55,19 +62,19 @@ export const ServicosSection: React.FC = () => {
       <section className="w-full bg-[#0F1222] text-[#0F1222] flex flex-col">
         
         {/* Bloco Superior com Fundo Claro */}
-        <div className="bg-[#F6F7F2] w-full pt-4 sm:pt-6 pb-6 sm:pb-8 text-[#0F1222]">
-          <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 w-full">
-            <div className="max-w-[1140px] space-y-3 sm:space-y-4">
+        <div className="bg-[#F6F7F2] w-full pt-4 sm:pt-6 pb-6 sm:pb-8 text-[#0F1222] min-h-[495.35px]">
+          <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 w-full min-h-[435.35px]">
+            <div className="max-w-[1140px]">
               
               {/* Header & Manifesto Intro */}
               <div className="space-y-2 sm:space-y-2.5">
-                <span className="font-mono-code text-[10px] sm:text-xs uppercase tracking-widest text-[#2340FF] font-bold block">
+                <span className="font-mono-code text-[10px] sm:text-xs uppercase tracking-widest text-[#2340FF] font-bold block mb-2 sm:mb-3">
                   Especialidades &amp; Craft
                 </span>
 
                 {/* Big Headline */}
                 <div className="space-y-3 sm:space-y-4 max-w-[72ch]">
-                  <p className="font-disp font-extrabold text-lg sm:text-2xl md:text-3xl lg:text-[34px] tracking-[-0.03em] leading-[1.06] text-[#0F1222]">
+                  <p className="font-disp font-extrabold text-lg sm:text-2xl md:text-3xl lg:text-[34px] tracking-[-0.03em] leading-[1.06] text-[#0F1222] min-h-[74.975px]">
                     <span className="font-serif-it italic text-[#2340FF] text-[1.18em] leading-none align-[-0.12em] mr-1.5">
                       “
                     </span>
@@ -75,20 +82,24 @@ export const ServicosSection: React.FC = () => {
                     Eu me fiz publicitário.
                   </p>
                   
-                  {/* Texto numa linha só com o destaque verde limão restaurado */}
-                  <p className="text-sm sm:text-base md:text-lg lg:text-[20px] font-medium text-[#343848] leading-snug whitespace-nowrap">
+                  {/* Texto numa linha só com o efeito orgânico e tátil de marca-texto */}
+                  <p className="text-sm sm:text-base md:text-lg lg:text-[20px] font-medium text-[#343848] leading-snug whitespace-nowrap pt-1 min-h-[34.5px] max-w-[838.8px]">
                     E aprendi a gerar resultados criativos em qualquer formato.{' '}
-                    <span className="hl-mark text-[#0F1222]">Inclusive... todos.”</span>
+                    <span className="inline-block bg-[#D4FF3A] text-[#0F1222] px-2 py-0.5 font-bold rounded-[255px_15px_225px_15px/15px_225px_15px_255px] transform -rotate-1 shadow-sm">
+                      Inclusive... todos.”
+                    </span>
                   </p>
                 </div>
               </div>
 
-              {/* Categorias & Entregas 01 a 04 */}
-              <div className="border-b border-[#DADCE3]">
+              {/* Categorias & Entregas 01 a 04 com espaçamento superior ajustado */}
+              <div className="border-b border-[#DADCE3] mt-5 sm:mt-7">
                 {especialidades.map((item) => (
                   <div
                     key={item.num}
-                    className="grid grid-cols-1 lg:grid-cols-12 gap-1 lg:gap-6 items-baseline py-2 sm:py-2.5 border-t border-[#DADCE3] group"
+                    className={`grid grid-cols-1 lg:grid-cols-12 gap-1 lg:gap-6 items-baseline py-2 sm:py-2.5 border-t border-[#DADCE3] group ${
+                      itemMinHeight[item.num] || ''
+                    }`}
                   >
                     {/* Título da Categoria */}
                     <div className="lg:col-span-4 xl:col-span-4">
@@ -132,8 +143,8 @@ export const ServicosSection: React.FC = () => {
           </div>
         </div>
 
-        {/* BARRA DE RODAPÉ ESCURA */}
-        <div className="bg-[#0F1222] text-[#F6F7F2] w-full border-t border-white/15 py-5 sm:py-7 lg:py-8">
+        {/* BARRA DE RODAPÉ ESCURA (Com respiro inferior ajustado) */}
+        <div className="bg-[#0F1222] text-[#F6F7F2] w-full border-t border-white/15 pt-5 pb-7 sm:pt-7 sm:pb-9 lg:pt-8 lg:pb-10 min-h-[153.087px]">
           <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 w-full">
             <div className="max-w-[1140px] space-y-2 sm:space-y-2.5">
               <div className="flex items-center gap-2.5">

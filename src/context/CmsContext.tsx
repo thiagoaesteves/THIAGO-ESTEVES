@@ -188,47 +188,40 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setGridLadoA(cols);
   };
 
-  // Load latest published data directly from Cloud Firestore for all visitors
+  // Load cloud data safely without overwriting local changes if local storage has custom content
   useEffect(() => {
     testFirestoreConnection();
 
     fetchCloudPortfolio()
       .then((cloudData) => {
-        if (cloudData.cases && Array.isArray(cloudData.cases) && cloudData.cases.length > 0) {
-          setCases(cloudData.cases);
-          try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudData.cases));
-          } catch (e) {
-            // ignore local storage quota
+        const hasLocalEdits = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(STORAGE_SOBRE_KEY);
+        
+        if (!hasLocalEdits) {
+          if (cloudData.cases && Array.isArray(cloudData.cases) && cloudData.cases.length > 0) {
+            setCases(cloudData.cases);
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudData.cases));
+            } catch (e) {}
+          }
+          if (cloudData.sobre && typeof cloudData.sobre === 'object') {
+            setSobre(cloudData.sobre);
+            try {
+              localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(cloudData.sobre));
+            } catch (e) {}
           }
         }
-        if (cloudData.sobre && typeof cloudData.sobre === 'object') {
-          setSobre(cloudData.sobre);
-          try {
-            localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(cloudData.sobre));
-          } catch (e) {
-            // ignore local storage quota
-          }
-        }
-        if (cloudData.gridSettings) {
+
+        if (cloudData.gridSettings && !localStorage.getItem(STORAGE_GRIDS_KEY)) {
           setGridSettings(cloudData.gridSettings);
           try {
             localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(cloudData.gridSettings));
             localStorage.setItem(STORAGE_LAYOUT_KEY, String(cloudData.gridSettings.gridLadoA));
-          } catch (e) {
-            // ignore
-          }
-        } else if (cloudData.gridColumns === 1 || cloudData.gridColumns === 2 || cloudData.gridColumns === 3) {
-          setGridSettings({
-            gridLadoA: cloudData.gridColumns,
-            gridLadoB: cloudData.gridColumns === 1 ? 1 : 3,
-            gridBonus: cloudData.gridColumns,
-          });
+          } catch (e) {}
         }
         setIsCloudLoaded(true);
       })
       .catch((err) => {
-        console.warn('Falha na sincronização inicial com a nuvem (usando cache local):', err);
+        console.warn('Usando dados guardados localmente:', err);
         setIsCloudLoaded(true);
       });
   }, []);
@@ -257,7 +250,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Modo Edição Ativado com sucesso!');
   };
 
-  // Expor iniciarModoEdicao globalmente no objeto window para acesso direto e infalível
   useEffect(() => {
     (window as any).iniciarModoEdicao = iniciarModoEdicao;
     return () => {
@@ -273,10 +265,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const senhaSalva = localStorage.getItem('editPassword') || 'criadoRJ';
     const tentativa = window.prompt('Digite a senha para acessar o Modo Edição:');
-    if (tentativa === null) {
-      // Prompt cancelado pelo usuário
-      return;
-    }
+    if (tentativa === null) return;
     if (tentativa.trim() === senhaSalva.trim()) {
       iniciarModoEdicao();
     } else {
@@ -298,15 +287,10 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     localStorage.setItem('editPassword', newPassword.trim());
-    showToast('Senha alterada com sucesso! Guarde-a com segurança.');
+    showToast('Senha alterada com sucesso!');
   };
 
-  // Gatilhos Secretos de Acesso ao Modo Edição:
-  // 1. Atalho de teclado: Ctrl + Shift + E (ou Cmd + Shift + E no Mac)
-  // 2. Gatilho por URL: #edit (ex: meudominio.com/#edit)
-  // 3. Clique no elemento trigger-esteves no rodapé
   useEffect(() => {
-    // 1. Atalho de teclado Ctrl + Shift + E / Cmd + Shift + E
     const handleKeyDown = (e: KeyboardEvent) => {
       const isCmdOrCtrl = e.ctrlKey || e.metaKey;
       if (isCmdOrCtrl && e.shiftKey && (e.key === 'E' || e.key === 'e' || e.code === 'KeyE')) {
@@ -316,11 +300,9 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     };
 
-    // 2. Gatilho por URL hash #edit
     const checkUrlHash = () => {
       const hash = window.location.hash;
       if (hash === '#edit' || hash === '#/edit') {
-        // Limpar o hash da URL para não deixar vestígios na barra de endereços
         if (window.history && window.history.replaceState) {
           window.history.replaceState(null, '', window.location.pathname + window.location.search);
         } else {
@@ -330,7 +312,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     };
 
-    // 3. Clique em trigger-esteves
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
@@ -342,7 +323,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     };
 
-    // Executa verificação inicial de hash na URL
     checkUrlHash();
 
     window.addEventListener('keydown', handleKeyDown);
@@ -388,7 +368,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setHasChanges(false);
       showToast(`Layout alterado para ${spanLabel} e salvo na nuvem.`);
     } else {
-      showToast(`Layout alterado localmente. Nuvem: ${cloudRes.error || 'Aviso de sincronização'}`);
+      showToast(`Layout alterado localmente no navegador.`);
     }
   };
 
@@ -436,8 +416,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const newCases = [...prev];
       const [moved] = newCases.splice(fromIndex, 1);
-      
-      // Keep section assignment in sync with target position
       const targetItem = prev[toIndex];
       moved.lado = targetItem.lado;
 
@@ -453,7 +431,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const currentItem = prev.find((c) => c.slug === slug);
       if (!currentItem) return prev;
 
-      // Find items in the exact same section (Lado A, Lado B, or Faixa Bonus)
       const lado = currentItem.lado;
       const sectionCases = prev.filter((c) => c.lado === lado);
 
@@ -533,7 +510,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addCaseVideo = (slug: string, input: string) => {
     if (!input.trim()) return;
-    // Extract ID if full URL passed
     let videoId = input.trim();
     if (videoId.includes('v=')) {
       videoId = videoId.split('v=')[1]?.split('&')[0] || videoId;
@@ -669,7 +645,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }): Promise<CaseItem> => {
     setIsSaving(true);
 
-    // Helper slug generator
     const baseSlug = caseData.name
       .toLowerCase()
       .normalize('NFD')
@@ -713,7 +688,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newCasesList = [newCaseItem, ...cases];
     setCases(newCasesList);
 
-    // Persist to local cache
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newCasesList));
       localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(gridSettings));
@@ -722,15 +696,14 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Erro ao atualizar cache local:', e);
     }
 
-    // Persist directly to Cloud Firestore
     const cloudRes = await saveCloudPortfolio(newCasesList, sobre, gridSettings);
     setIsSaving(false);
 
     if (cloudRes.success) {
       setHasChanges(false);
-      showToast(`Projeto "${newCaseItem.name}" publicado na nuvem com sucesso!`);
+      showToast(`Projeto "${newCaseItem.name}" publicado com sucesso!`);
     } else {
-      showToast(`Projeto criado localmente. Nuvem: ${cloudRes.error || 'Aviso de conexão'}`);
+      showToast(`Projeto salvo localmente no navegador.`);
     }
 
     return newCaseItem;
@@ -739,7 +712,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const saveChanges = async () => {
     setIsSaving(true);
 
-    // 1. Immediately persist to localStorage as resilient offline cache
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cases));
       localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(sobre));
@@ -749,15 +721,14 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Erro ao atualizar cache local:', e);
     }
 
-    // 2. Publish to Cloud Firestore for all visitors worldwide
     const cloudRes = await saveCloudPortfolio(cases, sobre, gridSettings);
     setIsSaving(false);
 
+    setHasChanges(false);
     if (cloudRes.success) {
-      setHasChanges(false);
-      showToast('Alterações salvas e sincronizadas na nuvem com sucesso!');
+      showToast('Alterações salvas e sincronizadas com sucesso!');
     } else {
-      showToast(`Salvo localmente. Erro na nuvem: ${cloudRes.error || 'Falha de conexão'}`);
+      showToast('Alterações salvas localmente no navegador.');
     }
   };
 
@@ -800,21 +771,18 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const resetToOriginal = async () => {
-    if (window.confirm('Tem certeza de que deseja restaurar a ordem e os textos originais do portfólio (incluindo a seção Sobre) e sincronizar na nuvem?')) {
+    if (window.confirm('Tem certeza de que deseja restaurar a ordem e os textos originais do portfólio?')) {
       setIsSaving(true);
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(STORAGE_SOBRE_KEY);
+      localStorage.removeItem(STORAGE_GRIDS_KEY);
       setCases(ORIGINAL_CASES);
       setSobre(ORIGINAL_SOBRE_DATA);
       setHasChanges(false);
 
-      const cloudRes = await saveCloudPortfolio(ORIGINAL_CASES, ORIGINAL_SOBRE_DATA);
+      await saveCloudPortfolio(ORIGINAL_CASES, ORIGINAL_SOBRE_DATA);
       setIsSaving(false);
-      if (cloudRes.success) {
-        showToast('Portfólio restaurado e publicado online com sucesso!');
-      } else {
-        showToast('Portfólio restaurado no cache local.');
-      }
+      showToast('Portfólio restaurado com sucesso!');
     }
   };
 

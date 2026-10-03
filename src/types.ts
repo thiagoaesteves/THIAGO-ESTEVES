@@ -26,4 +26,5 @@ export interface CaseItem {
   yt: string[];
   blocks?: CaseBlock[];
   gridSpan?: GridSpanType;
+  format?: 'landscape' | 'square' | 'vertical';
 }

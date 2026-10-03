@@ -189,17 +189,25 @@ export const SobreSection: React.FC = () => {
             )}
 
             {isEditMode ? (
-              <div className="space-y-1.5">
-                <textarea
-                  value={narrativeParagraphs.join('\n\n')}
-                  rows={4}
-                  onChange={(e) => {
-                    const fullText = e.target.value;
-                    const paras = fullText.split(/\n\s*\n/).filter((p) => p.trim());
-                    updateSobreField('bio', [currentTitle, ...paras]);
-                  }}
-                  className={`w-full ${bodySizeClass} ${bodyWeightClass} leading-relaxed bg-black/35 border-2 border-dashed border-[#D4FF3A] p-3 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#D4FF3A] resize-y min-h-[120px] whitespace-pre-wrap font-sans`}
-                />
+              <div className="space-y-2.5">
+                <label className="text-[10px] font-mono-code text-[#D4FF3A] font-bold flex items-center gap-1">
+                  <Type className="w-3 h-3" /> Parágrafos Biográficos (Editáveis por Linha/Parágrafo):
+                </label>
+                {narrativeParagraphs.map((para, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <span className="text-[9px] font-mono-code text-[#AFC0FF]">Parágrafo {idx + 1}:</span>
+                    <textarea
+                      value={para}
+                      rows={2}
+                      onChange={(e) => {
+                        const newParas = [...narrativeParagraphs];
+                        newParas[idx] = e.target.value;
+                        updateSobreField('bio', [currentTitle, ...newParas]);
+                      }}
+                      className="w-full text-xs font-sans leading-relaxed bg-black/40 border border-[#D4FF3A]/60 p-2.5 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#D4FF3A] resize-y"
+                    />
+                  </div>
+                ))}
               </div>
             ) : (
               <div className={`space-y-2 ${bodySizeClass} ${bodyWeightClass} leading-relaxed text-white/95`}>

@@ -105,7 +105,7 @@ function PortfolioApp() {
 
       <main>
         {/* Lado A */}
-        <section id="lado-a" className="pt-8 pb-14 sm:pt-12 sm:pb-18 md:pt-16 md:pb-24 bg-[#F6F7F2]">
+        <section id="lado-a" className="pt-4 sm:pt-6 md:pt-8 pb-14 sm:pb-18 md:pb-24 bg-[#F6F7F2]">
           <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
             {isEditMode && (
               <div className="mb-6 flex items-center justify-between bg-[#181C32] text-white border border-white/10 rounded-xl px-4 py-2.5 shadow-xl">
@@ -137,17 +137,17 @@ function PortfolioApp() {
               </div>
             )}
 
-            <div className="max-w-3xl space-y-1 mb-8 sm:mb-10 md:mb-12">
-              <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block">
+            <div className="max-w-3xl space-y-1 mb-4 sm:mb-6 md:mb-8">
+              <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block select-text">
                 Lado A
               </span>
-              <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] 2xl:text-[5.75rem] tracking-[-0.04em] text-[#0F1222] leading-[0.98]">
+              <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] 2xl:text-[5.75rem] tracking-[-0.04em] text-[#0F1222] leading-[0.98] select-text">
                 Advertising
               </h2>
             </div>
 
             {casesLadoA.length === 0 ? (
-              <div className="py-12 text-center text-[#5B6070] font-mono-code text-sm">
+              <div className="py-12 text-center text-[#5B6070] font-mono-code text-sm select-text">
                 Nenhum case do Lado A corresponde à pesquisa atual.
               </div>
             ) : (
@@ -169,7 +169,7 @@ function PortfolioApp() {
 
         {/* Lado B */}
         {casesLadoB.length > 0 && (
-          <section id="lado-b" className="pt-8 pb-14 sm:pt-12 sm:pb-18 md:pt-16 md:pb-24 bg-[#0F1222] text-[#F6F7F2] border-t border-[#262A3D]">
+          <section id="lado-b" className="pt-4 sm:pt-6 md:pt-8 pb-14 sm:pb-18 md:pb-24 bg-[#0F1222] text-[#F6F7F2] border-t border-[#262A3D]">
             <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
               {isEditMode && (
                 <div className="mb-6 flex items-center justify-between bg-[#181C32] text-white border border-white/10 rounded-xl px-4 py-2.5 shadow-xl">
@@ -201,11 +201,11 @@ function PortfolioApp() {
                 </div>
               )}
 
-              <div className="max-w-3xl space-y-1 mb-8 sm:mb-10 md:mb-12">
-                <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#FF4FA0] font-bold block">
+              <div className="max-w-3xl space-y-1 mb-4 sm:mb-6 md:mb-8">
+                <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#FF4FA0] font-bold block select-text">
                   Lado B
                 </span>
-                <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] 2xl:text-[5.75rem] tracking-[-0.04em] text-white leading-[0.98]">
+                <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] 2xl:text-[5.75rem] tracking-[-0.04em] text-white leading-[0.98] select-text">
                   Branding
                 </h2>
               </div>
@@ -229,7 +229,7 @@ function PortfolioApp() {
 
         {/* Faixa Bônus */}
         {casesBonus.length > 0 && (
-          <section id="faixa-bonus" className="pt-8 pb-14 sm:pt-12 sm:pb-18 md:pt-16 md:pb-24 bg-[#D4FF3A] text-[#0F1222] border-t border-black/10">
+          <section id="faixa-bonus" className="pt-4 sm:pt-6 md:pt-8 pb-14 sm:pb-18 md:pb-24 bg-[#D4FF3A] text-[#0F1222] border-t border-black/10">
             <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
               {isEditMode && (
                 <div className="mb-6 flex items-center justify-between bg-[#0F1222] text-white border border-black/10 rounded-xl px-4 py-2.5 shadow-xl">
@@ -261,14 +261,14 @@ function PortfolioApp() {
                 </div>
               )}
 
-              <div className="max-w-4xl space-y-1 mb-8 sm:mb-10 md:mb-12">
-                <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block">
-                  Faixa Bônus · {totalBonus} faixas
+              <div className="max-w-4xl space-y-1 mb-4 sm:mb-6 md:mb-8">
+                <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block select-text">
+                  Faixas Bonus · {totalBonus} faixas
                 </span>
-                <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] 2xl:text-[5.75rem] tracking-[-0.04em] text-[#0F1222] leading-[0.98]">
+                <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] 2xl:text-[5.75rem] tracking-[-0.04em] text-[#0F1222] leading-[0.98] select-text">
                   Especiais
                 </h2>
-                <p className="font-mono-code text-sm sm:text-base text-[#0F1222]/80 pt-2 font-medium">
+                <p className="font-mono-code text-sm sm:text-base text-[#0F1222]/80 pt-2 font-medium select-text">
                   Ideias que eram pra ser só um post
                 </p>
               </div>
