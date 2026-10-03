@@ -23,6 +23,9 @@ const getCaseSpanClass = (item: CaseItem, idx: number, isSectionBonus = false) =
       return 'col-span-1 md:col-span-12';
     case 'third':
       return 'col-span-1 sm:col-span-6 md:col-span-4';
+    case 'center-thumb':
+      // Ocupa 8 colunas centralizadas (com offset de 2 colunas à esquerda) num grid de 12 colunas, com largura máxima de miniatura
+      return 'col-span-1 md:col-span-8 md:col-start-3 mx-auto w-full max-w-2xl';
     case 'half':
     default:
       return 'col-span-1 sm:col-span-6 md:col-span-6';
@@ -69,7 +72,7 @@ function PortfolioApp() {
     handleHash();
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
-  }, []); // <--- Corrigido: dependência vazia evita o scroll indesejado ao editar textos ou dados!
+  }, []); // Dependência vazia para evitar o scroll indesejado ao editar
 
   const handleOpenCase = (c: CaseItem) => {
     setSelectedCase(c);
