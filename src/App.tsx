@@ -69,7 +69,7 @@ function PortfolioApp() {
     handleHash();
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
-  }, [cases]);
+  }, []); // <--- Corrigido: dependência vazia evita o scroll indesejado ao editar textos ou dados!
 
   const handleOpenCase = (c: CaseItem) => {
     setSelectedCase(c);

@@ -144,7 +144,7 @@ export const ServicosSection: React.FC = () => {
         </div>
 
         {/* BARRA DE RODAPÉ ESCURA (Com respiro inferior ajustado) */}
-        <div className="bg-[#0F1222] text-[#F6F7F2] w-full border-t border-white/15 pt-5 pb-7 sm:pt-7 sm:pb-9 lg:pt-8 lg:pb-10 min-h-[153.087px]">
+        <div className="bg-[#0F1222] text-[#F6F7F2] w-full border-t border-white/15 pt-5 pb-7 sm:pt-7 sm:pb-9 lg:pt-8 lg:pb-10 min-h-[160.078px]">
           <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 w-full">
             <div className="max-w-[1140px] space-y-2 sm:space-y-2.5">
               <div className="flex items-center gap-2.5">
