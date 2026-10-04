@@ -24,10 +24,10 @@ const getCaseSpanClass = (item: CaseItem, idx: number, isSectionBonus = false) =
     case 'third':
       return 'col-span-1 sm:col-span-6 md:col-span-4';
     case 'third-center':
-      // Ocupa 4 colunas (33%) e centraliza-se na grelha de 12 (início na coluna 5)
+      // Ocupa 33% (4 colunas) e centraliza-se na grelha de 12 colunas (início na coluna 5)
       return 'col-span-1 md:col-span-4 md:col-start-5 mx-auto w-full';
     case 'half-center':
-      // Ocupa 6 colunas (50%) e centraliza-se na grelha de 12 (início na coluna 4)
+      // Ocupa 50% (6 colunas) e centraliza-se na grelha de 12 colunas (início na coluna 4)
       return 'col-span-1 md:col-span-6 md:col-start-4 mx-auto w-full';
     case 'half':
     default:
@@ -75,7 +75,7 @@ function PortfolioApp() {
     handleHash();
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
-  }, []); // Dependência vazia mantém o scroll estável ao editar
+  }, []); // Dependência vazia previne o scroll indesejado para cima ao editar textos
 
   const handleOpenCase = (c: CaseItem) => {
     setSelectedCase(c);
