@@ -55,7 +55,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const coverFileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (isEditMode) {
       const target = e.target as HTMLElement;
       if (
@@ -67,7 +67,13 @@ export const CaseCard: React.FC<CaseCardProps> = ({
       ) {
         return;
       }
+      e.preventDefault();
+      return;
     }
+    // Impede o comportamento de salto de link padrão no clique esquerdo normal
+    // permitindo que abra o modal suavemente na mesma página.
+    // O botão direito / Ctrl+Click continua abrindo em nova aba nativamente.
+    e.preventDefault();
     onSelect(item);
   };
 
@@ -79,8 +85,9 @@ export const CaseCard: React.FC<CaseCardProps> = ({
     : 'bg-[#FF4FA0]';
 
   return (
-    <div
+    <a
       id={`card-${item.slug}`}
+      href={`#${item.slug}`}
       draggable={isEditMode}
       onDragStart={(e) => {
         if (!isEditMode) return;
@@ -127,7 +134,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
         setIsDragOver(false);
       }}
       onClick={handleCardClick}
-      className={`group relative text-left transition-all duration-300 w-full mb-3 sm:mb-4 ${
+      className={`group relative text-left transition-all duration-300 w-full mb-3 sm:mb-4 block ${
         isEditMode ? 'cursor-grab active:cursor-grabbing ring-2 ring-dashed ring-white' : 'cursor-pointer'
       } ${
         isDragging
@@ -472,6 +479,6 @@ export const CaseCard: React.FC<CaseCardProps> = ({
           />
         </div>
       </div>
-    </div>
+    </a>
   );
 };
