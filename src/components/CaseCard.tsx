@@ -324,74 +324,71 @@ export const CaseCard: React.FC<CaseCardProps> = ({
           {/* Dark Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 pointer-events-none" />
 
-          {/* Espaço superior vazio */}
-          <div className="relative z-20 w-full" />
+          {/* Top Row: DELIV isolado no canto superior direito */}
+          <div className="relative z-20 flex justify-end items-start w-full">
+            {isEditMode ? (
+              <input
+                type="text"
+                value={item.deliv}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => updateCaseField(item.slug, 'deliv', e.target.value)}
+                className="bg-black/45 backdrop-blur-sm text-white px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider focus:outline-none text-right max-w-[60%] rounded-none shadow"
+              />
+            ) : (
+              <span className="bg-black/45 backdrop-blur-sm text-white px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider shadow truncate max-w-[60%]" title={item.deliv}>
+                {item.deliv}
+              </span>
+            )}
+          </div>
 
-          {/* Bottom Area unificada para 100% e Grid: FAIXA em cima do Nome, DELIV na mesma linha à direita */}
-          <div className="relative z-20 mt-auto flex flex-col w-full gap-2">
-            {/* Linha superior: FAIXA (Esquerda) e DELIV (Direita) com fundo preto translúcido e blur */}
-            <div className="flex items-center justify-between w-full gap-2">
-              {isEditMode ? (
-                <input
-                  type="text"
-                  value={item.faixa}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => updateCaseField(item.slug, 'faixa', e.target.value)}
-                  className="bg-black/60 backdrop-blur-sm text-[#D4FF3A] px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider focus:outline-none w-28 rounded-none shadow"
-                />
-              ) : (
-                <span className="bg-black/60 backdrop-blur-sm text-[#D4FF3A] px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider shadow">
-                  {item.faixa}
-                </span>
-              )}
+          {/* Bottom Area: FAIXA em cima do Nome, e Conceito logo abaixo (no canto inferior esquerdo) */}
+          <div className="relative z-20 mt-auto flex flex-col items-start text-left w-full gap-1.5 max-w-[85%]">
+            {/* FAIXA */}
+            {isEditMode ? (
+              <input
+                type="text"
+                value={item.faixa}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => updateCaseField(item.slug, 'faixa', e.target.value)}
+                className="bg-black/45 backdrop-blur-sm text-[#D4FF3A] px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider focus:outline-none w-28 rounded-none shadow"
+              />
+            ) : (
+              <span className="bg-black/45 backdrop-blur-sm text-[#D4FF3A] px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider shadow">
+                {item.faixa}
+              </span>
+            )}
 
-              {isEditMode ? (
-                <input
-                  type="text"
-                  value={item.deliv}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => updateCaseField(item.slug, 'deliv', e.target.value)}
-                  className="bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider focus:outline-none text-right max-w-[50%] rounded-none shadow"
-                />
-              ) : (
-                <span className="bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider shadow truncate max-w-[50%]" title={item.deliv}>
-                  {item.deliv}
-                </span>
-              )}
-            </div>
+            {/* Nome do Projeto */}
+            {isEditMode ? (
+              <input
+                type="text"
+                value={item.name}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => updateCaseField(item.slug, 'name', e.target.value)}
+                className="w-full bg-black/45 backdrop-blur-sm text-white font-disp font-bold tracking-tight text-2xl sm:text-3xl md:text-4xl px-2 py-1 focus:outline-none rounded-none"
+              />
+            ) : (
+              <h3 className={`font-disp font-bold tracking-tight leading-tight text-white drop-shadow-md ${
+                isFullWidth ? 'text-3xl sm:text-4xl md:text-[40px]' : 'text-2xl sm:text-3xl'
+              }`}>
+                {item.name}
+              </h3>
+            )}
 
-            {/* Nome do Projeto e Conceito logo abaixo da Faixa */}
-            <div className="w-full flex flex-col items-start text-left mt-1">
-              {isEditMode ? (
-                <input
-                  type="text"
-                  value={item.name}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => updateCaseField(item.slug, 'name', e.target.value)}
-                  className="w-full bg-black/60 backdrop-blur-sm text-white font-disp font-bold tracking-tight text-2xl sm:text-3xl md:text-4xl px-2 py-1 focus:outline-none rounded-none mb-1"
-                />
-              ) : (
-                <h3 className={`font-disp font-bold tracking-tight leading-tight text-white drop-shadow-md ${
-                  isFullWidth ? 'text-3xl sm:text-4xl md:text-[40px]' : 'text-2xl sm:text-3xl'
-                }`}>
-                  {item.name}
-                </h3>
-              )}
-
-              {isEditMode ? (
-                <textarea
-                  value={item.concept}
-                  rows={2}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => updateCaseField(item.slug, 'concept', e.target.value)}
-                  className="w-full bg-black/60 backdrop-blur-sm text-white/95 text-xs sm:text-sm p-1.5 focus:outline-none resize-none rounded-none mt-0.5"
-                />
-              ) : (
-                <p className="text-white/90 text-xs sm:text-sm font-sans drop-shadow-sm line-clamp-2 mt-0.5">
-                  {item.concept}
-                </p>
-              )}
-            </div>
+            {/* Conceito */}
+            {isEditMode ? (
+              <textarea
+                value={item.concept}
+                rows={2}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => updateCaseField(item.slug, 'concept', e.target.value)}
+                className="w-full bg-black/45 backdrop-blur-sm text-white/95 text-xs sm:text-sm p-1.5 focus:outline-none resize-none rounded-none"
+              />
+            ) : (
+              <p className="text-white/90 text-xs sm:text-sm font-sans drop-shadow-sm line-clamp-2">
+                {item.concept}
+              </p>
+            )}
           </div>
 
           {/* Edit Mode Quick Upload Button */}
