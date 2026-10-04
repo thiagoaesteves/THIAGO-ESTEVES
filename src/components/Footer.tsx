@@ -32,7 +32,7 @@ export const Footer: React.FC = () => {
 
   return (
     <footer className="bg-[#0F1222] text-[#AFC0FF] py-6 sm:py-8 border-t border-[#262A3D]">
-      <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
+      <div className="max-w-[1320px] 2xl:max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 2xl:px-24">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 font-mono-code text-xs uppercase tracking-wider">
           <div className="flex items-center gap-3">
             <svg

@@ -673,8 +673,8 @@ export const CaseModal: React.FC<CaseModalProps> = ({
               <div className="space-y-4 sm:space-y-6 max-w-4xl">
                 {block.value
                   .split(/\n\s*\n/)
-                  .filter((p) => p.trim())
-                  .map((para, pIdx) => (
+                  .filter((p: string) => p.trim())
+                  .map((para: string, pIdx: number) => (
                     <p
                       key={pIdx}
                       className={`text-base sm:text-xl md:text-2xl lg:text-[1.65rem] leading-relaxed font-normal whitespace-pre-line break-words ${

@@ -3,7 +3,7 @@ import { Type, Sparkles } from 'lucide-react';
 import { useCms } from '../context/CmsContext';
 
 export const ServicosSection: React.FC = () => {
-  const cms = useCms() || {};
+  const cms = (useCms() as any) || {};
   const isEditMode = !!cms.isEditMode;
   const servicos = cms.servicos || {};
   const updateServicosField = cms.updateServicosField;
@@ -93,8 +93,8 @@ export const ServicosSection: React.FC = () => {
         
         {/* Bloco Superior com Fundo Claro */}
         <div className="bg-[#F6F7F2] w-full pt-4 sm:pt-6 pb-6 sm:pb-8 text-[#0F1222] min-h-[495.35px]">
-          <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 w-full min-h-[435.35px]">
-            <div className="max-w-[1140px]">
+          <div className="max-w-[1320px] 2xl:max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 2xl:px-24 w-full min-h-[435.35px]">
+            <div className="max-w-[1140px] 2xl:max-w-[1440px]">
               
               {/* Header & Manifesto Intro */}
               <div className="space-y-2 sm:space-y-2.5">
@@ -103,7 +103,7 @@ export const ServicosSection: React.FC = () => {
                 </span>
 
                 {/* Big Headline */}
-                <div className="space-y-3 sm:space-y-4 max-w-[72ch]">
+                <div className="space-y-3 sm:space-y-4 max-w-[72ch] 2xl:max-w-[85ch]">
                   {isEditMode ? (
                     <div className="space-y-2 p-4 rounded-xl bg-[#0F1222]/5 border border-[#2340FF]/30">
                       <label className="text-[10px] font-mono-code text-[#2340FF] font-bold flex items-center gap-1">
@@ -125,7 +125,7 @@ export const ServicosSection: React.FC = () => {
                       />
                     </div>
                   ) : (
-                    <p className="font-disp font-extrabold text-lg sm:text-2xl md:text-3xl lg:text-[34px] tracking-[-0.03em] leading-[1.06] text-[#0F1222] min-h-[74.975px]">
+                    <p className="font-disp font-extrabold text-lg sm:text-2xl md:text-3xl lg:text-[34px] 2xl:text-[38px] tracking-[-0.03em] leading-[1.06] text-[#0F1222] min-h-[74.975px] max-w-4xl">
                       <span className="font-serif-it italic text-[#2340FF] text-[1.18em] leading-none align-[-0.12em] mr-1.5">
                         “
                       </span>
@@ -156,7 +156,7 @@ export const ServicosSection: React.FC = () => {
                       />
                     </div>
                   ) : (
-                    <p className="text-sm sm:text-base md:text-lg lg:text-[20px] font-medium text-[#343848] leading-snug whitespace-nowrap pt-1 min-h-[34.5px] max-w-[838.8px]">
+                    <p className="text-sm sm:text-base md:text-lg lg:text-[20px] 2xl:text-[22px] font-medium text-[#343848] leading-snug whitespace-nowrap pt-1 min-h-[34.5px] max-w-[838.8px] 2xl:max-w-[960px]">
                       {manifesto.subText}{' '}
                       <span className="inline-block bg-[#D4FF3A] text-[#0F1222] px-2 py-0.5 font-bold rounded-[255px_15px_225px_15px/15px_225px_15px_255px] transform -rotate-1 shadow-sm">
                         {manifesto.badge}”
@@ -176,12 +176,12 @@ export const ServicosSection: React.FC = () => {
                 {especialidades.map((item: any, idx: number) => (
                   <div
                     key={item.num || idx}
-                    className={`grid grid-cols-1 lg:grid-cols-12 gap-1 lg:gap-6 items-baseline py-3 sm:py-3.5 border-t border-[#DADCE3] group ${
+                    className={`grid grid-cols-1 lg:grid-cols-12 gap-1 lg:gap-6 2xl:gap-8 items-baseline py-3 sm:py-3.5 2xl:py-4 border-t border-[#DADCE3] group ${
                       itemMinHeight[item.num] || ''
                     }`}
                   >
                     {/* Título da Categoria */}
-                    <div className="lg:col-span-4 xl:col-span-4">
+                    <div className="lg:col-span-4 xl:col-span-4 2xl:col-span-4">
                       {isEditMode ? (
                         <div className="space-y-1.5 p-3 rounded bg-white border border-[#2340FF]/30">
                           <div className="flex items-center gap-2">
@@ -215,7 +215,7 @@ export const ServicosSection: React.FC = () => {
                           <span className="font-mono-code text-[10px] sm:text-[11px] font-bold text-[#2340FF] tracking-wider shrink-0">
                             {item.num}
                           </span>
-                          <h3 className="font-disp font-extrabold text-sm sm:text-base md:text-[18px] tracking-tight text-[#0F1222]">
+                          <h3 className="font-disp font-extrabold text-sm sm:text-base md:text-[18px] 2xl:text-[20px] tracking-tight text-[#0F1222]">
                             {item.categoria}{' '}
                             <span className="font-serif-it italic font-normal text-[#2340FF] text-[1.12em] align-baseline">
                               {item.amp}
@@ -227,7 +227,7 @@ export const ServicosSection: React.FC = () => {
                     </div>
 
                     {/* Itens */}
-                    <div className="lg:col-span-8 xl:col-span-8">
+                    <div className="lg:col-span-8 xl:col-span-8 2xl:col-span-8">
                       {isEditMode ? (
                         <textarea
                           value={Array.isArray(item.itens) ? item.itens.join('\n') : item.itens}
@@ -242,7 +242,7 @@ export const ServicosSection: React.FC = () => {
                           placeholder="Digite um item por linha..."
                         />
                       ) : (
-                        <p className="text-xs sm:text-sm md:text-[14px] lg:text-[15px] text-[#343848] font-normal leading-relaxed">
+                        <p className="text-xs sm:text-sm md:text-[14px] lg:text-[15px] 2xl:text-[16px] text-[#343848] font-normal leading-relaxed max-w-4xl 2xl:max-w-5xl">
                           {item.itens.map((sub: string, sIdx: number) => (
                             <React.Fragment key={sIdx}>
                               <span className="text-[#202433] hover:text-[#2340FF] transition-colors duration-200">
@@ -268,9 +268,9 @@ export const ServicosSection: React.FC = () => {
         </div>
 
         {/* BARRA DE RODAPÉ ESCURA */}
-        <div className="bg-[#0F1222] text-[#F6F7F2] w-full border-t border-white/15 pt-5 pb-7 sm:pt-7 sm:pb-9 lg:pt-8 lg:pb-10 min-h-[160.078px]">
-          <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 w-full">
-            <div className="max-w-[1140px] space-y-2 sm:space-y-2.5">
+        <div className="bg-[#0F1222] text-[#F6F7F2] w-full border-t border-white/15 pt-5 pb-7 sm:pt-7 sm:pb-9 lg:pt-8 lg:pb-10 2xl:pt-9 2xl:pb-11 min-h-[160.078px]">
+          <div className="max-w-[1320px] 2xl:max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 2xl:px-24 w-full">
+            <div className="max-w-[1140px] 2xl:max-w-[1440px] space-y-2 sm:space-y-2.5">
               <div className="flex items-center gap-2.5">
                 {isEditMode ? (
                   <input

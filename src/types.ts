@@ -1,6 +1,34 @@
-export type GridSpanType = 'full' | 'half' | 'third';
+export type LadoType = 'A' | 'B' | 'bonus';
+
+export type CaseBlockType = 'text' | 'video' | 'image';
+
+export interface CaseBlock {
+  id: string;
+  type: CaseBlockType;
+  content?: string;
+  value?: any;
+  caption?: string;
+  columns?: any;
+  aspect?: any;
+  scale?: any;
+}
+
+export type GridSpanType =
+  | 'full'
+  | 'half'
+  | 'half-center'
+  | 'half-right'
+  | 'third'
+  | 'third-center'
+  | 'third-right';
+
 export type CardRatioType = 'original' | 'square' | 'vertical' | 'horizontal';
 export type CardAlignType = 'left' | 'center' | 'right';
+
+export interface CaseMetric {
+  label: string;
+  value: string;
+}
 
 export interface CaseItem {
   slug: string;
@@ -9,10 +37,30 @@ export interface CaseItem {
   faixa: string;
   deliv: string;
   cover: string;
-  lado?: 'A' | 'B';
+  coverFormat?: CardRatioType | string;
+  format?: CardRatioType | string;
+  aspectRatio?: string;
+  lado?: LadoType;
   gridSpan?: GridSpanType;
   cardRatio?: CardRatioType;
   cardAlign?: CardAlignType;
+  summary?: string;
+  challenge?: string;
+  solution?: string;
+  results?: string;
+  metrics?: CaseMetric[];
+  gallery?: string[];
+  tags?: string[];
+  clientLogo?: string;
+  externalLink?: string;
+  externalLinkText?: string;
+  clientUrl?: string;
+  roles?: string;
+  year?: string;
+  text: string[];
+  yt: string[];
+  imgs: string[];
+  blocks?: CaseBlock[];
   pieces?: Array<{
     id: string;
     type: string;
@@ -29,4 +77,7 @@ export interface CmsContextType {
   moveCaseOrder: (slug: string, direction: 'up' | 'down') => void;
   updateCaseField: (slug: string, field: keyof CaseItem, value: any) => void;
   updateCaseGridSpan: (slug: string, span: GridSpanType) => void;
+  servicos?: any;
+  updateServicosField?: (field: string, value: any) => void;
+  [key: string]: any;
 }

@@ -11,7 +11,7 @@ export interface SobreData {
   role: string;
   tagline: string;
   title: string;
-  bio: string[];
+  bio: any[];
   clientsTitle: string;
   clientsText: string;
   stats: {

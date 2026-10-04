@@ -31,7 +31,7 @@ export const Hero: React.FC<HeroProps> = ({
 
   return (
     <section id="topo" className="relative bg-[#2340FF] text-[#F6F7F2] overflow-hidden min-h-screen flex flex-col justify-between pt-20 sm:pt-22 md:pt-24 pb-6 sm:pb-8 md:pb-10 lg:pb-12">
-      <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10 w-full flex-1 flex flex-col justify-between">
+      <div className="max-w-[1320px] 2xl:max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 2xl:px-24 relative z-10 w-full flex-1 flex flex-col justify-between">
         {/* Top Hero Row: Headline on the left, Monumental Watermark Monogram on the right bleeding softly */}
         <div className="relative pt-2 sm:pt-4 my-auto min-h-[180px] sm:min-h-[240px] md:min-h-[280px] flex items-center">
           <div className="max-w-4xl relative z-10">

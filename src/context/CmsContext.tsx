@@ -35,28 +35,28 @@ interface CmsContextType {
   hasChanges: boolean;
   isSaving: boolean;
   isCloudLoaded: boolean;
-  updateCaseField: (slug: string, field: keyof CaseItem, value: any) => void;
+  updateCaseField: (slug: string, field: keyof CaseItem, value: any) => Promise<void>;
   updateCaseGridSpan: (slug: string, span: GridSpanType) => Promise<void>;
-  updateCaseParagraph: (slug: string, index: number, value: string) => void;
-  addCaseParagraph: (slug: string) => void;
-  removeCaseParagraph: (slug: string, index: number) => void;
-  reorderCases: (draggedSlug: string, targetSlug: string) => void;
-  moveCaseOrder: (slug: string, direction: 'up' | 'down') => void;
-  reorderCaseImages: (slug: string, sourceIdx: number, targetIdx: number) => void;
-  addCaseImage: (slug: string, url: string) => void;
-  removeCaseImage: (slug: string, index: number) => void;
-  reorderCaseVideos: (slug: string, sourceIdx: number, targetIdx: number) => void;
-  addCaseVideo: (slug: string, ytId: string) => void;
-  removeCaseVideo: (slug: string, index: number) => void;
-  updateCaseBlocks: (slug: string, blocks: CaseBlock[]) => void;
-  updateSobreField: <K extends keyof SobreData>(field: K, value: SobreData[K]) => void;
-  updateSobreBioParagraph: (index: number, value: string) => void;
-  addSobreBioParagraph: () => void;
-  removeSobreBioParagraph: (index: number) => void;
-  updateSobreStat: (statKey: keyof SobreData['stats'], value: string) => void;
-  updateSobreTypography: (key: keyof SobreTypography, value: any) => void;
-  addSobreSegment: (segment: string) => void;
-  removeSobreSegment: (index: number) => void;
+  updateCaseParagraph: (slug: string, index: number, value: string) => Promise<void>;
+  addCaseParagraph: (slug: string) => Promise<void>;
+  removeCaseParagraph: (slug: string, index: number) => Promise<void>;
+  reorderCases: (draggedSlug: string, targetSlug: string) => Promise<void>;
+  moveCaseOrder: (slug: string, direction: 'up' | 'down') => Promise<void>;
+  reorderCaseImages: (slug: string, sourceIdx: number, targetIdx: number) => Promise<void>;
+  addCaseImage: (slug: string, url: string) => Promise<void>;
+  removeCaseImage: (slug: string, index: number) => Promise<void>;
+  reorderCaseVideos: (slug: string, sourceIdx: number, targetIdx: number) => Promise<void>;
+  addCaseVideo: (slug: string, ytId: string) => Promise<void>;
+  removeCaseVideo: (slug: string, index: number) => Promise<void>;
+  updateCaseBlocks: (slug: string, blocks: CaseBlock[]) => Promise<void>;
+  updateSobreField: <K extends keyof SobreData>(field: K, value: SobreData[K]) => Promise<void>;
+  updateSobreBioParagraph: (index: number, value: string) => Promise<void>;
+  addSobreBioParagraph: () => Promise<void>;
+  removeSobreBioParagraph: (index: number) => Promise<void>;
+  updateSobreStat: (statKey: keyof SobreData['stats'], value: string) => Promise<void>;
+  updateSobreTypography: (key: keyof SobreTypography, value: any) => Promise<void>;
+  addSobreSegment: (segment: string) => Promise<void>;
+  removeSobreSegment: (index: number) => Promise<void>;
   saveChanges: () => Promise<void>;
   resetToOriginal: () => Promise<void>;
   exportModalOpen: boolean;
@@ -150,45 +150,61 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { gridLadoA: 2, gridLadoB: 3, gridBonus: 2 };
   });
 
+  const showToast = (msg: string) => {
+    setActiveNotification(msg);
+    setTimeout(() => {
+      setActiveNotification((curr) => (curr === msg ? null : curr));
+    }, 3500);
+  };
+
+  // Função centralizada para persistir dados localmente e sincronizar automaticamente com a nuvem
+  const commitChanges = async (newCases: CaseItem[], newSobre: SobreData, newGrids: SectionGridSettings, successMsg?: string) => {
+    setCases(newCases);
+    setSobre(newSobre);
+    setGridSettings(newGrids);
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newCases));
+      localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(newSobre));
+      localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(newGrids));
+      localStorage.setItem(STORAGE_LAYOUT_KEY, String(newGrids.gridLadoA));
+    } catch (e) {
+      console.warn('Erro ao atualizar cache local:', e);
+    }
+
+    setIsSaving(true);
+    const cloudRes = await saveCloudPortfolio(newCases, newSobre, newGrids);
+    setIsSaving(false);
+
+    if (cloudRes.success) {
+      setHasChanges(false);
+      if (successMsg) showToast(successMsg);
+    } else {
+      setHasChanges(true);
+      showToast('Salvo localmente (offline ou erro na nuvem).');
+    }
+  };
+
   const setGridLadoA = (cols: 1 | 2 | 3) => {
-    setGridSettings((prev) => {
-      const updated = { ...prev, gridLadoA: cols };
-      try {
-        localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(updated));
-        localStorage.setItem(STORAGE_LAYOUT_KEY, String(cols));
-      } catch (e) {}
-      return updated;
-    });
-    setHasChanges(true);
+    const updated = { ...gridSettings, gridLadoA: cols };
+    commitChanges(cases, sobre, updated, 'Grid do Lado A atualizado e salvo na nuvem.');
   };
 
   const setGridLadoB = (cols: 1 | 2 | 3) => {
-    setGridSettings((prev) => {
-      const updated = { ...prev, gridLadoB: cols };
-      try {
-        localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(updated));
-      } catch (e) {}
-      return updated;
-    });
-    setHasChanges(true);
+    const updated = { ...gridSettings, gridLadoB: cols };
+    commitChanges(cases, sobre, updated, 'Grid do Lado B atualizado e salvo na nuvem.');
   };
 
   const setGridBonus = (cols: 1 | 2 | 3) => {
-    setGridSettings((prev) => {
-      const updated = { ...prev, gridBonus: cols };
-      try {
-        localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(updated));
-      } catch (e) {}
-      return updated;
-    });
-    setHasChanges(true);
+    const updated = { ...gridSettings, gridBonus: cols };
+    commitChanges(cases, sobre, updated, 'Grid da Faixa Bônus atualizado e salvo na nuvem.');
   };
 
   const setGridColumns = (cols: 1 | 2 | 3) => {
     setGridLadoA(cols);
   };
 
-  // Load cloud data safely without overwriting local changes if local storage has custom content
+  // Load cloud data safely on startup
   useEffect(() => {
     testFirestoreConnection();
 
@@ -225,13 +241,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsCloudLoaded(true);
       });
   }, []);
-
-  const showToast = (msg: string) => {
-    setActiveNotification(msg);
-    setTimeout(() => {
-      setActiveNotification((curr) => (curr === msg ? null : curr));
-    }, 3500);
-  };
 
   const toggleEditMode = () => {
     setIsEditMode((prev) => {
@@ -336,179 +345,127 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [isEditMode]);
 
-  const updateCaseField = (slug: string, field: keyof CaseItem, value: any) => {
-    setCases((prev) =>
-      prev.map((c) => (c.slug === slug ? { ...c, [field]: value } : c))
-    );
-    setHasChanges(true);
+  // Funções de atualização equipadas com sincronização automática com a nuvem
+  const updateCaseField = async (slug: string, field: keyof CaseItem, value: any) => {
+    const updatedCasesList = cases.map((c) => (c.slug === slug ? { ...c, [field]: value } : c));
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Alteração salva na nuvem.');
   };
 
   const updateCaseGridSpan = async (slug: string, span: GridSpanType) => {
-    let updatedCasesList: CaseItem[] = [];
-    setCases((prev) => {
-      updatedCasesList = prev.map((c) => (c.slug === slug ? { ...c, gridSpan: span } : c));
-      return updatedCasesList;
+    const updatedCasesList = cases.map((c) => (c.slug === slug ? { ...c, gridSpan: span } : c));
+    const spanLabel = span === 'full' ? 'Destaque (100%)' : span === 'half' ? 'Médio (50%)' : 'Compacto (33%)';
+    await commitChanges(updatedCasesList, sobre, gridSettings, `Layout alterado para ${spanLabel} e salvo na nuvem.`);
+  };
+
+  const updateCaseParagraph = async (slug: string, index: number, value: string) => {
+    const updatedCasesList = cases.map((c) => {
+      if (c.slug !== slug) return c;
+      const newText = [...c.text];
+      newText[index] = value;
+      return { ...c, text: newText };
     });
-
-    const spanLabel =
-      span === 'full'
-        ? 'Destaque (100% da linha)'
-        : span === 'half'
-        ? 'Médio (50% da linha)'
-        : 'Compacto (33% da linha)';
-
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedCasesList));
-    } catch (e) {
-      console.warn('Erro ao atualizar cache local:', e);
-    }
-
-    const cloudRes = await saveCloudPortfolio(updatedCasesList, sobre, gridSettings);
-    if (cloudRes.success) {
-      setHasChanges(false);
-      showToast(`Layout alterado para ${spanLabel} e salvo na nuvem.`);
-    } else {
-      showToast(`Layout alterado localmente no navegador.`);
-    }
+    await commitChanges(updatedCasesList, sobre, gridSettings);
   };
 
-  const updateCaseParagraph = (slug: string, index: number, value: string) => {
-    setCases((prev) =>
-      prev.map((c) => {
-        if (c.slug !== slug) return c;
-        const newText = [...c.text];
-        newText[index] = value;
-        return { ...c, text: newText };
-      })
-    );
-    setHasChanges(true);
+  const addCaseParagraph = async (slug: string) => {
+    const updatedCasesList = cases.map((c) => {
+      if (c.slug !== slug) return c;
+      return { ...c, text: [...c.text, 'Novo parágrafo de texto...'] };
+    });
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Novo parágrafo adicionado e salvo.');
   };
 
-  const addCaseParagraph = (slug: string) => {
-    setCases((prev) =>
-      prev.map((c) => {
-        if (c.slug !== slug) return c;
-        return { ...c, text: [...c.text, 'Novo parágrafo de texto...'] };
-      })
-    );
-    setHasChanges(true);
-    showToast('Novo parágrafo adicionado.');
+  const removeCaseParagraph = async (slug: string, index: number) => {
+    const updatedCasesList = cases.map((c) => {
+      if (c.slug !== slug) return c;
+      const newText = c.text.filter((_, i) => i !== index);
+      return { ...c, text: newText };
+    });
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Parágrafo removido e salvo.');
   };
 
-  const removeCaseParagraph = (slug: string, index: number) => {
-    setCases((prev) =>
-      prev.map((c) => {
-        if (c.slug !== slug) return c;
-        const newText = c.text.filter((_, i) => i !== index);
-        return { ...c, text: newText };
-      })
-    );
-    setHasChanges(true);
-    showToast('Parágrafo removido.');
-  };
-
-  const reorderCases = (draggedSlug: string, targetSlug: string) => {
+  const reorderCases = async (draggedSlug: string, targetSlug: string) => {
     if (draggedSlug === targetSlug) return;
-    setCases((prev) => {
-      const fromIndex = prev.findIndex((c) => c.slug === draggedSlug);
-      const toIndex = prev.findIndex((c) => c.slug === targetSlug);
-      if (fromIndex === -1 || toIndex === -1) return prev;
+    const fromIndex = cases.findIndex((c) => c.slug === draggedSlug);
+    const toIndex = cases.findIndex((c) => c.slug === targetSlug);
+    if (fromIndex === -1 || toIndex === -1) return;
 
-      const newCases = [...prev];
-      const [moved] = newCases.splice(fromIndex, 1);
-      const targetItem = prev[toIndex];
-      moved.lado = targetItem.lado;
+    const newCases = [...cases];
+    const [moved] = newCases.splice(fromIndex, 1);
+    const targetItem = cases[toIndex];
+    moved.lado = targetItem.lado;
+    newCases.splice(toIndex, 0, moved);
 
-      newCases.splice(toIndex, 0, moved);
-      return newCases;
-    });
-    setHasChanges(true);
-    showToast('Ordem dos projetos atualizada!');
+    await commitChanges(newCases, sobre, gridSettings, 'Ordem dos projetos atualizada na nuvem!');
   };
 
-  const moveCaseOrder = (slug: string, direction: 'up' | 'down') => {
-    setCases((prev) => {
-      const currentItem = prev.find((c) => c.slug === slug);
-      if (!currentItem) return prev;
+  const moveCaseOrder = async (slug: string, direction: 'up' | 'down') => {
+    const currentItem = cases.find((c) => c.slug === slug);
+    if (!currentItem) return;
 
-      const lado = currentItem.lado;
-      const sectionCases = prev.filter((c) => c.lado === lado);
+    const lado = currentItem.lado;
+    const sectionCases = cases.filter((c) => c.lado === lado);
+    const sectionIndex = sectionCases.findIndex((c) => c.slug === slug);
+    if (sectionIndex === -1) return;
 
-      const sectionIndex = sectionCases.findIndex((c) => c.slug === slug);
-      if (sectionIndex === -1) return prev;
+    const targetSectionIndex = direction === 'up' ? sectionIndex - 1 : sectionIndex + 1;
+    if (targetSectionIndex < 0 || targetSectionIndex >= sectionCases.length) return;
 
-      const targetSectionIndex = direction === 'up' ? sectionIndex - 1 : sectionIndex + 1;
-      if (targetSectionIndex < 0 || targetSectionIndex >= sectionCases.length) return prev;
+    const targetItem = sectionCases[targetSectionIndex];
+    const fromGlobalIndex = cases.findIndex((c) => c.slug === slug);
+    const toGlobalIndex = cases.findIndex((c) => c.slug === targetItem.slug);
+    if (fromGlobalIndex === -1 || toGlobalIndex === -1) return;
 
-      const targetItem = sectionCases[targetSectionIndex];
-      const fromGlobalIndex = prev.findIndex((c) => c.slug === slug);
-      const toGlobalIndex = prev.findIndex((c) => c.slug === targetItem.slug);
-      if (fromGlobalIndex === -1 || toGlobalIndex === -1) return prev;
+    const newCases = [...cases];
+    const [moved] = newCases.splice(fromGlobalIndex, 1);
+    newCases.splice(toGlobalIndex, 0, moved);
 
-      const newCases = [...prev];
-      const [moved] = newCases.splice(fromGlobalIndex, 1);
-      newCases.splice(toGlobalIndex, 0, moved);
-      return newCases;
-    });
-    setHasChanges(true);
-    showToast(`Projeto movido para ${direction === 'up' ? 'cima' : 'baixo'}.`);
+    await commitChanges(newCases, sobre, gridSettings, 'Projeto movido e salvo na nuvem.');
   };
 
-  const reorderCaseImages = (slug: string, sourceIdx: number, targetIdx: number) => {
+  const reorderCaseImages = async (slug: string, sourceIdx: number, targetIdx: number) => {
     if (sourceIdx === targetIdx) return;
-    setCases((prev) =>
-      prev.map((c) => {
-        if (c.slug !== slug) return c;
-        const newImgs = [...c.imgs];
-        const [moved] = newImgs.splice(sourceIdx, 1);
-        newImgs.splice(targetIdx, 0, moved);
-        return { ...c, imgs: newImgs };
-      })
-    );
-    setHasChanges(true);
-    showToast('Ordem das peças/imagens atualizada!');
+    const updatedCasesList = cases.map((c) => {
+      if (c.slug !== slug) return c;
+      const newImgs = [...c.imgs];
+      const [moved] = newImgs.splice(sourceIdx, 1);
+      newImgs.splice(targetIdx, 0, moved);
+      return { ...c, imgs: newImgs };
+    });
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Ordem das peças/imagens atualizada!');
   };
 
-  const addCaseImage = (slug: string, url: string) => {
+  const addCaseImage = async (slug: string, url: string) => {
     if (!url.trim()) return;
-    setCases((prev) =>
-      prev.map((c) => {
-        if (c.slug !== slug) return c;
-        return { ...c, imgs: [...c.imgs, url.trim()] };
-      })
-    );
-    setHasChanges(true);
-    showToast('Nova peça/imagem adicionada!');
+    const updatedCasesList = cases.map((c) => {
+      if (c.slug !== slug) return c;
+      return { ...c, imgs: [...c.imgs, url.trim()] };
+    });
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Nova peça/imagem adicionada!');
   };
 
-  const removeCaseImage = (slug: string, index: number) => {
-    setCases((prev) =>
-      prev.map((c) => {
-        if (c.slug !== slug) return c;
-        const newImgs = c.imgs.filter((_, i) => i !== index);
-        return { ...c, imgs: newImgs };
-      })
-    );
-    setHasChanges(true);
-    showToast('Peça removida.');
+  const removeCaseImage = async (slug: string, index: number) => {
+    const updatedCasesList = cases.map((c) => {
+      if (c.slug !== slug) return c;
+      const newImgs = c.imgs.filter((_, i) => i !== index);
+      return { ...c, imgs: newImgs };
+    });
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Peça removida.');
   };
 
-  const reorderCaseVideos = (slug: string, sourceIdx: number, targetIdx: number) => {
+  const reorderCaseVideos = async (slug: string, sourceIdx: number, targetIdx: number) => {
     if (sourceIdx === targetIdx) return;
-    setCases((prev) =>
-      prev.map((c) => {
-        if (c.slug !== slug) return c;
-        const newYt = [...c.yt];
-        const [moved] = newYt.splice(sourceIdx, 1);
-        newYt.splice(targetIdx, 0, moved);
-        return { ...c, yt: newYt };
-      })
-    );
-    setHasChanges(true);
-    showToast('Ordem dos vídeos atualizada!');
+    const updatedCasesList = cases.map((c) => {
+      if (c.slug !== slug) return c;
+      const newYt = [...c.yt];
+      const [moved] = newYt.splice(sourceIdx, 1);
+      newYt.splice(targetIdx, 0, moved);
+      return { ...c, yt: newYt };
+    });
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Ordem dos vídeos atualizada!');
   };
 
-  const addCaseVideo = (slug: string, input: string) => {
+  const addCaseVideo = async (slug: string, input: string) => {
     if (!input.trim()) return;
     let videoId = input.trim();
     if (videoId.includes('v=')) {
@@ -516,120 +473,106 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } else if (videoId.includes('youtu.be/')) {
       videoId = videoId.split('youtu.be/')[1]?.split('?')[0] || videoId;
     }
-    setCases((prev) =>
-      prev.map((c) => {
-        if (c.slug !== slug) return c;
-        return { ...c, yt: [...c.yt, videoId] };
-      })
-    );
-    setHasChanges(true);
-    showToast('Vídeo adicionado!');
-  };
-
-  const removeCaseVideo = (slug: string, index: number) => {
-    setCases((prev) =>
-      prev.map((c) => {
-        if (c.slug !== slug) return c;
-        const newYt = c.yt.filter((_, i) => i !== index);
-        return { ...c, yt: newYt };
-      })
-    );
-    setHasChanges(true);
-    showToast('Vídeo removido.');
-  };
-
-  const updateCaseBlocks = (slug: string, blocks: CaseBlock[]) => {
-    setCases((prev) =>
-      prev.map((c) => {
-        if (c.slug !== slug) return c;
-        const text = blocks
-          .filter((b) => b.type === 'text')
-          .flatMap((b) => b.value.split(/\n\s*\n/).filter((p) => p.trim()));
-        const yt = blocks.filter((b) => b.type === 'video').map((b) => b.value);
-        const imgs = blocks.filter((b) => b.type === 'image').map((b) => b.value);
-        return {
-          ...c,
-          blocks,
-          text,
-          yt,
-          imgs,
-        };
-      })
-    );
-    setHasChanges(true);
-  };
-
-  const updateSobreField = <K extends keyof SobreData>(field: K, value: SobreData[K]) => {
-    setSobre((prev) => ({ ...prev, [field]: value }));
-    setHasChanges(true);
-  };
-
-  const updateSobreBioParagraph = (index: number, value: string) => {
-    setSobre((prev) => {
-      const newBio = [...prev.bio];
-      newBio[index] = value;
-      return { ...prev, bio: newBio };
+    const updatedCasesList = cases.map((c) => {
+      if (c.slug !== slug) return c;
+      return { ...c, yt: [...c.yt, videoId] };
     });
-    setHasChanges(true);
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Vídeo adicionado!');
   };
 
-  const addSobreBioParagraph = () => {
-    setSobre((prev) => ({
-      ...prev,
-      bio: [...prev.bio, 'Novo parágrafo da biografia. Clique para editar.'],
-    }));
-    setHasChanges(true);
-    showToast('Novo parágrafo adicionado à biografia.');
+  const removeCaseVideo = async (slug: string, index: number) => {
+    const updatedCasesList = cases.map((c) => {
+      if (c.slug !== slug) return c;
+      const newYt = c.yt.filter((_, i) => i !== index);
+      return { ...c, yt: newYt };
+    });
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Vídeo removido.');
   };
 
-  const removeSobreBioParagraph = (index: number) => {
-    setSobre((prev) => ({
-      ...prev,
-      bio: prev.bio.filter((_, i) => i !== index),
-    }));
-    setHasChanges(true);
-    showToast('Parágrafo da biografia removido.');
+  const updateCaseBlocks = async (slug: string, blocks: CaseBlock[]) => {
+    const updatedCasesList = cases.map((c) => {
+      if (c.slug !== slug) return c;
+      const text = blocks
+        .filter((b) => b.type === 'text')
+        .flatMap((b) => (b.value || '').split(/\n\s*\n/).filter((p: string) => p.trim()));
+      const yt = blocks.filter((b) => b.type === 'video').map((b) => b.value);
+      const imgs = blocks.filter((b) => b.type === 'image').map((b) => b.value);
+      return {
+        ...c,
+        blocks,
+        text,
+        yt,
+        imgs,
+      };
+    });
+    await commitChanges(updatedCasesList, sobre, gridSettings);
   };
 
-  const updateSobreStat = (statKey: keyof SobreData['stats'], value: string) => {
-    setSobre((prev) => ({
-      ...prev,
+  const updateSobreField = async <K extends keyof SobreData>(field: K, value: SobreData[K]) => {
+    const updatedSobre = { ...sobre, [field]: value };
+    await commitChanges(cases, updatedSobre, gridSettings, 'Seção Sobre atualizada na nuvem.');
+  };
+
+  const updateSobreBioParagraph = async (index: number, value: string) => {
+    const newBio = [...sobre.bio];
+    newBio[index] = value;
+    const updatedSobre = { ...sobre, bio: newBio };
+    await commitChanges(cases, updatedSobre, gridSettings);
+  };
+
+  const addSobreBioParagraph = async () => {
+    const updatedSobre = {
+      ...sobre,
+      bio: [...sobre.bio, 'Novo parágrafo da biografia. Clique para editar.'],
+    };
+    await commitChanges(cases, updatedSobre, gridSettings, 'Novo parágrafo adicionado.');
+  };
+
+  const removeSobreBioParagraph = async (index: number) => {
+    const updatedSobre = {
+      ...sobre,
+      bio: sobre.bio.filter((_, i) => i !== index),
+    };
+    await commitChanges(cases, updatedSobre, gridSettings, 'Parágrafo removido.');
+  };
+
+  const updateSobreStat = async (statKey: keyof SobreData['stats'], value: string) => {
+    const updatedSobre = {
+      ...sobre,
       stats: {
-        ...prev.stats,
+        ...sobre.stats,
         [statKey]: value,
       },
-    }));
-    setHasChanges(true);
+    };
+    await commitChanges(cases, updatedSobre, gridSettings);
   };
 
-  const updateSobreTypography = (key: keyof SobreTypography, value: any) => {
-    setSobre((prev) => ({
-      ...prev,
+  const updateSobreTypography = async (key: keyof SobreTypography, value: any) => {
+    const updatedSobre = {
+      ...sobre,
       typography: {
-        ...prev.typography,
+        ...sobre.typography,
         [key]: value,
       },
-    }));
-    setHasChanges(true);
+    };
+    await commitChanges(cases, updatedSobre, gridSettings);
   };
 
-  const addSobreSegment = (segment: string) => {
+  const addSobreSegment = async (segment: string) => {
     if (!segment.trim()) return;
-    setSobre((prev) => ({
-      ...prev,
-      segments: [...prev.segments, segment.trim()],
-    }));
-    setHasChanges(true);
-    showToast('Segmento adicionado!');
+    const updatedSobre = {
+      ...sobre,
+      segments: [...sobre.segments, segment.trim()],
+    };
+    await commitChanges(cases, updatedSobre, gridSettings, 'Segmento adicionado!');
   };
 
-  const removeSobreSegment = (index: number) => {
-    setSobre((prev) => ({
-      ...prev,
-      segments: prev.segments.filter((_, i) => i !== index),
-    }));
-    setHasChanges(true);
-    showToast('Segmento removido.');
+  const removeSobreSegment = async (index: number) => {
+    const updatedSobre = {
+      ...sobre,
+      segments: sobre.segments.filter((_, i) => i !== index),
+    };
+    await commitChanges(cases, updatedSobre, gridSettings, 'Segmento removido.');
   };
 
   const addNewCase = async (caseData: {
@@ -643,8 +586,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     yt?: string[];
     gridSpan?: GridSpanType;
   }): Promise<CaseItem> => {
-    setIsSaving(true);
-
     const baseSlug = caseData.name
       .toLowerCase()
       .normalize('NFD')
@@ -686,50 +627,13 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     const newCasesList = [newCaseItem, ...cases];
-    setCases(newCasesList);
-
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newCasesList));
-      localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(gridSettings));
-      localStorage.setItem(STORAGE_LAYOUT_KEY, String(gridSettings.gridLadoA));
-    } catch (e) {
-      console.warn('Erro ao atualizar cache local:', e);
-    }
-
-    const cloudRes = await saveCloudPortfolio(newCasesList, sobre, gridSettings);
-    setIsSaving(false);
-
-    if (cloudRes.success) {
-      setHasChanges(false);
-      showToast(`Projeto "${newCaseItem.name}" publicado com sucesso!`);
-    } else {
-      showToast(`Projeto salvo localmente no navegador.`);
-    }
+    await commitChanges(newCasesList, sobre, gridSettings, `Projeto "${newCaseItem.name}" publicado na nuvem!`);
 
     return newCaseItem;
   };
 
   const saveChanges = async () => {
-    setIsSaving(true);
-
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cases));
-      localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(sobre));
-      localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(gridSettings));
-      localStorage.setItem(STORAGE_LAYOUT_KEY, String(gridSettings.gridLadoA));
-    } catch (e) {
-      console.warn('Erro ao atualizar cache local:', e);
-    }
-
-    const cloudRes = await saveCloudPortfolio(cases, sobre, gridSettings);
-    setIsSaving(false);
-
-    setHasChanges(false);
-    if (cloudRes.success) {
-      showToast('Alterações salvas e sincronizadas com sucesso!');
-    } else {
-      showToast('Alterações salvas localmente no navegador.');
-    }
+    await commitChanges(cases, sobre, gridSettings, 'Todas as alterações foram salvas e sincronizadas com sucesso!');
   };
 
   const exportCasesJson = () => {
@@ -780,7 +684,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSobre(ORIGINAL_SOBRE_DATA);
       setHasChanges(false);
 
-      await saveCloudPortfolio(ORIGINAL_CASES, ORIGINAL_SOBRE_DATA);
+      await saveCloudPortfolio(ORIGINAL_CASES, ORIGINAL_SOBRE_DATA, gridSettings);
       setIsSaving(false);
       showToast('Portfólio restaurado com sucesso!');
     }
@@ -855,3 +759,5 @@ export const useCms = () => {
   }
   return context;
 };
+
+export default CmsContext;

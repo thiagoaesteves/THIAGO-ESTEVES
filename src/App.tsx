@@ -115,7 +115,7 @@ function PortfolioApp() {
       <main>
         {/* Lado A */}
         <section id="lado-a" className="pt-4 sm:pt-6 md:pt-8 pb-14 sm:pb-18 md:pb-24 bg-[#F6F7F2]">
-          <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
+          <div className="max-w-[1320px] 2xl:max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 2xl:px-24">
             <div className="max-w-3xl space-y-1 mb-4 sm:mb-6 md:mb-8">
               <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block select-text">
                 Lado A
@@ -237,7 +237,7 @@ function PortfolioApp() {
         {/* Lado B */}
         {casesLadoB.length > 0 && (
           <section id="lado-b" className="pt-4 sm:pt-6 md:pt-8 pb-14 sm:pb-18 md:pb-24 bg-[#0F1222] text-[#F6F7F2] border-t border-[#262A3D]">
-            <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
+            <div className="max-w-[1320px] 2xl:max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 2xl:px-24">
               <div className="max-w-3xl space-y-1 mb-4 sm:mb-6 md:mb-8">
                 <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#FF4FA0] font-bold block select-text">
                   Lado B
@@ -351,7 +351,7 @@ function PortfolioApp() {
         {/* Faixa Bônus */}
         {casesBonus.length > 0 && (
           <section id="faixa-bonus" className="pt-4 sm:pt-6 md:pt-8 pb-14 sm:pb-18 md:pb-24 bg-[#D4FF3A] text-[#0F1222] border-t border-black/10">
-            <div className="max-w-[1320px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
+            <div className="max-w-[1320px] 2xl:max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 2xl:px-24">
               <div className="max-w-4xl space-y-1 mb-4 sm:mb-6 md:mb-8">
                 <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block select-text">
                   Faixas Bonus · {totalBonus} faixas
