@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Loader2, Type, Sliders } from 'lucide-react';
+import { Upload, Loader2, Type, Sliders, Palette, Sparkles } from 'lucide-react';
 import { useCms } from '../context/CmsContext';
 import { convertFileToBase64 } from '../utils/imageUpload';
 
@@ -24,22 +24,48 @@ const TITLE_SIZE_MAP: Record<string, string> = {
   xl: 'text-4xl sm:text-5xl lg:text-6xl',
 };
 
+// Mapeamento de cores permitidas dentro da palheta oficial da seção
+const TEXT_COLOR_MAP: Record<string, { label: string; class: string }> = {
+  white: { label: 'Branco Padrão', class: 'text-white/95' },
+  accent: { label: 'Verde Limão', class: 'text-[#D4FF3A]' },
+  muted: { label: 'Azul Suave', class: 'text-[#AFC0FF]' },
+};
+
+// Mapeamento de estilos tipográficos (Normal vs Caligrafia Editorial)
+const TEXT_STYLE_MAP: Record<string, { label: string; class: string }> = {
+  normal: { label: 'Normal', class: 'font-sans font-normal' },
+  serifItalic: { label: 'Caligrafia Editorial', class: 'font-serif-it italic font-normal' },
+  semibold: { label: 'Destaque Forte', class: 'font-sans font-semibold' },
+};
+
 export const SobreSection: React.FC = () => {
   const {
     isEditMode,
     sobre,
     updateSobreField,
-    updateSobreStat,
     updateSobreTypography,
   } = useCms();
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   const currentTitle = sobre.title || 'Quem é do Méier não bobéia.';
 
-  const narrativeParagraphs = sobre.bio.filter(
-    (p) =>
-      p.trim() !== currentTitle.trim() &&
-      !p.toLowerCase().includes('quem é do méier')
+  // Normaliza o array de bio para suportar objetos { text, color, style } ou strings antigas
+  const rawBio = Array.isArray(sobre.bio) ? sobre.bio : [currentTitle];
+  const normalizedBioItems = rawBio.map((item) => {
+    if (typeof item === 'string') {
+      return { text: item, color: 'white', style: 'normal' };
+    }
+    return {
+      text: item.text || '',
+      color: item.color || 'white',
+      style: item.style || 'normal',
+    };
+  });
+
+  const narrativeItems = normalizedBioItems.filter(
+    (item) =>
+      item.text.trim() !== currentTitle.trim() &&
+      !item.text.toLowerCase().includes('quem é do méier')
   );
 
   const fontSizeKey = sobre.typography?.fontSize || 'base';
@@ -47,14 +73,13 @@ export const SobreSection: React.FC = () => {
   const titleSizeKey = sobre.typography?.titleSize || 'lg';
 
   const bodySizeClass = FONT_SIZE_MAP[fontSizeKey] || FONT_SIZE_MAP.base;
-  const bodyWeightClass = FONT_WEIGHT_MAP[fontWeightKey] || FONT_WEIGHT_MAP.normal;
   const titleSizeClass = TITLE_SIZE_MAP[titleSizeKey] || TITLE_SIZE_MAP.lg;
 
   // Quebra cirúrgica do título exatamente a seguir a "Méier"
   const titleParts = currentTitle.includes('Méier')
     ? [
-        currentTitle.substring(0, currentTitle.indexOf('Méier') + 5), // "Quem é do Méier"
-        currentTitle.substring(currentTitle.indexOf('Méier') + 5).trim(), // "não bobéia."
+        currentTitle.substring(0, currentTitle.indexOf('Méier') + 5),
+        currentTitle.substring(currentTitle.indexOf('Méier') + 5).trim(),
       ]
     : [currentTitle, ''];
 
@@ -71,6 +96,32 @@ export const SobreSection: React.FC = () => {
 
       <div className="max-w-[1280px] 2xl:max-w-[1360px] w-full mx-auto my-auto flex flex-col justify-between relative z-10 space-y-6 lg:space-y-8">
         
+        {/* PAINEL DE CONTROLE CMS GERAL (Tamanho de texto global) */}
+        {isEditMode && (
+          <div className="flex flex-wrap items-center gap-3 p-2.5 rounded-xl bg-black/80 backdrop-blur-md border border-[#D4FF3A]/30 text-xs font-mono-code mb-1 shadow-xl">
+            <div className="flex items-center gap-1 text-[#D4FF3A] font-bold text-[10px] uppercase">
+              <Sliders className="w-3 h-3" /> Ajuste Global de Corpo:
+            </div>
+            <div className="flex items-center gap-1 border-l border-white/20 pl-2">
+              <span className="text-[#AFC0FF] text-[10px]">Tamanho:</span>
+              {(['sm', 'base', 'lg', 'xl'] as const).map((sz) => (
+                <button
+                  key={sz}
+                  type="button"
+                  onClick={() => updateSobreTypography('fontSize', sz)}
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase transition-all cursor-pointer ${
+                    fontSizeKey === sz
+                      ? 'bg-[#D4FF3A] text-[#0F1222] font-black'
+                      : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                >
+                  {sz === 'sm' ? 'P' : sz === 'base' ? 'M' : sz === 'lg' ? 'G' : 'GG'}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* BLOCO CENTRAL COESO: Foto Retrato Ampliada + Copy Editorial */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 xl:gap-12 items-center">
           
@@ -88,7 +139,7 @@ export const SobreSection: React.FC = () => {
               {isEditMode && (
                 <div className="absolute top-2.5 right-2.5 z-20 bg-black/85 backdrop-blur-md p-2 rounded-xl border border-white/20 shadow-xl max-w-[210px]">
                   <label className="text-[10px] font-mono-code text-[#D4FF3A] font-bold flex items-center gap-1.5 mb-1">
-                    <Upload className="w-3 h-3" /> Trocar Foto (Local):
+                    <Upload className="w-3 h-3" /> Trocar Foto:
                   </label>
                   <input
                     type="file"
@@ -102,7 +153,7 @@ export const SobreSection: React.FC = () => {
                         const base64 = await convertFileToBase64(file);
                         updateSobreField('photoUrl', base64);
                       } catch (err) {
-                        console.error('Erro ao converter foto em base64:', err);
+                        console.error('Erro ao converter foto:', err);
                       } finally {
                         setIsUploadingPhoto(false);
                         e.target.value = '';
@@ -137,31 +188,6 @@ export const SobreSection: React.FC = () => {
           {/* Coluna Direita: Copy Biográfica */}
           <div className="lg:col-span-7 flex flex-col justify-center space-y-3 sm:space-y-4">
             
-            {isEditMode && (
-              <div className="flex flex-wrap items-center gap-2.5 p-2 rounded-xl bg-black/60 backdrop-blur-md border border-[#D4FF3A]/30 text-xs font-mono-code mb-1">
-                <div className="flex items-center gap-1 text-[#D4FF3A] font-bold text-[10px] uppercase">
-                  <Sliders className="w-3 h-3" /> Estilo:
-                </div>
-                <div className="flex items-center gap-1 border-l border-white/20 pl-2">
-                  <span className="text-[#AFC0FF] text-[10px]">Texto:</span>
-                  {(['sm', 'base', 'lg', 'xl'] as const).map((sz) => (
-                    <button
-                      key={sz}
-                      type="button"
-                      onClick={() => updateSobreTypography('fontSize', sz)}
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase transition-all cursor-pointer ${
-                        fontSizeKey === sz
-                          ? 'bg-[#D4FF3A] text-[#0F1222] font-black'
-                          : 'bg-white/10 text-white hover:bg-white/20'
-                      }`}
-                    >
-                      {sz === 'sm' ? 'P' : sz === 'base' ? 'M' : sz === 'lg' ? 'G' : 'GG'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {isEditMode ? (
               <div className="space-y-1">
                 <label className="text-[10px] font-mono-code text-[#D4FF3A] font-bold flex items-center gap-1">
@@ -188,41 +214,78 @@ export const SobreSection: React.FC = () => {
               </div>
             )}
 
+            {/* PARÁGRAFOS COM CONTROLES INDIVIDUAIS DE COR E ESTILO CALIGRÁFICO NO MODO EDIT */}
             {isEditMode ? (
-              <div className="space-y-2.5">
+              <div className="space-y-4">
                 <label className="text-[10px] font-mono-code text-[#D4FF3A] font-bold flex items-center gap-1">
-                  <Type className="w-3 h-3" /> Parágrafos Biográficos (Editáveis por Linha/Parágrafo):
+                  <Sparkles className="w-3 h-3" /> Parágrafos & Estilos Editoriais (Destaques de Cor e Caligrafia):
                 </label>
-                {narrativeParagraphs.map((para, idx) => (
-                  <div key={idx} className="space-y-1">
-                    <span className="text-[9px] font-mono-code text-[#AFC0FF]">Parágrafo {idx + 1}:</span>
+                {narrativeItems.map((item, idx) => (
+                  <div key={idx} className="p-3 rounded-xl bg-black/50 border border-white/20 space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-[10px] font-mono-code text-[#AFC0FF] font-bold">
+                        Parágrafo {idx + 1}
+                      </span>
+
+                      {/* Controles de Cor e Estilo para esta linha */}
+                      <div className="flex items-center gap-2">
+                        {/* Seletor de Cor */}
+                        <select
+                          value={item.color}
+                          onChange={(e) => {
+                            const newItems = [...narrativeItems];
+                            newItems[idx] = { ...newItems[idx], color: e.target.value };
+                            updateSobreField('bio', [currentTitle, ...newItems]);
+                          }}
+                          className="bg-black text-[10px] font-mono-code text-[#D4FF3A] border border-[#D4FF3A]/40 rounded px-1.5 py-0.5 focus:outline-none cursor-pointer"
+                        >
+                          <option value="white">Cor: Branco</option>
+                          <option value="accent">Cor: Verde Limão</option>
+                          <option value="muted">Cor: Azul Suave</option>
+                        </select>
+
+                        {/* Seletor de Estilo Tipográfico (Caligrafia/Itálico) */}
+                        <select
+                          value={item.style}
+                          onChange={(e) => {
+                            const newItems = [...narrativeItems];
+                            newItems[idx] = { ...newItems[idx], style: e.target.value };
+                            updateSobreField('bio', [currentTitle, ...newItems]);
+                          }}
+                          className="bg-black text-[10px] font-mono-code text-white border border-white/30 rounded px-1.5 py-0.5 focus:outline-none cursor-pointer"
+                        >
+                          <option value="normal">Estilo: Normal</option>
+                          <option value="serifItalic">Estilo: Caligrafia (Itálico)</option>
+                          <option value="semibold">Estilo: Destaque Forte</option>
+                        </select>
+                      </div>
+                    </div>
+
                     <textarea
-                      value={para}
+                      value={item.text}
                       rows={2}
                       onChange={(e) => {
-                        const newParas = [...narrativeParagraphs];
-                        newParas[idx] = e.target.value;
-                        updateSobreField('bio', [currentTitle, ...newParas]);
+                        const newItems = [...narrativeItems];
+                        newItems[idx] = { ...newItems[idx], text: e.target.value };
+                        updateSobreField('bio', [currentTitle, ...newItems]);
                       }}
-                      className="w-full text-xs font-sans leading-relaxed bg-black/40 border border-[#D4FF3A]/60 p-2.5 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#D4FF3A] resize-y"
+                      className="w-full text-xs font-sans leading-relaxed bg-black/70 border border-white/20 p-2 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-[#D4FF3A] resize-y"
                     />
                   </div>
                 ))}
               </div>
             ) : (
-              <div className={`space-y-2 ${bodySizeClass} ${bodyWeightClass} leading-relaxed text-white/95`}>
-                {narrativeParagraphs.map((para, idx) => (
-                  <p
-                    key={idx}
-                    className={
-                      idx === narrativeParagraphs.length - 1
-                        ? 'text-white/85 italic font-serif-it'
-                        : 'text-white/95'
-                    }
-                  >
-                    {para}
-                  </p>
-                ))}
+              <div className={`space-y-3 ${bodySizeClass} leading-relaxed`}>
+                {narrativeItems.map((item, idx) => {
+                  const colorClass = TEXT_COLOR_MAP[item.color]?.class || 'text-white/95';
+                  const styleClass = TEXT_STYLE_MAP[item.style]?.class || 'font-sans font-normal';
+
+                  return (
+                    <p key={idx} className={`${colorClass} ${styleClass} transition-colors duration-300`}>
+                      {item.text}
+                    </p>
+                  );
+                })}
               </div>
             )}
 
