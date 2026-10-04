@@ -21,6 +21,15 @@ interface CaseCardProps {
   columns?: 1 | 2 | 3;
 }
 
+// Mapeamento dos formatos para as classes de proporção do Tailwind
+const FORMAT_CLASS_MAP: Record<string, string> = {
+  original: 'aspect-[16/9]',
+  square: 'aspect-square',
+  quadrado: 'aspect-square',
+  vertical: 'aspect-[4/5]',
+  horizontal: 'aspect-[16/9]',
+};
+
 export const CaseCard: React.FC<CaseCardProps> = ({
   item,
   onSelect,
@@ -34,6 +43,10 @@ export const CaseCard: React.FC<CaseCardProps> = ({
   const isLadoA = item.lado === 'A';
   const currentSpan: GridSpanType = item.gridSpan || (featured ? 'full' : 'half');
   const isFullWidth = currentSpan === 'full';
+
+  // Obter o formato atual da capa (fallback para 'original')
+  const currentFormat = (item.coverFormat || item.format || item.aspectRatio || 'original').toLowerCase();
+  const coverAspectClass = FORMAT_CLASS_MAP[currentFormat] || 'aspect-[16/9]';
 
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -169,6 +182,33 @@ export const CaseCard: React.FC<CaseCardProps> = ({
                   }`}
                 >
                   {span === 'full' ? '100%' : span === 'half' ? '50%' : '33%'}
+                </button>
+              ))}
+            </div>
+
+            {/* Formato / Proporção Toggle */}
+            <div className="flex items-center gap-0.5 bg-white/10 p-0.5 text-[11px] font-mono-code">
+              {[
+                { id: 'original', label: 'Orig' },
+                { id: 'square', label: 'Quad' },
+                { id: 'vertical', label: 'Vert' },
+                { id: 'horizontal', label: 'Horiz' },
+              ].map((fmt) => (
+                <button
+                  key={fmt.id}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateCaseField(item.slug, 'coverFormat', fmt.id);
+                  }}
+                  className={`px-1.5 py-0.5 text-[10px] font-bold uppercase transition-all cursor-pointer ${
+                    currentFormat === fmt.id
+                      ? 'bg-[#D4FF3A] text-black font-black'
+                      : 'text-white/70 hover:bg-white/20'
+                  }`}
+                  title={`Formato: ${fmt.label}`}
+                >
+                  {fmt.label}
                 </button>
               ))}
             </div>
@@ -310,8 +350,8 @@ export const CaseCard: React.FC<CaseCardProps> = ({
         {/* Camada de fundo colorida que cria o "Lzinho" e a sombra estilo adesivo */}
         <div className={`absolute inset-0 translate-x-1.5 sm:translate-x-2 translate-y-1.5 sm:translate-y-2 ${bgFrameClass} pointer-events-none rounded-none`} />
 
-        {/* Card Principal de Imagem (100% preenchido, sem bordas internas) */}
-        <div className="relative z-10 bg-[#1a1e36] overflow-hidden w-full aspect-[16/9] flex flex-col justify-between p-4 sm:p-6 rounded-none border border-black/30 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]">
+        {/* Card Principal de Imagem com Aspect Ratio Dinâmico */}
+        <div className={`relative z-10 bg-[#1a1e36] overflow-hidden w-full ${coverAspectClass} flex flex-col justify-between p-4 sm:p-6 rounded-none border border-black/30 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] transition-all duration-300`}>
           {/* Background Image / GIF */}
           <img
             src={item.cover}
