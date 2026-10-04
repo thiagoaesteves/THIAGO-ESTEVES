@@ -1,19 +1,20 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
-// Configuração padrão integrada
 const firebaseConfig = {
-  apiKey: "mock-api-key-for-development",
-  authDomain: "portfolio-app.firebaseapp.com",
-  projectId: "portfolio-app",
-  storageBucket: "portfolio-app.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:0000000000000000"
+  apiKey: "AIzaSyCM-syKpAFXDfFjnjf62aZgaxgWqzDQ68s",
+  authDomain: "gen-lang-client-0423855874.firebaseapp.com",
+  projectId: "gen-lang-client-0423855874",
+  storageBucket: "gen-lang-client-0423855874.firebasestorage.app",
+  messagingSenderId: "11081994761",
+  appId: "1:11081994761:web:3bfb6452764b1e0dec5ed8"
 };
 
-// Inicialização segura do Firebase
+// Inicialização segura
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-export const db = getFirestore(app);
+
+// Ligação correta ao banco de dados personalizado visível na sua imagem
+export const db = getFirestore(app, "ai-studio-thiagoesteves-9fb46c9e-ff07-461c-b108-042469fb0e6");
 
 export interface SectionGridSettings {
   gridLadoA: 1 | 2 | 3;
@@ -21,14 +22,29 @@ export interface SectionGridSettings {
   gridBonus: 1 | 2 | 3;
 }
 
-// Funções para sincronização do portfólio
+// Apontando para a coleção real visível no painel
+const PORTFOLIO_DOC_REF = doc(db, "portfolio_content", "cases");
+
 export async function fetchCloudPortfolio(): Promise<{
   cases?: any[];
   sobre?: any;
   gridSettings?: SectionGridSettings;
-  gridColumns?: number;
 }> {
-  return { cases: [] };
+  try {
+    const snap = await getDoc(PORTFOLIO_DOC_REF);
+    if (snap.exists()) {
+      const data = snap.data();
+      return {
+        cases: data.cases || [],
+        sobre: data.sobre || undefined,
+        gridSettings: data.gridSettings || undefined,
+      };
+    }
+    return {};
+  } catch (error) {
+    console.error("Erro ao buscar da nuvem:", error);
+    return {};
+  }
 }
 
 export async function saveCloudPortfolio(
@@ -36,15 +52,29 @@ export async function saveCloudPortfolio(
   sobre?: any,
   gridSettings?: any
 ): Promise<{ success: boolean; error?: string }> {
-  return { success: true };
+  try {
+    await setDoc(PORTFOLIO_DOC_REF, {
+      cases: cases || [],
+      sobre: sobre || {},
+      gridSettings: gridSettings || {},
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+    
+    return { success: true };
+  } catch (error: any) {
+    console.error("Erro ao salvar na nuvem:", error);
+    return { success: false, error: error.message };
+  }
 }
 
-export async function testFirestoreConnection(
-  cases?: any,
-  sobre?: any,
-  gridSettings?: any
-): Promise<{ success: boolean; error?: string }> {
-  return { success: true };
+export async function testFirestoreConnection(): Promise<boolean> {
+  try {
+    await getDoc(PORTFOLIO_DOC_REF);
+    return true;
+  } catch (error) {
+    console.error("Erro ao testar ligação ao Firestore:", error);
+    return false;
+  }
 }
 
 export default app;
