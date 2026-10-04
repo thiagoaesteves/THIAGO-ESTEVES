@@ -14,7 +14,6 @@ import { CmsExportModal } from './components/CmsExportModal';
 import { AddCaseModal } from './components/AddCaseModal';
 import { CmsProvider, useCms } from './context/CmsContext';
 import { CaseItem, GridSpanType } from './types';
-import { Columns, AlignLeft, AlignCenter, AlignRight, Maximize2, LayoutGrid, Minimize2 } from 'lucide-react';
 
 const getCaseSpanClass = (item: CaseItem, idx: number, isSectionBonus = false) => {
   const span = item.gridSpan || (isSectionBonus && idx === 0 ? 'full' : idx === 0 ? 'full' : 'half');
@@ -44,13 +43,7 @@ function PortfolioApp() {
     isEditMode, 
     isAddModalOpen, 
     setIsAddModalOpen,
-    updateCaseField,
-    gridLadoA,
-    gridLadoB,
-    gridBonus,
-    setGridLadoA,
-    setGridLadoB,
-    setGridBonus
+    updateCaseField
   } = useCms();
 
   const [selectedCase, setSelectedCase] = useState<CaseItem | null>(null);
@@ -140,17 +133,18 @@ function PortfolioApp() {
               <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 gap-y-6 sm:gap-y-8 items-start">
                 {casesLadoA.map((item, idx) => {
                   const currentSpan = item.gridSpan || (idx === 0 ? 'full' : 'half');
+                  const currentRatio = item.cardRatio || 'original';
                   return (
                     <div key={item.slug} className={getCaseSpanClass(item, idx, false)}>
                       {/* Barra de controle individual acima de cada card no Modo Edição */}
                       {isEditMode && (
-                        <div className="mb-2.5 p-2 bg-[#181C32] text-white rounded-xl border border-white/15 flex flex-wrap items-center justify-between gap-2 shadow-lg">
-                          <span className="font-mono-code text-[10px] uppercase text-[#D4FF3A] font-bold px-1">
-                            Card: {item.name}
-                          </span>
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            {/* Tamanho / Largura */}
-                            <div className="inline-flex bg-[#0F1222] rounded p-0.5 border border-white/10 text-[11px] font-mono-code">
+                        <div className="mb-2.5 p-2 bg-[#181C32] text-white rounded-xl border border-white/15 flex flex-col gap-2 shadow-lg">
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono-code text-[10px] uppercase text-[#D4FF3A] font-bold px-1">
+                              Card: {item.name}
+                            </span>
+                            {/* Largura (Span) */}
+                            <div className="inline-flex bg-[#0F1222] rounded p-0.5 border border-white/10 text-[10px] font-mono-code">
                               <button
                                 type="button"
                                 onClick={() => updateCaseField(item.slug, 'gridSpan', 'full')}
@@ -170,48 +164,58 @@ function PortfolioApp() {
                                 onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('center') ? 'third-center' : currentSpan.includes('right') ? 'third-right' : 'third')}
                                 className={`px-2 py-0.5 rounded font-bold transition-all ${currentSpan.includes('third') ? 'bg-[#2340FF] text-white' : 'text-white/60 hover:text-white'}`}
                               >
-                                Miniatura (33%)
+                                Mini (33%)
                               </button>
                             </div>
+                          </div>
 
+                          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-white/10">
                             {/* Alinhamento (se não for full) */}
-                            {!currentSpan.includes('full') && (
-                              <div className="inline-flex bg-[#0F1222] rounded p-0.5 border border-white/10 text-[11px] font-mono-code">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const base = currentSpan.includes('third') ? 'third' : 'half';
-                                    updateCaseField(item.slug, 'gridSpan', base);
-                                  }}
-                                  title="Esquerda"
-                                  className={`px-2 py-0.5 rounded ${!currentSpan.includes('center') && !currentSpan.includes('right') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
-                                >
-                                  Esq
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const base = currentSpan.includes('third') ? 'third-center' : 'half-center';
-                                    updateCaseField(item.slug, 'gridSpan', base);
-                                  }}
-                                  title="Centro"
-                                  className={`px-2 py-0.5 rounded ${currentSpan.includes('center') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
-                                >
-                                  Centro
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const base = currentSpan.includes('third') ? 'third-right' : 'half-right';
-                                    updateCaseField(item.slug, 'gridSpan', base);
-                                  }}
-                                  title="Direita"
-                                  className={`px-2 py-0.5 rounded ${currentSpan.includes('right') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
-                                >
-                                  Dir
-                                </button>
+                            {!currentSpan.includes('full') ? (
+                              <div className="inline-flex items-center gap-1">
+                                <span className="font-mono-code text-[9px] text-white/50 uppercase">Alinhamento:</span>
+                                <div className="inline-flex bg-[#0F1222] rounded p-0.5 border border-white/10 text-[10px] font-mono-code">
+                                  <button
+                                    type="button"
+                                    onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third' : 'half')}
+                                    className={`px-1.5 py-0.5 rounded ${!currentSpan.includes('center') && !currentSpan.includes('right') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
+                                  >
+                                    Esq
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third-center' : 'half-center')}
+                                    className={`px-1.5 py-0.5 rounded ${currentSpan.includes('center') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
+                                  >
+                                    Centro
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third-right' : 'half-right')}
+                                    className={`px-1.5 py-0.5 rounded ${currentSpan.includes('right') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
+                                  >
+                                    Dir
+                                  </button>
+                                </div>
                               </div>
-                            )}
+                            ) : <div />}
+
+                            {/* Proporção / Formato */}
+                            <div className="inline-flex items-center gap-1">
+                              <span className="font-mono-code text-[9px] text-white/50 uppercase">Formato:</span>
+                              <div className="inline-flex bg-[#0F1222] rounded p-0.5 border border-white/10 text-[10px] font-mono-code">
+                                {(['original', 'square', 'vertical', 'horizontal'] as const).map((ratio) => (
+                                  <button
+                                    key={ratio}
+                                    type="button"
+                                    onClick={() => updateCaseField(item.slug, 'cardRatio', ratio)}
+                                    className={`px-1.5 py-0.5 rounded capitalize ${currentRatio === ratio ? 'bg-[#2340FF] text-white font-bold' : 'text-white/50 hover:text-white'}`}
+                                  >
+                                    {ratio === 'square' ? 'Quadrado' : ratio === 'vertical' ? 'Vertical' : ratio === 'horizontal' ? 'Horizontal' : 'Original'}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -246,15 +250,16 @@ function PortfolioApp() {
               <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 gap-y-6 sm:gap-y-8 items-start">
                 {casesLadoB.map((item, idx) => {
                   const currentSpan = item.gridSpan || (idx === 0 ? 'full' : 'half');
+                  const currentRatio = item.cardRatio || 'original';
                   return (
                     <div key={item.slug} className={getCaseSpanClass(item, idx, false)}>
                       {isEditMode && (
-                        <div className="mb-2.5 p-2 bg-[#181C32] text-white rounded-xl border border-white/15 flex flex-wrap items-center justify-between gap-2 shadow-lg">
-                          <span className="font-mono-code text-[10px] uppercase text-[#D4FF3A] font-bold px-1">
-                            Card: {item.name}
-                          </span>
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <div className="inline-flex bg-[#0F1222] rounded p-0.5 border border-white/10 text-[11px] font-mono-code">
+                        <div className="mb-2.5 p-2 bg-[#181C32] text-white rounded-xl border border-white/15 flex flex-col gap-2 shadow-lg">
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono-code text-[10px] uppercase text-[#FF4FA0] font-bold px-1">
+                              Card: {item.name}
+                            </span>
+                            <div className="inline-flex bg-[#0F1222] rounded p-0.5 border border-white/10 text-[10px] font-mono-code">
                               <button
                                 type="button"
                                 onClick={() => updateCaseField(item.slug, 'gridSpan', 'full')}
@@ -274,34 +279,56 @@ function PortfolioApp() {
                                 onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('center') ? 'third-center' : currentSpan.includes('right') ? 'third-right' : 'third')}
                                 className={`px-2 py-0.5 rounded font-bold transition-all ${currentSpan.includes('third') ? 'bg-[#FF4FA0] text-white' : 'text-white/60 hover:text-white'}`}
                               >
-                                Miniatura (33%)
+                                Mini (33%)
                               </button>
                             </div>
-                            {!currentSpan.includes('full') && (
-                              <div className="inline-flex bg-[#0F1222] rounded p-0.5 border border-white/10 text-[11px] font-mono-code">
-                                <button
-                                  type="button"
-                                  onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third' : 'half')}
-                                  className={`px-2 py-0.5 rounded ${!currentSpan.includes('center') && !currentSpan.includes('right') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
-                                >
-                                  Esq
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third-center' : 'half-center')}
-                                  className={`px-2 py-0.5 rounded ${currentSpan.includes('center') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
-                                >
-                                  Centro
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third-right' : 'half-right')}
-                                  className={`px-2 py-0.5 rounded ${currentSpan.includes('right') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
-                                >
-                                  Dir
-                                </button>
+                          </div>
+
+                          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-white/10">
+                            {!currentSpan.includes('full') ? (
+                              <div className="inline-flex items-center gap-1">
+                                <span className="font-mono-code text-[9px] text-white/50 uppercase">Alinhamento:</span>
+                                <div className="inline-flex bg-[#0F1222] rounded p-0.5 border border-white/10 text-[10px] font-mono-code">
+                                  <button
+                                    type="button"
+                                    onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third' : 'half')}
+                                    className={`px-1.5 py-0.5 rounded ${!currentSpan.includes('center') && !currentSpan.includes('right') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
+                                  >
+                                    Esq
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third-center' : 'half-center')}
+                                    className={`px-1.5 py-0.5 rounded ${currentSpan.includes('center') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
+                                  >
+                                    Centro
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third-right' : 'half-right')}
+                                    className={`px-1.5 py-0.5 rounded ${currentSpan.includes('right') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
+                                  >
+                                    Dir
+                                  </button>
+                                </div>
                               </div>
-                            )}
+                            ) : <div />}
+
+                            <div className="inline-flex items-center gap-1">
+                              <span className="font-mono-code text-[9px] text-white/50 uppercase">Formato:</span>
+                              <div className="inline-flex bg-[#0F1222] rounded p-0.5 border border-white/10 text-[10px] font-mono-code">
+                                {(['original', 'square', 'vertical', 'horizontal'] as const).map((ratio) => (
+                                  <button
+                                    key={ratio}
+                                    type="button"
+                                    onClick={() => updateCaseField(item.slug, 'cardRatio', ratio)}
+                                    className={`px-1.5 py-0.5 rounded capitalize ${currentRatio === ratio ? 'bg-[#FF4FA0] text-white font-bold' : 'text-white/50 hover:text-white'}`}
+                                  >
+                                    {ratio === 'square' ? 'Quadrado' : ratio === 'vertical' ? 'Vertical' : ratio === 'horizontal' ? 'Horizontal' : 'Original'}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -340,15 +367,16 @@ function PortfolioApp() {
               <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 gap-y-6 sm:gap-y-8 items-start">
                 {casesBonus.map((item, idx) => {
                   const currentSpan = item.gridSpan || (idx === 0 ? 'full' : 'half');
+                  const currentRatio = item.cardRatio || 'original';
                   return (
                     <div key={item.slug} className={getCaseSpanClass(item, idx, true)}>
                       {isEditMode && (
-                        <div className="mb-2.5 p-2 bg-[#0F1222] text-white rounded-xl border border-black/20 flex flex-wrap items-center justify-between gap-2 shadow-lg">
-                          <span className="font-mono-code text-[10px] uppercase text-[#D4FF3A] font-bold px-1">
-                            Card: {item.name}
-                          </span>
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <div className="inline-flex bg-[#181C32] rounded p-0.5 border border-white/10 text-[11px] font-mono-code">
+                        <div className="mb-2.5 p-2 bg-[#0F1222] text-white rounded-xl border border-black/20 flex flex-col gap-2 shadow-lg">
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono-code text-[10px] uppercase text-[#D4FF3A] font-bold px-1">
+                              Card: {item.name}
+                            </span>
+                            <div className="inline-flex bg-[#181C32] rounded p-0.5 border border-white/10 text-[10px] font-mono-code">
                               <button
                                 type="button"
                                 onClick={() => updateCaseField(item.slug, 'gridSpan', 'full')}
@@ -368,34 +396,56 @@ function PortfolioApp() {
                                 onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('center') ? 'third-center' : currentSpan.includes('right') ? 'third-right' : 'third')}
                                 className={`px-2 py-0.5 rounded font-bold transition-all ${currentSpan.includes('third') ? 'bg-[#D4FF3A] text-[#0F1222]' : 'text-white/60 hover:text-white'}`}
                               >
-                                Miniatura (33%)
+                                Mini (33%)
                               </button>
                             </div>
-                            {!currentSpan.includes('full') && (
-                              <div className="inline-flex bg-[#181C32] rounded p-0.5 border border-white/10 text-[11px] font-mono-code">
-                                <button
-                                  type="button"
-                                  onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third' : 'half')}
-                                  className={`px-2 py-0.5 rounded ${!currentSpan.includes('center') && !currentSpan.includes('right') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
-                                >
-                                  Esq
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third-center' : 'half-center')}
-                                  className={`px-2 py-0.5 rounded ${currentSpan.includes('center') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
-                                >
-                                  Centro
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third-right' : 'half-right')}
-                                  className={`px-2 py-0.5 rounded ${currentSpan.includes('right') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
-                                >
-                                  Dir
-                                </button>
+                          </div>
+
+                          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-white/10">
+                            {!currentSpan.includes('full') ? (
+                              <div className="inline-flex items-center gap-1">
+                                <span className="font-mono-code text-[9px] text-white/50 uppercase">Alinhamento:</span>
+                                <div className="inline-flex bg-[#181C32] rounded p-0.5 border border-white/10 text-[10px] font-mono-code">
+                                  <button
+                                    type="button"
+                                    onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third' : 'half')}
+                                    className={`px-1.5 py-0.5 rounded ${!currentSpan.includes('center') && !currentSpan.includes('right') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
+                                  >
+                                    Esq
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third-center' : 'half-center')}
+                                    className={`px-1.5 py-0.5 rounded ${currentSpan.includes('center') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
+                                  >
+                                    Centro
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateCaseField(item.slug, 'gridSpan', currentSpan.includes('third') ? 'third-right' : 'half-right')}
+                                    className={`px-1.5 py-0.5 rounded ${currentSpan.includes('right') ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'}`}
+                                  >
+                                    Dir
+                                  </button>
+                                </div>
                               </div>
-                            )}
+                            ) : <div />}
+
+                            <div className="inline-flex items-center gap-1">
+                              <span className="font-mono-code text-[9px] text-white/50 uppercase">Formato:</span>
+                              <div className="inline-flex bg-[#181C32] rounded p-0.5 border border-white/10 text-[10px] font-mono-code">
+                                {(['original', 'square', 'vertical', 'horizontal'] as const).map((ratio) => (
+                                  <button
+                                    key={ratio}
+                                    type="button"
+                                    onClick={() => updateCaseField(item.slug, 'cardRatio', ratio)}
+                                    className={`px-1.5 py-0.5 rounded capitalize ${currentRatio === ratio ? 'bg-[#D4FF3A] text-[#0F1222] font-bold' : 'text-white/50 hover:text-white'}`}
+                                  >
+                                    {ratio === 'square' ? 'Quadrado' : ratio === 'vertical' ? 'Vertical' : ratio === 'horizontal' ? 'Horizontal' : 'Original'}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       )}

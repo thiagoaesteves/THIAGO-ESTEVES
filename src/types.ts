@@ -1,30 +1,39 @@
-export type LadoType = 'A' | 'B' | 'bonus';
+export type GridSpanType = 
+  | 'full' 
+  | 'half' 
+  | 'half-center' 
+  | 'half-right' 
+  | 'third' 
+  | 'third-center' 
+  | 'third-right';
 
-export type CaseBlockType = 'text' | 'video' | 'image';
+export type CardRatioType = 'original' | 'square' | 'vertical' | 'horizontal';
 
-export type GridSpanType = 'full' | 'half' | 'third' | 'centered';
-
-export interface CaseBlock {
-  id: string;
-  type: CaseBlockType;
+export interface CaseMetric {
   value: string;
-  aspect?: 'auto' | 'contain' | 'square' | 'story' | 'video';
-  columns?: number;
-  scale?: 'original' | 'thumb';
+  label: string;
 }
 
 export interface CaseItem {
   slug: string;
-  lado: LadoType;
-  faixa: string;
   name: string;
-  concept: string;
-  deliv: string;
-  text: string[];
-  cover: string;
-  imgs: string[];
-  yt: string[];
-  blocks?: CaseBlock[];
+  client?: string;
+  lado: 'A' | 'B' | 'bonus';
   gridSpan?: GridSpanType;
-  format?: 'landscape' | 'square' | 'vertical';
+  cardRatio?: CardRatioType; // <--- Novo controlo de proporção (original, quadrado, vertical, horizontal)
+  year?: string;
+  role?: string;
+  coverImage?: string;
+  heroImage?: string;
+  summary?: string;
+  challenge?: string;
+  solution?: string;
+  results?: string;
+  metrics?: CaseMetric[];
+  gallery?: string[];
+  tags?: string[];
+  clientLogo?: string;
+  externalLink?: string;
+  externalLinkText?: string;
+  clientUrl?: string;
 }
