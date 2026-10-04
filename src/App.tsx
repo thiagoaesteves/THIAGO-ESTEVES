@@ -16,35 +16,61 @@ import { CmsProvider, useCms } from './context/CmsContext';
 import { CaseItem, GridSpanType } from './types';
 import { Columns, GripVertical } from 'lucide-react';
 
-const getCaseSpanClass = (item: CaseItem, idx: number, isSectionBonus = false) => {
-  const span = item.gridSpan || (isSectionBonus && idx === 0 ? 'full' : idx === 0 ? 'full' : 'half');
-  switch (span) {
-    case 'full':
-      return 'col-span-1 md:col-span-12';
-    case 'third':
-      return 'col-span-1 sm:col-span-6 md:col-span-4';
-    case 'third-center':
-      // Ocupa 33% (4 colunas) e centraliza-se na grelha de 12 colunas (início na coluna 5)
-      return 'col-span-1 md:col-span-4 md:col-start-5 mx-auto w-full';
-    case 'half-center':
-      // Ocupa 50% (6 colunas) e centraliza-se na grelha de 12 colunas (início na coluna 4)
-      return 'col-span-1 md:col-span-6 md:col-start-4 mx-auto w-full';
-    case 'half':
-    default:
-      return 'col-span-1 sm:col-span-6 md:col-span-6';
+const getCaseSpanClass = (item: CaseItem, sectionColumns: number, idx: number, isSectionBonus = false) => {
+  const span = item.gridSpan;
+  
+  // Se o utilizador definiu um span avançado personalizado, aplicamos com precisão de tamanho e alinhamento
+  if (span) {
+    switch (span) {
+      // 100% (Full)
+      case 'full':
+        return 'col-span-1 md:col-span-12';
+      
+      // 50% (Half) - Alinhamentos
+      case 'half':
+        return 'col-span-1 sm:col-span-6 md:col-span-6';
+      case 'half-center':
+        return 'col-span-1 md:col-span-6 md:col-start-4 mx-auto w-full';
+      case 'half-right':
+        return 'col-span-1 sm:col-span-6 md:col-span-6 ml-auto';
+
+      // 33% (Third / Miniaturas) - Alinhamentos
+      case 'third':
+        return 'col-span-1 sm:col-span-6 md:col-span-4';
+      case 'third-center':
+        return 'col-span-1 md:col-span-4 md:col-start-5 mx-auto w-full';
+      case 'third-right':
+        return 'col-span-1 sm:col-span-6 md:col-span-4 ml-auto';
+    }
+  }
+
+  // Comportamento padrão baseado nas colunas gerais da secção (sem forçar obrigatoriamente 100% no modo 1 coluna)
+  if (sectionColumns === 1) {
+    // Padrão amigável para 1 por linha: tamanho médio centralizado (mas editável)
+    return 'col-span-1 md:col-span-8 md:col-start-3 mx-auto w-full';
+  } else if (sectionColumns === 3) {
+    return 'col-span-1 sm:col-span-6 md:col-span-4';
+  } else {
+    return 'col-span-1 sm:col-span-6 md:col-span-6';
   }
 };
 
 function PortfolioApp() {
-  const { cases, isEditMode, isAddModalOpen, setIsAddModalOpen } = useCms();
+  const { 
+    cases, 
+    isEditMode, 
+    isAddModalOpen, 
+    setIsAddModalOpen,
+    gridLadoA,
+    gridLadoB,
+    gridBonus,
+    setGridLadoA,
+    setGridLadoB,
+    setGridBonus
+  } = useCms();
+
   const [selectedCase, setSelectedCase] = useState<CaseItem | null>(null);
   const [lightboxData, setLightboxData] = useState<{ url: string; title: string } | null>(null);
-
-  const [sectionCols, setSectionCols] = useState<{ [key: string]: number }>({
-    ladoA: 2,
-    ladoB: 2,
-    bonus: 2,
-  });
 
   useEffect(() => {
     const handleHash = () => {
@@ -75,7 +101,7 @@ function PortfolioApp() {
     handleHash();
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
-  }, []); // Dependência vazia previne o scroll indesejado para cima ao editar textos
+  }, []); // Mantém o scroll estável e fixo ao editar textos
 
   const handleOpenCase = (c: CaseItem) => {
     setSelectedCase(c);
@@ -130,9 +156,9 @@ function PortfolioApp() {
                       <button
                         key={col}
                         type="button"
-                        onClick={() => setSectionCols({ ...sectionCols, ladoA: col })}
+                        onClick={() => setGridLadoA(col as 1 | 2 | 3)}
                         className={`px-2.5 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
-                          sectionCols.ladoA === col ? 'bg-[#2340FF] text-white shadow' : 'text-white/60 hover:text-white'
+                          gridLadoA === col ? 'bg-[#2340FF] text-white shadow' : 'text-white/60 hover:text-white'
                         }`}
                       >
                         {col}
@@ -159,7 +185,7 @@ function PortfolioApp() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 gap-y-6 sm:gap-y-8 items-start">
                 {casesLadoA.map((item, idx) => (
-                  <div key={item.slug} className={getCaseSpanClass(item, idx, false)}>
+                  <div key={item.slug} className={getCaseSpanClass(item, gridLadoA, idx, false)}>
                     <CaseCard
                       item={item}
                       onSelect={handleOpenCase}
@@ -194,9 +220,9 @@ function PortfolioApp() {
                         <button
                           key={col}
                           type="button"
-                          onClick={() => setSectionCols({ ...sectionCols, ladoB: col })}
+                          onClick={() => setGridLadoB(col as 1 | 2 | 3)}
                           className={`px-2.5 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
-                            sectionCols.ladoB === col ? 'bg-[#FF4FA0] text-white shadow' : 'text-white/60 hover:text-white'
+                            gridLadoB === col ? 'bg-[#FF4FA0] text-white shadow' : 'text-white/60 hover:text-white'
                           }`}
                         >
                           {col}
@@ -218,7 +244,7 @@ function PortfolioApp() {
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 gap-y-6 sm:gap-y-8 items-start">
                 {casesLadoB.map((item, idx) => (
-                  <div key={item.slug} className={getCaseSpanClass(item, idx, false)}>
+                  <div key={item.slug} className={getCaseSpanClass(item, gridLadoB, idx, false)}>
                     <CaseCard
                       item={item}
                       onSelect={handleOpenCase}
@@ -254,9 +280,9 @@ function PortfolioApp() {
                         <button
                           key={col}
                           type="button"
-                          onClick={() => setSectionCols({ ...sectionCols, bonus: col })}
+                          onClick={() => setGridBonus(col as 1 | 2 | 3)}
                           className={`px-2.5 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
-                            sectionCols.bonus === col ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black' : 'text-white/60 hover:text-white'
+                            gridBonus === col ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black' : 'text-white/60 hover:text-white'
                           }`}
                         >
                           {col}
@@ -281,7 +307,7 @@ function PortfolioApp() {
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 gap-y-6 sm:gap-y-8 items-start">
                 {casesBonus.map((item, idx) => (
-                  <div key={item.slug} className={getCaseSpanClass(item, idx, true)}>
+                  <div key={item.slug} className={getCaseSpanClass(item, gridBonus, idx, true)}>
                     <CaseCard
                       item={item}
                       onSelect={handleOpenCase}
