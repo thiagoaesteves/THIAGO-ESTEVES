@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Loader2, Type, Sliders, Palette, Sparkles } from 'lucide-react';
+import { Upload, Loader2, Type, Sliders, Sparkles } from 'lucide-react';
 import { useCms } from '../context/CmsContext';
 import { convertFileToBase64 } from '../utils/imageUpload';
 
@@ -10,13 +10,6 @@ const FONT_SIZE_MAP: Record<string, string> = {
   xl: 'text-xl',
 };
 
-const FONT_WEIGHT_MAP: Record<string, string> = {
-  normal: 'font-normal',
-  medium: 'font-medium',
-  semibold: 'font-semibold',
-  bold: 'font-bold',
-};
-
 const TITLE_SIZE_MAP: Record<string, string> = {
   sm: 'text-2xl sm:text-3xl',
   base: 'text-3xl sm:text-4xl',
@@ -24,18 +17,23 @@ const TITLE_SIZE_MAP: Record<string, string> = {
   xl: 'text-4xl sm:text-5xl lg:text-6xl',
 };
 
-// Mapeamento de cores permitidas dentro da palheta oficial da seção
 const TEXT_COLOR_MAP: Record<string, { label: string; class: string }> = {
   white: { label: 'Branco Padrão', class: 'text-white/95' },
   accent: { label: 'Verde Limão', class: 'text-[#D4FF3A]' },
   muted: { label: 'Azul Suave', class: 'text-[#AFC0FF]' },
 };
 
-// Mapeamento de estilos tipográficos (Normal vs Caligrafia Editorial)
 const TEXT_STYLE_MAP: Record<string, { label: string; class: string }> = {
   normal: { label: 'Normal', class: 'font-sans font-normal' },
   serifItalic: { label: 'Caligrafia Editorial', class: 'font-serif-it italic font-normal' },
   semibold: { label: 'Destaque Forte', class: 'font-sans font-semibold' },
+};
+
+// Mapeamento de tamanho individual opcional para o parágrafo
+const PARAGRAPH_SIZE_MAP: Record<string, string> = {
+  normal: '', // Herda o tamanho global da seção
+  lg: 'text-base sm:text-lg lg:text-[19px] leading-snug',
+  xl: 'text-lg sm:text-xl lg:text-[21px] leading-snug',
 };
 
 export const SobreSection: React.FC = () => {
@@ -49,16 +47,17 @@ export const SobreSection: React.FC = () => {
 
   const currentTitle = sobre.title || 'Quem é do Méier não bobéia.';
 
-  // Normaliza o array de bio para suportar objetos { text, color, style } ou strings antigas
+  // Normaliza o array de bio para suportar { text, color, style, size } ou strings antigas
   const rawBio = Array.isArray(sobre.bio) ? sobre.bio : [currentTitle];
   const normalizedBioItems = rawBio.map((item) => {
     if (typeof item === 'string') {
-      return { text: item, color: 'white', style: 'normal' };
+      return { text: item, color: 'white', style: 'normal', size: 'normal' };
     }
     return {
       text: item.text || '',
       color: item.color || 'white',
       style: item.style || 'normal',
+      size: item.size || 'normal',
     };
   });
 
@@ -69,13 +68,10 @@ export const SobreSection: React.FC = () => {
   );
 
   const fontSizeKey = sobre.typography?.fontSize || 'base';
-  const fontWeightKey = sobre.typography?.fontWeight || 'normal';
   const titleSizeKey = sobre.typography?.titleSize || 'lg';
-
-  const bodySizeClass = FONT_SIZE_MAP[fontSizeKey] || FONT_SIZE_MAP.base;
+  const globalBodySizeClass = FONT_SIZE_MAP[fontSizeKey] || FONT_SIZE_MAP.base;
   const titleSizeClass = TITLE_SIZE_MAP[titleSizeKey] || TITLE_SIZE_MAP.lg;
 
-  // Quebra cirúrgica do título exatamente a seguir a "Méier"
   const titleParts = currentTitle.includes('Méier')
     ? [
         currentTitle.substring(0, currentTitle.indexOf('Méier') + 5),
@@ -88,7 +84,6 @@ export const SobreSection: React.FC = () => {
       id="sobre"
       className="w-full bg-[#2340FF] text-white flex flex-col justify-between py-4 sm:py-6 lg:py-8 px-6 sm:px-10 lg:px-16 xl:px-20 scroll-mt-[54px] sm:scroll-mt-[58px] relative min-h-[calc(100vh-54px)] sm:min-h-[calc(100vh-58px)] min-h-[calc(100dvh-54px)] sm:min-h-[calc(100dvh-58px)] overflow-hidden"
     >
-      {/* Editorial background ambient texture */}
       <div 
         className="absolute inset-0 opacity-[0.035] pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:24px_24px]" 
         aria-hidden="true" 
@@ -96,14 +91,13 @@ export const SobreSection: React.FC = () => {
 
       <div className="max-w-[1280px] 2xl:max-w-[1360px] w-full mx-auto my-auto flex flex-col justify-between relative z-10 space-y-6 lg:space-y-8">
         
-        {/* PAINEL DE CONTROLE CMS GERAL (Tamanho de texto global) */}
+        {/* PAINEL CMS GERAL */}
         {isEditMode && (
           <div className="flex flex-wrap items-center gap-3 p-2.5 rounded-xl bg-black/80 backdrop-blur-md border border-[#D4FF3A]/30 text-xs font-mono-code mb-1 shadow-xl">
             <div className="flex items-center gap-1 text-[#D4FF3A] font-bold text-[10px] uppercase">
-              <Sliders className="w-3 h-3" /> Ajuste Global de Corpo:
+              <Sliders className="w-3 h-3" /> Corpo Global:
             </div>
             <div className="flex items-center gap-1 border-l border-white/20 pl-2">
-              <span className="text-[#AFC0FF] text-[10px]">Tamanho:</span>
               {(['sm', 'base', 'lg', 'xl'] as const).map((sz) => (
                 <button
                   key={sz}
@@ -122,10 +116,9 @@ export const SobreSection: React.FC = () => {
           </div>
         )}
 
-        {/* BLOCO CENTRAL COESO: Foto Retrato Ampliada + Copy Editorial */}
+        {/* BLOCO CENTRAL: Foto + Copy */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 xl:gap-12 items-center">
           
-          {/* Coluna Esquerda: Fotografia Retrato */}
           <div className="lg:col-span-5 flex justify-center lg:justify-start items-center">
             <div className="relative w-[240px] sm:w-[265px] lg:w-[295px] xl:w-[310px] aspect-[4/5] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.35)] border border-white/20 bg-[#0F1222] group flex flex-col">
               <img
@@ -153,7 +146,7 @@ export const SobreSection: React.FC = () => {
                         const base64 = await convertFileToBase64(file);
                         updateSobreField('photoUrl', base64);
                       } catch (err) {
-                        console.error('Erro ao converter foto:', err);
+                        console.error(err);
                       } finally {
                         setIsUploadingPhoto(false);
                         e.target.value = '';
@@ -185,19 +178,18 @@ export const SobreSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Coluna Direita: Copy Biográfica */}
           <div className="lg:col-span-7 flex flex-col justify-center space-y-3 sm:space-y-4">
             
             {isEditMode ? (
               <div className="space-y-1">
                 <label className="text-[10px] font-mono-code text-[#D4FF3A] font-bold flex items-center gap-1">
-                  <Type className="w-3 h-3" /> Título Principal da Seção:
+                  <Type className="w-3 h-3" /> Título Principal:
                 </label>
                 <input
                   type="text"
                   value={currentTitle}
                   onChange={(e) => updateSobreField('title', e.target.value)}
-                  className={`w-full font-disp font-extrabold ${titleSizeClass} tracking-[-0.03em] text-white bg-black/40 border border-[#D4FF3A] rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#D4FF3A] leading-tight`}
+                  className={`w-full font-disp font-extrabold ${titleSizeClass} tracking-[-0.03em] text-white bg-black/40 border border-[#D4FF3A] rounded-xl px-3 py-1.5 focus:outline-none`}
                 />
               </div>
             ) : (
@@ -214,11 +206,11 @@ export const SobreSection: React.FC = () => {
               </div>
             )}
 
-            {/* PARÁGRAFOS COM CONTROLES INDIVIDUAIS DE COR E ESTILO CALIGRÁFICO NO MODO EDIT */}
+            {/* CONTROLES INDIVIDUAIS DE COR, ESTILO E TAMANHO POR PARÁGRAFO */}
             {isEditMode ? (
               <div className="space-y-4">
                 <label className="text-[10px] font-mono-code text-[#D4FF3A] font-bold flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> Parágrafos & Estilos Editoriais (Destaques de Cor e Caligrafia):
+                  <Sparkles className="w-3 h-3" /> Parágrafos & Personalização Editorial:
                 </label>
                 {narrativeItems.map((item, idx) => (
                   <div key={idx} className="p-3 rounded-xl bg-black/50 border border-white/20 space-y-2">
@@ -227,9 +219,9 @@ export const SobreSection: React.FC = () => {
                         Parágrafo {idx + 1}
                       </span>
 
-                      {/* Controles de Cor e Estilo para esta linha */}
-                      <div className="flex items-center gap-2">
-                        {/* Seletor de Cor */}
+                      {/* Seletor de Cor, Estilo e Tamanho */}
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {/* Cor */}
                         <select
                           value={item.color}
                           onChange={(e) => {
@@ -244,7 +236,7 @@ export const SobreSection: React.FC = () => {
                           <option value="muted">Cor: Azul Suave</option>
                         </select>
 
-                        {/* Seletor de Estilo Tipográfico (Caligrafia/Itálico) */}
+                        {/* Estilo */}
                         <select
                           value={item.style}
                           onChange={(e) => {
@@ -257,6 +249,21 @@ export const SobreSection: React.FC = () => {
                           <option value="normal">Estilo: Normal</option>
                           <option value="serifItalic">Estilo: Caligrafia (Itálico)</option>
                           <option value="semibold">Estilo: Destaque Forte</option>
+                        </select>
+
+                        {/* Tamanho Individual */}
+                        <select
+                          value={item.size}
+                          onChange={(e) => {
+                            const newItems = [...narrativeItems];
+                            newItems[idx] = { ...newItems[idx], size: e.target.value };
+                            updateSobreField('bio', [currentTitle, ...newItems]);
+                          }}
+                          className="bg-black text-[10px] font-mono-code text-[#AFC0FF] border border-white/30 rounded px-1.5 py-0.5 focus:outline-none cursor-pointer"
+                        >
+                          <option value="normal">Tamanho: Padrão</option>
+                          <option value="lg">Tamanho: Maior (L)</option>
+                          <option value="xl">Tamanho: Destaque (XL)</option>
                         </select>
                       </div>
                     </div>
@@ -275,13 +282,17 @@ export const SobreSection: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className={`space-y-3 ${bodySizeClass} leading-relaxed`}>
+              <div className="space-y-3">
                 {narrativeItems.map((item, idx) => {
                   const colorClass = TEXT_COLOR_MAP[item.color]?.class || 'text-white/95';
                   const styleClass = TEXT_STYLE_MAP[item.style]?.class || 'font-sans font-normal';
+                  // Se tiver tamanho customizado, aplica; senão, usa o globalBodySizeClass
+                  const individualSizeClass = item.size && item.size !== 'normal' 
+                    ? PARAGRAPH_SIZE_MAP[item.size] 
+                    : globalBodySizeClass;
 
                   return (
-                    <p key={idx} className={`${colorClass} ${styleClass} transition-colors duration-300`}>
+                    <p key={idx} className={`${colorClass} ${styleClass} ${individualSizeClass} transition-colors duration-300`}>
                       {item.text}
                     </p>
                   );
@@ -296,12 +307,11 @@ export const SobreSection: React.FC = () => {
         <div className="pt-4 sm:pt-5 border-t border-white/20">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
             
-            {/* 1º: REPERTÓRIO */}
             <div className="flex flex-col space-y-1">
               <span className="font-disp text-xs sm:text-sm lg:text-[14px] text-white uppercase tracking-[0.14em] font-black block leading-none">
                 REPERTÓRIO
               </span>
-              <span className="font-disp text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-white transition-colors duration-300 hover:text-[#D4FF3A] cursor-pointer block leading-none pt-0.5">
+              <span className="font-disp text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-white block leading-none pt-0.5">
                 {sobre.stats?.stat2Number || '50+'}
               </span>
               <div className="space-y-0.5 pt-0.5">
@@ -314,12 +324,11 @@ export const SobreSection: React.FC = () => {
               </div>
             </div>
 
-            {/* 2º: TURNÊS */}
             <div className="flex flex-col space-y-1">
               <span className="font-disp text-xs sm:text-sm lg:text-[14px] text-white uppercase tracking-[0.14em] font-black block leading-none">
                 TURNÊS
               </span>
-              <span className="font-disp text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-white transition-colors duration-300 hover:text-[#D4FF3A] cursor-pointer block leading-none pt-0.5">
+              <span className="font-disp text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-white block leading-none pt-0.5">
                 {sobre.stats?.stat3Number || '3 + 3'}
               </span>
               <div className="space-y-0.5 pt-0.5">
@@ -332,12 +341,11 @@ export const SobreSection: React.FC = () => {
               </div>
             </div>
 
-            {/* 3º: BAGAGEM */}
             <div className="flex flex-col space-y-1">
               <span className="font-disp text-xs sm:text-sm lg:text-[14px] text-white uppercase tracking-[0.14em] font-black block leading-none">
                 BAGAGEM
               </span>
-              <span className="font-disp text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-white transition-colors duration-300 hover:text-[#D4FF3A] cursor-pointer block leading-none pt-0.5">
+              <span className="font-disp text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-white block leading-none pt-0.5">
                 {sobre.stats?.stat1Number || '15+'}
               </span>
               <div className="space-y-0.5 pt-0.5">
