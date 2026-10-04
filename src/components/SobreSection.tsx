@@ -29,9 +29,8 @@ const TEXT_STYLE_MAP: Record<string, { label: string; class: string }> = {
   semibold: { label: 'Destaque Forte', class: 'font-sans font-semibold' },
 };
 
-// Mapeamento de tamanho individual opcional para o parágrafo
 const PARAGRAPH_SIZE_MAP: Record<string, string> = {
-  normal: '', // Herda o tamanho global da seção
+  normal: '', 
   lg: 'text-base sm:text-lg lg:text-[19px] leading-snug',
   xl: 'text-lg sm:text-xl lg:text-[21px] leading-snug',
 };
@@ -47,7 +46,6 @@ export const SobreSection: React.FC = () => {
 
   const currentTitle = sobre.title || 'Quem é do Méier não bobéia.';
 
-  // Normaliza o array de bio para suportar { text, color, style, size } ou strings antigas
   const rawBio = Array.isArray(sobre.bio) ? sobre.bio : [currentTitle];
   const normalizedBioItems = rawBio.map((item) => {
     if (typeof item === 'string') {
@@ -91,7 +89,6 @@ export const SobreSection: React.FC = () => {
 
       <div className="max-w-[1280px] 2xl:max-w-[1360px] w-full mx-auto my-auto flex flex-col justify-between relative z-10 space-y-6 lg:space-y-8">
         
-        {/* PAINEL CMS GERAL */}
         {isEditMode && (
           <div className="flex flex-wrap items-center gap-3 p-2.5 rounded-xl bg-black/80 backdrop-blur-md border border-[#D4FF3A]/30 text-xs font-mono-code mb-1 shadow-xl">
             <div className="flex items-center gap-1 text-[#D4FF3A] font-bold text-[10px] uppercase">
@@ -116,7 +113,6 @@ export const SobreSection: React.FC = () => {
           </div>
         )}
 
-        {/* BLOCO CENTRAL: Foto + Copy */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 xl:gap-12 items-center">
           
           <div className="lg:col-span-5 flex justify-center lg:justify-start items-center">
@@ -206,7 +202,6 @@ export const SobreSection: React.FC = () => {
               </div>
             )}
 
-            {/* CONTROLES INDIVIDUAIS DE COR, ESTILO E TAMANHO POR PARÁGRAFO */}
             {isEditMode ? (
               <div className="space-y-4">
                 <label className="text-[10px] font-mono-code text-[#D4FF3A] font-bold flex items-center gap-1">
@@ -219,9 +214,7 @@ export const SobreSection: React.FC = () => {
                         Parágrafo {idx + 1}
                       </span>
 
-                      {/* Seletor de Cor, Estilo e Tamanho */}
                       <div className="flex flex-wrap items-center gap-1.5">
-                        {/* Cor */}
                         <select
                           value={item.color}
                           onChange={(e) => {
@@ -236,7 +229,6 @@ export const SobreSection: React.FC = () => {
                           <option value="muted">Cor: Azul Suave</option>
                         </select>
 
-                        {/* Estilo */}
                         <select
                           value={item.style}
                           onChange={(e) => {
@@ -251,7 +243,6 @@ export const SobreSection: React.FC = () => {
                           <option value="semibold">Estilo: Destaque Forte</option>
                         </select>
 
-                        {/* Tamanho Individual */}
                         <select
                           value={item.size}
                           onChange={(e) => {
@@ -270,7 +261,7 @@ export const SobreSection: React.FC = () => {
 
                     <textarea
                       value={item.text}
-                      rows={2}
+                      rows={3}
                       onChange={(e) => {
                         const newItems = [...narrativeItems];
                         newItems[idx] = { ...newItems[idx], text: e.target.value };
@@ -286,13 +277,15 @@ export const SobreSection: React.FC = () => {
                 {narrativeItems.map((item, idx) => {
                   const colorClass = TEXT_COLOR_MAP[item.color]?.class || 'text-white/95';
                   const styleClass = TEXT_STYLE_MAP[item.style]?.class || 'font-sans font-normal';
-                  // Se tiver tamanho customizado, aplica; senão, usa o globalBodySizeClass
                   const individualSizeClass = item.size && item.size !== 'normal' 
                     ? PARAGRAPH_SIZE_MAP[item.size] 
                     : globalBodySizeClass;
 
                   return (
-                    <p key={idx} className={`${colorClass} ${styleClass} ${individualSizeClass} transition-colors duration-300`}>
+                    <p 
+                      key={idx} 
+                      className={`${colorClass} ${styleClass} ${individualSizeClass} whitespace-pre-line transition-colors duration-300`}
+                    >
                       {item.text}
                     </p>
                   );
@@ -303,7 +296,6 @@ export const SobreSection: React.FC = () => {
           </div>
         </div>
 
-        {/* RODAPÉ DE MÉTRICAS */}
         <div className="pt-4 sm:pt-5 border-t border-white/20">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
             
