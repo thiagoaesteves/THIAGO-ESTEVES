@@ -273,7 +273,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             >
               {isUploadingCover ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Processando...
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> A processar...
                 </>
               ) : (
                 <>
@@ -288,7 +288,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
               type="text"
               value={coverInput}
               onChange={(e) => setCoverInput(e.target.value)}
-              placeholder="Cole a URL da capa..."
+              placeholder="Cole o URL da capa..."
               className="w-full sm:flex-1 sm:min-w-0 px-2.5 py-1.5 text-xs font-mono-code bg-black text-white rounded-none"
             />
             <button
@@ -305,14 +305,14 @@ export const CaseCard: React.FC<CaseCardProps> = ({
         </div>
       )}
 
-      {/* Container com o efeito "Lzinho" (Fundo colorido saltado à direita e em baixo) */}
+      {/* Container com o efeito "Lzinho" (Fundo colorido deslocado à direita e em baixo) */}
       <div className="relative w-full">
         {/* Camada de fundo colorida que cria o "Lzinho" e a sombra estilo adesivo */}
         <div className={`absolute inset-0 translate-x-1.5 sm:translate-x-2 translate-y-1.5 sm:translate-y-2 ${bgFrameClass} pointer-events-none rounded-none`} />
 
         {/* Card Principal de Imagem (100% preenchido, sem bordas internas) */}
         <div className="relative z-10 bg-[#1a1e36] overflow-hidden w-full aspect-[16/9] flex flex-col justify-between p-4 sm:p-6 rounded-none border border-black/30 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]">
-          {/* Background Image */}
+          {/* Background Image / GIF */}
           <img
             src={item.cover}
             alt={`Capa do case ${item.name}`}
@@ -324,68 +324,71 @@ export const CaseCard: React.FC<CaseCardProps> = ({
           {/* Dark Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 pointer-events-none" />
 
-          {/* Top Row: DELIV isolado no canto superior direito */}
-          <div className="relative z-20 flex justify-end items-start w-full">
+          {/* Top Right Floating DELIV (Limpo, sem badge) */}
+          <div className="absolute top-4 right-4 sm:top-5 sm:right-5 z-20">
             {isEditMode ? (
               <input
                 type="text"
                 value={item.deliv}
                 onClick={(e) => e.stopPropagation()}
                 onChange={(e) => updateCaseField(item.slug, 'deliv', e.target.value)}
-                className="bg-black/45 backdrop-blur-sm text-white px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider focus:outline-none text-right max-w-[60%] rounded-none shadow"
+                className="bg-black/80 text-white px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider focus:outline-none text-right rounded-none shadow border border-white/20"
               />
             ) : (
-              <span className="bg-black/45 backdrop-blur-sm text-white px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider shadow truncate max-w-[60%]" title={item.deliv}>
+              <span className="text-white text-[11px] sm:text-xs font-mono-code font-bold uppercase tracking-wider drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] select-none">
                 {item.deliv}
               </span>
             )}
           </div>
 
-          {/* Bottom Area: FAIXA em cima do Nome, e Conceito logo abaixo (no canto inferior esquerdo) */}
+          {/* Espaço superior vazio para o GIF respirar */}
+          <div className="relative z-20 w-full" />
+
+          {/* Bottom Area: FAIXA com badge blur, Nome e Conceito limpos flutuando */}
           <div className="relative z-20 mt-auto flex flex-col items-start text-left w-full gap-1.5 max-w-[85%]">
-            {/* FAIXA */}
+            {/* FAIXA com badge blur */}
             {isEditMode ? (
               <input
                 type="text"
                 value={item.faixa}
                 onClick={(e) => e.stopPropagation()}
                 onChange={(e) => updateCaseField(item.slug, 'faixa', e.target.value)}
-                className="bg-black/45 backdrop-blur-sm text-[#D4FF3A] px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider focus:outline-none w-28 rounded-none shadow"
+                className="bg-black/60 backdrop-blur-sm text-[#D4FF3A] px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider focus:outline-none w-28 rounded-none shadow"
               />
             ) : (
-              <span className="bg-black/45 backdrop-blur-sm text-[#D4FF3A] px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider shadow">
+              <span className="bg-black/60 backdrop-blur-sm text-[#D4FF3A] px-2.5 py-1 text-[11px] font-mono-code font-bold uppercase tracking-wider shadow">
                 {item.faixa}
               </span>
             )}
 
-            {/* Nome do Projeto */}
+            {/* Nome do Projeto (Limpo, sem caixa, com forte drop-shadow) */}
             {isEditMode ? (
               <input
                 type="text"
                 value={item.name}
                 onClick={(e) => e.stopPropagation()}
                 onChange={(e) => updateCaseField(item.slug, 'name', e.target.value)}
-                className="w-full bg-black/45 backdrop-blur-sm text-white font-disp font-bold tracking-tight text-2xl sm:text-3xl md:text-4xl px-2 py-1 focus:outline-none rounded-none"
+                className="w-full bg-black/30 backdrop-blur-[2px] text-white font-disp font-bold tracking-tight text-2xl sm:text-3xl md:text-4xl px-2 py-1 focus:outline-none rounded-none border border-white/20"
               />
             ) : (
-              <h3 className={`font-disp font-bold tracking-tight leading-tight text-white drop-shadow-md ${
+              <h3 className={`font-disp font-bold tracking-tight leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] ${
                 isFullWidth ? 'text-3xl sm:text-4xl md:text-[40px]' : 'text-2xl sm:text-3xl'
               }`}>
                 {item.name}
               </h3>
             )}
 
-            {/* Conceito */}
+            {/* Conceito (Limpo, sem caixa, com forte drop-shadow) */}
             {isEditMode ? (
               <textarea
                 value={item.concept}
                 rows={2}
                 onClick={(e) => e.stopPropagation()}
                 onChange={(e) => updateCaseField(item.slug, 'concept', e.target.value)}
-                className="w-full bg-black/45 backdrop-blur-sm text-white/95 text-xs sm:text-sm p-1.5 focus:outline-none resize-none rounded-none"
+                className="w-full bg-black/30 backdrop-blur-[2px] text-white/95 text-xs sm:text-sm p-1.5 focus:outline-none resize-none rounded-none border border-white/20"
               />
             ) : (
-              <p className="text-white/90 text-xs sm:text-sm font-sans drop-shadow-sm line-clamp-2">
+              <p className="text-white/90 text-xs sm:text-sm font-sans drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] line-clamp-2">
                 {item.concept}
               </p>
             )}
