@@ -85,7 +85,7 @@ export const Header: React.FC = () => {
               id="nav-lado-a"
               href="#lado-a"
               onClick={(e) => handleNavClick(e, 'lado-a')}
-              className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium cursor-pointer py-1 mr-[-12px] lg:mr-[-16px]"
+              className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium cursor-pointer py-1"
             >
               Lado A
             </a>
