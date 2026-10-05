@@ -670,14 +670,14 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                 </span>
               </div>
             ) : (
-              <div className="space-y-4 sm:space-y-6 max-w-4xl">
+              <div className="space-y-4 sm:space-y-6">
                 {block.value
                   .split(/\n\s*\n/)
                   .filter((p: string) => p.trim())
                   .map((para: string, pIdx: number) => (
                     <p
                       key={pIdx}
-                      className={`text-base sm:text-xl md:text-2xl lg:text-[1.65rem] leading-relaxed font-normal whitespace-pre-line break-words ${
+                      className={`text-base sm:text-xl md:text-2xl lg:text-[1.65rem] leading-[1.45] font-normal whitespace-pre-line break-words ${
                         isLadoB ? 'text-[#D5DBF5]' : 'text-[#343848]'
                       }`}
                     >
@@ -840,8 +840,8 @@ export const CaseModal: React.FC<CaseModalProps> = ({
             className={
               currentCols === 1
                 ? currentScale === 'thumb'
-                  ? 'w-full max-w-md sm:max-w-lg mx-auto'
-                  : 'w-full max-w-4xl mx-auto'
+                  ? 'w-full max-w-md sm:max-w-lg'
+                  : 'w-full max-w-4xl'
                 : 'w-full'
             }
           >
@@ -892,9 +892,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
             )}
 
             <div
-              className={`relative rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shadow-lg group/img bg-[#E4E6EA]/50 dark:bg-[#151928]/50 ${
-                currentCols === 1 && currentScale === 'thumb' ? 'mx-auto' : ''
-              }`}
+              className={`relative rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shadow-lg group/img bg-[#E4E6EA]/50 dark:bg-[#151928]/50`}
             >
               <img
                 src={block.value}
@@ -904,13 +902,13 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                 className={`w-full cursor-pointer ${
                   currentCols === 1
                     ? currentScale === 'thumb'
-                      ? 'w-full h-auto object-contain max-w-md sm:max-w-lg mx-auto block'
-                      : 'w-full h-auto object-contain max-w-4xl mx-auto block'
+                      ? 'w-full h-auto object-contain max-w-md sm:max-w-lg block'
+                      : 'w-full h-auto object-contain max-w-4xl block'
                     : isSquare
                     ? 'aspect-square object-cover block'
                     : isStory
                     ? 'aspect-[9/16] object-cover block'
-                    : 'w-full h-auto object-contain block mx-auto'
+                    : 'w-full h-auto object-contain block'
                 }`}
                 onClick={() =>
                   !isEditMode &&
@@ -996,509 +994,293 @@ export const CaseModal: React.FC<CaseModalProps> = ({
 
         {/* Modal Main Content */}
         <main className="flex-1 w-full max-w-[1240px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 py-6 sm:py-10 md:py-14">
-          {/* Header Section - Ajustado para aproximar títulos e tags/advertising sem colar */}
-          <div className="space-y-2.5 sm:space-y-3.5 mb-8 sm:mb-10 max-w-4xl">
-            <div>
-              {isEditMode ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={safeItem.name}
-                    onChange={(e) => updateCaseField(safeItem.slug, 'name', e.target.value)}
-                    className={`faixa-clip text-sm sm:text-base font-bold border-2 border-white/40 px-2 py-1 focus:outline-none ${
+          
+          {/* Container restrito e alinhado rigorosamente à esquerda embaixo do título */}
+          <div className="max-w-3xl w-full">
+            
+            {/* Header Section */}
+            <div className="space-y-2.5 sm:space-y-3.5 mb-8 sm:mb-10">
+              <div>
+                {isEditMode ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={safeItem.name}
+                      onChange={(e) => updateCaseField(safeItem.slug, 'name', e.target.value)}
+                      className={`faixa-clip text-sm sm:text-base font-bold border-2 border-white/40 px-2 py-1 focus:outline-none ${
+                        isLadoB ? 'bg-[#FF4FA0] text-white' : 'bg-[#2340FF] text-[#F6F7F2]'
+                      }`}
+                    />
+                    <span className="text-xs font-mono-code text-[#AFC0FF] flex items-center gap-1">
+                      <Edit3 className="w-3 h-3" /> Clique para editar
+                    </span>
+                  </div>
+                ) : (
+                  <span
+                    className={`faixa-clip text-sm sm:text-base font-bold inline-block ${
                       isLadoB ? 'bg-[#FF4FA0] text-white' : 'bg-[#2340FF] text-[#F6F7F2]'
                     }`}
-                  />
-                  <span className="text-xs font-mono-code text-[#AFC0FF] flex items-center gap-1">
-                    <Edit3 className="w-3 h-3" /> Clique para editar
+                  >
+                    {safeItem.name}
                   </span>
-                </div>
-              ) : (
-                <span
-                  className={`faixa-clip text-sm sm:text-base font-bold inline-block ${
-                    isLadoB ? 'bg-[#FF4FA0] text-white' : 'bg-[#2340FF] text-[#F6F7F2]'
-                  }`}
-                >
-                  {safeItem.name}
-                </span>
-              )}
-            </div>
+                )}
+              </div>
 
-            {isEditMode ? (
-              <textarea
-                value={safeItem.concept}
-                rows={2}
-                onChange={(e) => updateCaseField(safeItem.slug, 'concept', e.target.value)}
-                className={`w-full font-disp font-extrabold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[0.98] bg-transparent border-2 border-dashed p-2 rounded focus:outline-none break-words ${
-                  isLadoB
-                    ? 'border-[#FF4FA0] text-white focus:bg-white/5'
-                    : 'border-[#2340FF] text-gray-900 focus:bg-black/5'
-                }`}
-              />
-            ) : (
-              <h2
-                id="case-modal-title"
-                className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl tracking-tight leading-[1.02] text-balance break-words"
-              >
-                {safeItem.concept}
-              </h2>
-            )}
-
-            <div className="flex flex-wrap items-center gap-3">
               {isEditMode ? (
-                <input
-                  type="text"
-                  value={safeItem.deliv}
-                  onChange={(e) => updateCaseField(safeItem.slug, 'deliv', e.target.value)}
-                  className={`font-mono-code text-xs sm:text-sm uppercase tracking-wider py-1.5 px-3 rounded border border-dashed ${
+                <textarea
+                  value={safeItem.concept}
+                  rows={2}
+                  onChange={(e) => updateCaseField(safeItem.slug, 'concept', e.target.value)}
+                  className={`w-full font-disp font-extrabold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[0.98] bg-transparent border-2 border-dashed p-2 rounded focus:outline-none break-words ${
                     isLadoB
-                      ? 'border-[#FF4FA0] bg-white/10 text-[#AFC0FF]'
-                      : 'border-[#2340FF] bg-white text-gray-900 shadow-sm'
+                      ? 'border-[#FF4FA0] text-white focus:bg-white/5'
+                      : 'border-[#2340FF] text-gray-900 focus:bg-black/5'
                   }`}
                 />
               ) : (
-                <span
-                  className={`font-mono-code text-xs sm:text-sm uppercase tracking-wider py-1.5 px-3 rounded inline-block ${
-                    isLadoB ? 'bg-white/10 text-[#AFC0FF]' : 'bg-black/5 text-[#5B6070]'
-                  }`}
+                <h2
+                  id="case-modal-title"
+                  className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl tracking-tight leading-[1.02] text-balance break-words"
                 >
-                  {safeItem.deliv}
-                </span>
+                  {safeItem.concept}
+                </h2>
               )}
 
-              {isEditMode && (
-                <div className={`flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl border border-dashed font-mono-code text-xs ${
-                  isLadoB
-                    ? 'border-[#D4FF3A] bg-white/5'
-                    : 'border-[#2340FF] bg-black/5'
-                }`}>
-                  <span className={`text-[10px] px-1 font-bold uppercase ${
-                    isLadoB ? 'text-[#AFC0FF]' : 'text-gray-600'
-                  }`}>
-                    Formato no Grid:
+              <div className="flex flex-wrap items-center gap-3">
+                {isEditMode ? (
+                  <input
+                    type="text"
+                    value={safeItem.deliv}
+                    onChange={(e) => updateCaseField(safeItem.slug, 'deliv', e.target.value)}
+                    className={`font-mono-code text-xs sm:text-sm uppercase tracking-wider py-1.5 px-3 rounded border border-dashed ${
+                      isLadoB
+                        ? 'border-[#FF4FA0] bg-white/10 text-[#AFC0FF]'
+                        : 'border-[#2340FF] bg-white text-gray-900 shadow-sm'
+                    }`}
+                  />
+                ) : (
+                  <span
+                    className={`font-mono-code text-xs sm:text-sm uppercase tracking-wider py-1.5 px-3 rounded inline-block ${
+                      isLadoB ? 'bg-white/10 text-[#AFC0FF]' : 'bg-black/5 text-[#5B6070]'
+                    }`}
+                  >
+                    {safeItem.deliv}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => updateCaseGridSpan(safeItem.slug, 'full')}
-                    className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
-                      (safeItem.gridSpan || 'half') === 'full'
-                        ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
-                        : isLadoB
-                        ? 'text-white/70 hover:bg-white/10'
-                        : 'text-gray-800 hover:bg-black/10'
-                    }`}
-                    title="Destaque: O projeto ocupa 100% da largura da linha (Full)"
-                  >
-                    Full (100%)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => updateCaseGridSpan(safeItem.slug, 'half')}
-                    className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
-                      (safeItem.gridSpan || 'half') === 'half'
-                        ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
-                        : isLadoB
-                        ? 'text-white/70 hover:bg-white/10'
-                        : 'text-gray-800 hover:bg-black/10'
-                    }`}
-                    title="Médio: O projeto ocupa 50% da largura da linha (Metade)"
-                  >
-                    Médio (50%)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => updateCaseGridSpan(safeItem.slug, 'third')}
-                    className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
-                      (safeItem.gridSpan || 'half') === 'third'
-                        ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
-                        : isLadoB
-                        ? 'text-white/70 hover:bg-white/10'
-                        : 'text-gray-800 hover:bg-black/10'
-                    }`}
-                    title="Compacto: O projeto ocupa 33% da largura da linha (Terço)"
-                  >
-                    Compacto (33%)
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+                )}
 
-          {/* Universal Content Flow with Interactive Grid Groups */}
-          <div className="space-y-8 sm:space-y-12 mb-16 max-w-5xl">
-            {renderGroups.map((group, gIdx) => {
-               if (group.type === 'single') {
-                 return (
-                   <div key={`group-single-${gIdx}`} className="w-full">
-                     {renderBlockCard(group.block, group.originalIdx)}
-                   </div>
-                 );
-               }
-
-               if (group.type === 'grid') {
-                 const colsClass = getGridColsClass(group.columns);
-                 return (
-                   <div
-                     key={`group-grid-${gIdx}`}
-                     className={`grid ${colsClass} gap-3 sm:gap-4 items-start w-full`}
-                   >
-                     {group.items.map(({ block, originalIdx }) =>
-                       renderBlockCard(block, originalIdx)
-                     )}
-                   </div>
-                 );
-               }
-
-               return null;
-             })}
-          </div>
-
-          {/* Add Block Toolbar in Edit Mode */}
-          {isEditMode && (
-            <div className="p-4 sm:p-5 rounded-xl border border-dashed border-[#2340FF] dark:border-[#D4FF3A] bg-[#2340FF]/5 dark:bg-[#D4FF3A]/5 max-w-4xl space-y-4 mb-16">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <span className="font-mono-code text-xs font-bold uppercase tracking-wider text-[#2340FF] dark:text-[#D4FF3A] flex items-center gap-1.5">
-                  <Plus className="w-4 h-4" /> Adicionar Bloco de Conteúdo
-                </span>
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => addBlock('text', 'Novo parágrafo de texto...')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2340FF] hover:bg-[#1B34D6] text-white text-xs font-mono-code font-bold cursor-pointer transition-colors shadow-sm"
-                  >
-                    <FileText className="w-3.5 h-3.5" /> + Texto
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveAddForm(activeAddForm === 'youtube' ? null : 'youtube');
-                      setAddInputVal('');
-                      setAddVideoColumnsVal(1);
-                    }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-colors shadow-sm ${
-                      activeAddForm === 'youtube'
-                        ? 'bg-[#FF4FA0] text-white'
-                        : isLadoB
-                        ? 'bg-white/10 hover:bg-white/20 text-white'
-                        : 'bg-black/10 hover:bg-black/20 text-gray-900'
-                    }`}
-                  >
-                    <Video className="w-3.5 h-3.5" /> + Vídeo YouTube
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveAddForm(activeAddForm === 'vimeo' ? null : 'vimeo');
-                      setAddInputVal('');
-                      setAddVideoColumnsVal(1);
-                    }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-colors shadow-sm ${
-                      activeAddForm === 'vimeo'
-                        ? 'bg-[#00ADEF] text-white'
-                        : isLadoB
-                        ? 'bg-white/10 hover:bg-white/20 text-white'
-                        : 'bg-black/10 hover:bg-black/20 text-gray-900'
-                    }`}
-                  >
-                    <Video className="w-3.5 h-3.5" /> + Vídeo Vimeo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveAddForm(activeAddForm === 'image' ? null : 'image');
-                      setAddInputVal('');
-                      setAddScaleVal('original');
-                    }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-colors shadow-sm ${
-                      activeAddForm === 'image'
-                        ? 'bg-[#2340FF] text-white'
-                        : isLadoB
-                        ? 'bg-white/10 hover:bg-white/20 text-white'
-                        : 'bg-black/10 hover:bg-black/20 text-gray-900'
-                    }`}
-                  >
-                    <ImageIcon className="w-3.5 h-3.5" /> + Imagem
-                  </button>
-                </div>
-              </div>
-
-              {/* Form: Inserir Vídeo YouTube */}
-              {activeAddForm === 'youtube' && (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (addInputVal.trim()) {
-                      const clean = extractIframeSrc(addInputVal.trim());
-                      if (isVimeoVideo(clean)) {
-                        const vid = getVimeoVideoId(clean);
-                        addBlock('video', `vimeo:${vid}`, undefined, addVideoColumnsVal);
-                      } else {
-                        const yid = getYouTubeVideoId(clean);
-                        addBlock('video', yid, undefined, addVideoColumnsVal);
-                      }
-                      setAddInputVal('');
-                      setActiveAddForm(null);
-                    }
-                  }}
-                  className="space-y-2.5 pt-2 border-t border-black/10 dark:border-white/10"
-                >
-                  <div className="flex flex-wrap gap-2">
-                    <input
-                      type="text"
-                      value={addInputVal}
-                      onChange={(e) => setAddInputVal(e.target.value)}
-                      placeholder="Cole o link, ID ou código <iframe> do YouTube..."
-                      className={`w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded border ${
-                        isLadoB
-                          ? 'bg-[#0F1222] border-white/20 text-white placeholder:text-white/40'
-                          : 'bg-white border-black/20 text-gray-900 placeholder:text-gray-400 shadow-sm'
-                      }`}
-                      autoFocus
-                    />
-                    <button
-                      type="submit"
-                      className="px-4 py-1.5 bg-[#FF4FA0] hover:bg-[#e03f8a] text-white text-xs font-mono-code font-bold rounded cursor-pointer transition-colors"
-                    >
-                      Inserir YouTube
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveAddForm(null)}
-                      className="px-3 py-1.5 bg-gray-500/20 text-xs font-mono-code rounded cursor-pointer"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs font-mono-code">
-                    <span className="text-gray-500">Colunas:</span>
-                    {[1, 2, 3].map((cols) => (
-                      <button
-                        key={cols}
-                        type="button"
-                        onClick={() => setAddVideoColumnsVal(cols)}
-                        className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
-                          addVideoColumnsVal === cols
-                            ? 'bg-[#FF4FA0] text-white font-bold'
-                            : isLadoB
-                            ? 'bg-white/10 hover:bg-white/20 text-white'
-                            : 'bg-black/10 hover:bg-black/20 text-gray-800'
-                        }`}
-                      >
-                        {cols}
-                      </button>
-                    ))}
-                  </div>
-                </form>
-              )}
-
-              {/* Form: Inserir Vídeo Vimeo */}
-              {activeAddForm === 'vimeo' && (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (addInputVal.trim()) {
-                      const clean = extractIframeSrc(addInputVal.trim());
-                      if (clean.includes('youtube.com') || clean.includes('youtu.be')) {
-                        const yid = getYouTubeVideoId(clean);
-                        addBlock('video', yid, undefined, addVideoColumnsVal);
-                      } else {
-                        const vid = getVimeoVideoId(clean);
-                        addBlock('video', `vimeo:${vid}`, undefined, addVideoColumnsVal);
-                      }
-                      setAddInputVal('');
-                      setActiveAddForm(null);
-                    }
-                  }}
-                  className="space-y-2.5 pt-2 border-t border-black/10 dark:border-white/10"
-                >
-                  <div className="flex flex-wrap gap-2">
-                    <input
-                      type="text"
-                      value={addInputVal}
-                      onChange={(e) => setAddInputVal(e.target.value)}
-                      placeholder="Cole o link, ID ou código <iframe> do Vimeo..."
-                      className={`w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded border ${
-                        isLadoB
-                          ? 'bg-[#0F1222] border-white/20 text-white placeholder:text-white/40'
-                          : 'bg-white border-black/20 text-gray-900 placeholder:text-gray-400 shadow-sm'
-                      }`}
-                      autoFocus
-                    />
-                    <button
-                      type="submit"
-                      className="px-4 py-1.5 bg-[#00ADEF] hover:bg-[#0092ca] text-white text-xs font-mono-code font-bold rounded cursor-pointer transition-colors"
-                    >
-                      Inserir Vimeo
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveAddForm(null)}
-                      className="px-3 py-1.5 bg-gray-500/20 text-xs font-mono-code rounded cursor-pointer"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs font-mono-code">
-                    <span className="text-gray-500">Colunas:</span>
-                    {[1, 2, 3].map((cols) => (
-                      <button
-                        key={cols}
-                        type="button"
-                        onClick={() => setAddVideoColumnsVal(cols)}
-                        className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
-                          addVideoColumnsVal === cols
-                            ? 'bg-[#00ADEF] text-white font-bold'
-                            : isLadoB
-                            ? 'bg-white/10 hover:bg-white/20 text-white'
-                            : 'bg-black/10 hover:bg-black/20 text-gray-800'
-                        }`}
-                      >
-                        {cols}
-                      </button>
-                    ))}
-                  </div>
-                </form>
-              )}
-
-              {/* Form: Inserir Imagem */}
-              {activeAddForm === 'image' && (
-                <div className="space-y-3 pt-2 border-t border-black/10 dark:border-white/10">
-                  {/* File input for direct computer upload */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 bg-black/5 dark:bg-white/5 rounded-lg border border-dashed border-[#2340FF]/40 dark:border-white/20">
-                    <label className="flex items-center gap-2 px-4 py-2 bg-[#2340FF] hover:bg-[#1B34D6] text-white text-xs font-mono-code font-bold rounded cursor-pointer transition-colors shadow-sm">
-                      {isUploadingNewImage ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-[#D4FF3A]" />
-                      ) : (
-                        <Upload className="w-4 h-4 text-[#D4FF3A]" />
-                      )}
-                      <span>
-                        {isUploadingNewImage ? 'Convertendo Imagem...' : 'Escolher Imagem do Computador'}
-                      </span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        disabled={isUploadingNewImage}
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          setIsUploadingNewImage(true);
-                          try {
-                            const base64 = await processImageUpload(file, 2048, 2048, 0.88);
-                            addBlock('image', base64, addAspectVal, addColumnsVal, addScaleVal);
-                            setActiveAddForm(null);
-                          } catch (err) {
-                            console.error('Erro ao converter imagem:', err);
-                            alert('Erro ao carregar a imagem do computador. Tente novamente.');
-                          } finally {
-                            setIsUploadingNewImage(false);
-                            e.target.value = '';
-                          }
-                        }}
-                      />
-                    </label>
-                    <span className="text-[11px] font-mono-code text-gray-500 dark:text-gray-400">
-                      Converte em Base64 e insere no projeto instantaneamente.
+                {isEditMode && (
+                  <div className={`flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl border border-dashed font-mono-code text-xs ${
+                    isLadoB
+                      ? 'border-[#D4FF3A] bg-white/5'
+                      : 'border-[#2340FF] bg-black/5'
+                  }`}>
+                    <span className={`text-[10px] px-1 font-bold uppercase ${
+                      isLadoB ? 'text-[#AFC0FF]' : 'text-gray-600'
+                    }`}>
+                      Formato no Grid:
                     </span>
+                    <button
+                      type="button"
+                      onClick={() => updateCaseGridSpan(safeItem.slug, 'full')}
+                      className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
+                        (safeItem.gridSpan || 'half') === 'full'
+                          ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
+                          : isLadoB
+                          ? 'text-white/70 hover:bg-white/10'
+                          : 'text-gray-800 hover:bg-black/10'
+                      }`}
+                      title="Destaque: O projeto ocupa 100% da largura da linha (Full)"
+                    >
+                      Full (100%)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateCaseGridSpan(safeItem.slug, 'half')}
+                      className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
+                        (safeItem.gridSpan || 'half') === 'half'
+                          ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
+                          : isLadoB
+                          ? 'text-white/70 hover:bg-white/10'
+                          : 'text-gray-800 hover:bg-black/10'
+                      }`}
+                      title="Médio: O projeto ocupa 50% da largura da linha (Metade)"
+                    >
+                      Médio (50%)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateCaseGridSpan(safeItem.slug, 'third')}
+                      className={`px-2 py-0.5 rounded text-xs font-bold transition-all cursor-pointer ${
+                        (safeItem.gridSpan || 'half') === 'third'
+                          ? 'bg-[#D4FF3A] text-[#0F1222] shadow font-black'
+                          : isLadoB
+                          ? 'text-white/70 hover:bg-white/10'
+                          : 'text-gray-800 hover:bg-black/10'
+                      }`}
+                      title="Compacto: O projeto ocupa 33% da largura da linha (Terço)"
+                    >
+                      Compacto (33%)
+                    </button>
                   </div>
+                )}
+              </div>
+            </div>
 
-                  <div className="flex items-center gap-2 text-xs font-mono-code text-gray-400">
-                    <span className="h-px bg-gray-300 dark:bg-gray-700 flex-1" />
-                    <span>ou cole a URL</span>
-                    <span className="h-px bg-gray-300 dark:bg-gray-700 flex-1" />
+            {/* Universal Content Flow with Interactive Grid Groups */}
+            <div className="space-y-8 sm:space-y-12 mb-16 w-full">
+              {renderGroups.map((group, gIdx) => {
+                 if (group.type === 'single') {
+                   return (
+                     <div key={`group-single-${gIdx}`} className="w-full">
+                       {renderBlockCard(group.block, group.originalIdx)}
+                     </div>
+                   );
+                 }
+
+                 if (group.type === 'grid') {
+                   const colsClass = getGridColsClass(group.columns);
+                   return (
+                     <div
+                       key={`group-grid-${gIdx}`}
+                       className={`grid ${colsClass} gap-3 sm:gap-4 items-start w-full`}
+                     >
+                       {group.items.map(({ block, originalIdx }) =>
+                         renderBlockCard(block, originalIdx)
+                       )}
+                     </div>
+                   );
+                 }
+
+                 return null;
+               })}
+            </div>
+
+            {/* Add Block Toolbar in Edit Mode */}
+            {isEditMode && (
+              <div className="p-4 sm:p-5 rounded-xl border border-dashed border-[#2340FF] dark:border-[#D4FF3A] bg-[#2340FF]/5 dark:bg-[#D4FF3A]/5 space-y-4 mb-16">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="font-mono-code text-xs font-bold uppercase tracking-wider text-[#2340FF] dark:text-[#D4FF3A] flex items-center gap-1.5">
+                    <Plus className="w-4 h-4" /> Adicionar Bloco de Conteúdo
+                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => addBlock('text', 'Novo parágrafo de texto...')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2340FF] hover:bg-[#1B34D6] text-white text-xs font-mono-code font-bold cursor-pointer transition-colors shadow-sm"
+                    >
+                      <FileText className="w-3.5 h-3.5" /> + Texto
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveAddForm(activeAddForm === 'youtube' ? null : 'youtube');
+                        setAddInputVal('');
+                        setAddVideoColumnsVal(1);
+                      }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-colors shadow-sm ${
+                        activeAddForm === 'youtube'
+                          ? 'bg-[#FF4FA0] text-white'
+                          : isLadoB
+                          ? 'bg-white/10 hover:bg-white/20 text-white'
+                          : 'bg-black/10 hover:bg-black/20 text-gray-900'
+                      }`}
+                    >
+                      <Video className="w-3.5 h-3.5" /> + Vídeo YouTube
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveAddForm(activeAddForm === 'vimeo' ? null : 'vimeo');
+                        setAddInputVal('');
+                        setAddVideoColumnsVal(1);
+                      }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-colors shadow-sm ${
+                        activeAddForm === 'vimeo'
+                          ? 'bg-[#00ADEF] text-white'
+                          : isLadoB
+                          ? 'bg-white/10 hover:bg-white/20 text-white'
+                          : 'bg-black/10 hover:bg-black/20 text-gray-900'
+                      }`}
+                    >
+                      <Video className="w-3.5 h-3.5" /> + Vídeo Vimeo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveAddForm(activeAddForm === 'image' ? null : 'image');
+                        setAddInputVal('');
+                        setAddScaleVal('original');
+                      }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-colors shadow-sm ${
+                        activeAddForm === 'image'
+                          ? 'bg-[#2340FF] text-white'
+                          : isLadoB
+                          ? 'bg-white/10 hover:bg-white/20 text-white'
+                          : 'bg-black/10 hover:bg-black/20 text-gray-900'
+                      }`}
+                    >
+                      <ImageIcon className="w-3.5 h-3.5" /> + Imagem
+                    </button>
                   </div>
+                </div>
 
+                {/* Form: Inserir Vídeo YouTube */}
+                {activeAddForm === 'youtube' && (
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
                       if (addInputVal.trim()) {
-                        addBlock('image', addInputVal.trim(), addAspectVal, addColumnsVal, addScaleVal);
+                        const clean = extractIframeSrc(addInputVal.trim());
+                        if (isVimeoVideo(clean)) {
+                          const vid = getVimeoVideoId(clean);
+                          addBlock('video', `vimeo:${vid}`, undefined, addVideoColumnsVal);
+                        } else {
+                          const yid = getYouTubeVideoId(clean);
+                          addBlock('video', yid, undefined, addVideoColumnsVal);
+                        }
                         setAddInputVal('');
                         setActiveAddForm(null);
                       }
                     }}
-                    className="flex flex-wrap gap-2"
+                    className="space-y-2.5 pt-2 border-t border-black/10 dark:border-white/10"
                   >
-                    <input
-                      type="text"
-                      value={addInputVal}
-                      onChange={(e) => setAddInputVal(e.target.value)}
-                      placeholder="Cole a URL direta da imagem (ex: https://...)"
-                      className={`w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded border ${
-                        isLadoB
-                          ? 'bg-[#0F1222] border-white/20 text-white placeholder:text-white/40'
-                          : 'bg-white border-black/20 text-gray-900 placeholder:text-gray-400 shadow-sm'
-                      }`}
-                      autoFocus
-                    />
-                    <button
-                      type="submit"
-                      className="px-4 py-1.5 bg-[#2340FF] text-white text-xs font-mono-code font-bold rounded cursor-pointer"
-                    >
-                      Inserir via URL
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveAddForm(null)}
-                      className="px-3 py-1.5 bg-gray-500/20 text-xs font-mono-code rounded cursor-pointer"
-                    >
-                      Cancelar
-                    </button>
-                  </form>
-                  <div className="flex flex-wrap items-center gap-4 text-xs font-mono-code">
-                    <span className="text-gray-500">Formato:</span>
-                    <label className="flex items-center gap-1 cursor-pointer">
+                    <div className="flex flex-wrap gap-2">
                       <input
-                        type="radio"
-                        name="addAspect"
-                        checked={addAspectVal === 'contain'}
-                        onChange={() => {
-                          setAddAspectVal('contain');
-                          setAddColumnsVal(1);
-                        }}
+                        type="text"
+                        value={addInputVal}
+                        onChange={(e) => setAddInputVal(e.target.value)}
+                        placeholder="Cole o link, ID ou código <iframe> do YouTube..."
+                        className={`w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded border ${
+                          isLadoB
+                            ? 'bg-[#0F1222] border-white/20 text-white placeholder:text-white/40'
+                            : 'bg-white border-black/20 text-gray-900 placeholder:text-gray-400 shadow-sm'
+                        }`}
+                        autoFocus
                       />
-                      Inteira
-                    </label>
-                    <label className="flex items-center gap-1 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="addAspect"
-                        checked={addAspectVal === 'square'}
-                        onChange={() => {
-                          setAddAspectVal('square');
-                          setAddColumnsVal(3);
-                        }}
-                      />
-                      Quadrada
-                    </label>
-                    <label className="flex items-center gap-1 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="addAspect"
-                        checked={addAspectVal === 'story'}
-                        onChange={() => {
-                          setAddAspectVal('story');
-                          setAddColumnsVal(5);
-                        }}
-                      />
-                      Vertical
-                    </label>
-
-                    <div className="flex items-center gap-1.5 ml-2">
+                      <button
+                        type="submit"
+                        className="px-4 py-1.5 bg-[#FF4FA0] hover:bg-[#e03f8a] text-white text-xs font-mono-code font-bold rounded cursor-pointer transition-colors"
+                      >
+                        Inserir YouTube
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveAddForm(null)}
+                        className="px-3 py-1.5 bg-gray-500/20 text-xs font-mono-code rounded cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs font-mono-code">
                       <span className="text-gray-500">Colunas:</span>
-                      {(addAspectVal === 'story'
-                        ? [1, 2, 3, 4, 5]
-                        : addAspectVal === 'square'
-                        ? [1, 2, 3, 4]
-                        : [1, 2, 3]
-                      ).map((cols) => (
+                      {[1, 2, 3].map((cols) => (
                         <button
                           key={cols}
                           type="button"
-                          onClick={() => setAddColumnsVal(cols)}
+                          onClick={() => setAddVideoColumnsVal(cols)}
                           className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
-                            addColumnsVal === cols
-                              ? 'bg-[#2340FF] text-white font-bold'
+                            addVideoColumnsVal === cols
+                              ? 'bg-[#FF4FA0] text-white font-bold'
                               : isLadoB
                               ? 'bg-white/10 hover:bg-white/20 text-white'
                               : 'bg-black/10 hover:bg-black/20 text-gray-800'
@@ -1508,99 +1290,320 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                         </button>
                       ))}
                     </div>
+                  </form>
+                )}
 
-                    {addColumnsVal === 1 && (
+                {/* Form: Inserir Vídeo Vimeo */}
+                {activeAddForm === 'vimeo' && (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (addInputVal.trim()) {
+                        const clean = extractIframeSrc(addInputVal.trim());
+                        if (clean.includes('youtube.com') || clean.includes('youtu.be')) {
+                          const yid = getYouTubeVideoId(clean);
+                          addBlock('video', yid, undefined, addVideoColumnsVal);
+                        } else {
+                          const vid = getVimeoVideoId(clean);
+                          addBlock('video', `vimeo:${vid}`, undefined, addVideoColumnsVal);
+                        }
+                        setAddInputVal('');
+                        setActiveAddForm(null);
+                      }
+                    }}
+                    className="space-y-2.5 pt-2 border-t border-black/10 dark:border-white/10"
+                  >
+                    <div className="flex flex-wrap gap-2">
+                      <input
+                        type="text"
+                        value={addInputVal}
+                        onChange={(e) => setAddInputVal(e.target.value)}
+                        placeholder="Cole o link, ID ou código <iframe> do Vimeo..."
+                        className={`w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded border ${
+                          isLadoB
+                            ? 'bg-[#0F1222] border-white/20 text-white placeholder:text-white/40'
+                            : 'bg-white border-black/20 text-gray-900 placeholder:text-gray-400 shadow-sm'
+                        }`}
+                        autoFocus
+                      />
+                      <button
+                        type="submit"
+                        className="px-4 py-1.5 bg-[#00ADEF] hover:bg-[#0092ca] text-white text-xs font-mono-code font-bold rounded cursor-pointer transition-colors"
+                      >
+                        Inserir Vimeo
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveAddForm(null)}
+                        className="px-3 py-1.5 bg-gray-500/20 text-xs font-mono-code rounded cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs font-mono-code">
+                      <span className="text-gray-500">Colunas:</span>
+                      {[1, 2, 3].map((cols) => (
+                        <button
+                          key={cols}
+                          type="button"
+                          onClick={() => setAddVideoColumnsVal(cols)}
+                          className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
+                            addVideoColumnsVal === cols
+                              ? 'bg-[#00ADEF] text-white font-bold'
+                              : isLadoB
+                              ? 'bg-white/10 hover:bg-white/20 text-white'
+                              : 'bg-black/10 hover:bg-black/20 text-gray-800'
+                          }`}
+                        >
+                          {cols}
+                        </button>
+                      ))}
+                    </div>
+                  </form>
+                )}
+
+                {/* Form: Inserir Imagem */}
+                {activeAddForm === 'image' && (
+                  <div className="space-y-3 pt-2 border-t border-black/10 dark:border-white/10">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 bg-black/5 dark:bg-white/5 rounded-lg border border-dashed border-[#2340FF]/40 dark:border-white/20">
+                      <label className="flex items-center gap-2 px-4 py-2 bg-[#2340FF] hover:bg-[#1B34D6] text-white text-xs font-mono-code font-bold rounded cursor-pointer transition-colors shadow-sm">
+                        {isUploadingNewImage ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-[#D4FF3A]" />
+                        ) : (
+                          <Upload className="w-4 h-4 text-[#D4FF3A]" />
+                        )}
+                        <span>
+                          {isUploadingNewImage ? 'Convertendo Imagem...' : 'Escolher Imagem do Computador'}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={isUploadingNewImage}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setIsUploadingNewImage(true);
+                            try {
+                              const base64 = await processImageUpload(file, 2048, 2048, 0.88);
+                              addBlock('image', base64, addAspectVal, addColumnsVal, addScaleVal);
+                              setActiveAddForm(null);
+                            } catch (err) {
+                              console.error('Erro ao converter imagem:', err);
+                              alert('Erro ao carregar a imagem do computador. Tente novamente.');
+                            } finally {
+                              setIsUploadingNewImage(false);
+                              e.target.value = '';
+                            }
+                          }}
+                        />
+                      </label>
+                      <span className="text-[11px] font-mono-code text-gray-500 dark:text-gray-400">
+                        Converte em Base64 e insere no projeto instantaneamente.
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs font-mono-code text-gray-400">
+                      <span className="h-px bg-gray-300 dark:bg-gray-700 flex-1" />
+                      <span>ou cole a URL</span>
+                      <span className="h-px bg-gray-300 dark:bg-gray-700 flex-1" />
+                    </div>
+
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (addInputVal.trim()) {
+                          addBlock('image', addInputVal.trim(), addAspectVal, addColumnsVal, addScaleVal);
+                          setAddInputVal('');
+                          setActiveAddForm(null);
+                        }
+                      }}
+                      className="flex flex-wrap gap-2"
+                    >
+                      <input
+                        type="text"
+                        value={addInputVal}
+                        onChange={(e) => setAddInputVal(e.target.value)}
+                        placeholder="Cole a URL direta da imagem (ex: https://...)"
+                        className={`w-full sm:flex-1 min-w-0 px-3 py-1.5 text-xs font-mono-code rounded border ${
+                          isLadoB
+                            ? 'bg-[#0F1222] border-white/20 text-white placeholder:text-white/40'
+                            : 'bg-white border-black/20 text-gray-900 placeholder:text-gray-400 shadow-sm'
+                        }`}
+                        autoFocus
+                      />
+                      <button
+                        type="submit"
+                        className="px-4 py-1.5 bg-[#2340FF] text-white text-xs font-mono-code font-bold rounded cursor-pointer"
+                      >
+                        Inserir via URL
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveAddForm(null)}
+                        className="px-3 py-1.5 bg-gray-500/20 text-xs font-mono-code rounded cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                    </form>
+                    <div className="flex flex-wrap items-center gap-4 text-xs font-mono-code">
+                      <span className="text-gray-500">Formato:</span>
+                      <label className="flex items-center gap-1 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="addAspect"
+                          checked={addAspectVal === 'contain'}
+                          onChange={() => {
+                            setAddAspectVal('contain');
+                            setAddColumnsVal(1);
+                          }}
+                        />
+                        Inteira
+                      </label>
+                      <label className="flex items-center gap-1 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="addAspect"
+                          checked={addAspectVal === 'square'}
+                          onChange={() => {
+                            setAddAspectVal('square');
+                            setAddColumnsVal(3);
+                          }}
+                        />
+                        Quadrada
+                      </label>
+                      <label className="flex items-center gap-1 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="addAspect"
+                          checked={addAspectVal === 'story'}
+                          onChange={() => {
+                            setAddAspectVal('story');
+                            setAddColumnsVal(5);
+                          }}
+                        />
+                        Vertical
+                      </label>
+
                       <div className="flex items-center gap-1.5 ml-2">
-                        <span className="text-gray-500">Tamanho:</span>
-                        <button
-                          type="button"
-                          onClick={() => setAddScaleVal('original')}
-                          className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
-                            addScaleVal === 'original'
-                              ? 'bg-[#2340FF] text-white font-bold'
-                              : isLadoB
-                              ? 'bg-white/10 hover:bg-white/20 text-white'
-                              : 'bg-black/10 hover:bg-black/20 text-gray-800'
-                          }`}
-                        >
-                          Original
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setAddScaleVal('thumb')}
-                          className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
-                            addScaleVal === 'thumb'
-                              ? 'bg-[#2340FF] text-white font-bold'
-                              : isLadoB
-                              ? 'bg-white/10 hover:bg-white/20 text-white'
-                              : 'bg-black/10 hover:bg-black/20 text-gray-800'
-                          }`}
-                        >
-                          Miniatura
-                        </button>
+                        <span className="text-gray-500">Colunas:</span>
+                        {(addAspectVal === 'story'
+                          ? [1, 2, 3, 4, 5]
+                          : addAspectVal === 'square'
+                          ? [1, 2, 3, 4]
+                          : [1, 2, 3]
+                        ).map((cols) => (
+                          <button
+                            key={cols}
+                            type="button"
+                            onClick={() => setAddColumnsVal(cols)}
+                            className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
+                              addColumnsVal === cols
+                                ? 'bg-[#2340FF] text-white font-bold'
+                                : isLadoB
+                                ? 'bg-white/10 hover:bg-white/20 text-white'
+                                : 'bg-black/10 hover:bg-black/20 text-gray-800'
+                            }`}
+                          >
+                            {cols}
+                          </button>
+                        ))}
                       </div>
-                    )}
+
+                      {addColumnsVal === 1 && (
+                        <div className="flex items-center gap-1.5 ml-2">
+                          <span className="text-gray-500">Tamanho:</span>
+                          <button
+                            type="button"
+                            onClick={() => setAddScaleVal('original')}
+                            className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
+                              addScaleVal === 'original'
+                                ? 'bg-[#2340FF] text-white font-bold'
+                                : isLadoB
+                                ? 'bg-white/10 hover:bg-white/20 text-white'
+                                : 'bg-black/10 hover:bg-black/20 text-gray-800'
+                            }`}
+                          >
+                            Original
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAddScaleVal('thumb')}
+                            className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
+                              addScaleVal === 'thumb'
+                                ? 'bg-[#2340FF] text-white font-bold'
+                                : isLadoB
+                                ? 'bg-white/10 hover:bg-white/20 text-white'
+                                : 'bg-black/10 hover:bg-black/20 text-gray-800'
+                            }`}
+                          >
+                            Miniatura
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                )}
+              </div>
+            )}
+
+            {/* Bottom Navigation: Anterior / Próximo */}
+            <div className="pt-8 sm:pt-12 mt-8 sm:mt-12 border-t border-black/10 dark:border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 sm:gap-6">
+              <button
+                id="btn-prev-case"
+                type="button"
+                onClick={() => onSelectCase(prevCase)}
+                className="group flex items-center gap-3 text-left cursor-pointer p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors min-h-[44px]"
+              >
+                <div
+                  className={`p-2.5 sm:p-3 rounded-full transition-transform group-hover:-translate-x-1 shrink-0 ${
+                    isLadoB ? 'bg-white/10 text-white' : 'bg-black/5 text-[#0F1222]'
+                  }`}
+                >
+                  <ArrowLeft className="w-5 h-5" />
                 </div>
-              )}
+                <div className="min-w-0">
+                  <span
+                    className={`font-mono-code text-[11px] uppercase tracking-widest block ${
+                      isLadoB ? 'text-[#AFC0FF]' : 'text-[#5B6070]'
+                    }`}
+                  >
+                    Anterior
+                  </span>
+                  <span className="font-disp font-bold text-base sm:text-lg group-hover:underline truncate block">
+                    {prevCase.name}
+                  </span>
+                </div>
+              </button>
+
+              <button
+                id="btn-next-case"
+                type="button"
+                onClick={() => onSelectCase(nextCase)}
+                className="group flex items-center justify-end gap-3 text-right cursor-pointer p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors min-h-[44px]"
+              >
+                <div className="min-w-0">
+                  <span
+                    className={`font-mono-code text-[11px] uppercase tracking-widest block ${
+                      isLadoB ? 'text-[#AFC0FF]' : 'text-[#5B6070]'
+                    }`}
+                  >
+                    Próximo
+                  </span>
+                  <span className="font-disp font-bold text-base sm:text-lg group-hover:underline truncate block">
+                    {nextCase.name}
+                  </span>
+                </div>
+                <div
+                  className={`p-2.5 sm:p-3 rounded-full transition-transform group-hover:translate-x-1 shrink-0 ${
+                    isLadoB ? 'bg-white/10 text-white' : 'bg-black/5 text-[#0F1222]'
+                  }`}
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </div>
+              </button>
             </div>
-          )}
 
-          {/* Bottom Navigation: Anterior / Próximo */}
-          <div className="pt-8 sm:pt-12 mt-8 sm:mt-12 border-t border-black/10 dark:border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 sm:gap-6">
-            <button
-              id="btn-prev-case"
-              type="button"
-              onClick={() => onSelectCase(prevCase)}
-              className="group flex items-center gap-3 text-left cursor-pointer p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors min-h-[44px]"
-            >
-              <div
-                className={`p-2.5 sm:p-3 rounded-full transition-transform group-hover:-translate-x-1 shrink-0 ${
-                  isLadoB ? 'bg-white/10 text-white' : 'bg-black/5 text-[#0F1222]'
-                }`}
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
-                <span
-                  className={`font-mono-code text-[11px] uppercase tracking-widest block ${
-                    isLadoB ? 'text-[#AFC0FF]' : 'text-[#5B6070]'
-                  }`}
-                >
-                  Anterior
-                </span>
-                <span className="font-disp font-bold text-base sm:text-lg group-hover:underline truncate block">
-                  {prevCase.name}
-                </span>
-              </div>
-            </button>
-
-            <button
-              id="btn-next-case"
-              type="button"
-              onClick={() => onSelectCase(nextCase)}
-              className="group flex items-center justify-end gap-3 text-right cursor-pointer p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors min-h-[44px]"
-            >
-              <div className="min-w-0">
-                <span
-                  className={`font-mono-code text-[11px] uppercase tracking-widest block ${
-                    isLadoB ? 'text-[#AFC0FF]' : 'text-[#5B6070]'
-                  }`}
-                >
-                  Próximo
-                </span>
-                <span className="font-disp font-bold text-base sm:text-lg group-hover:underline truncate block">
-                  {nextCase.name}
-                </span>
-              </div>
-              <div
-                className={`p-2.5 sm:p-3 rounded-full transition-transform group-hover:translate-x-1 shrink-0 ${
-                  isLadoB ? 'bg-white/10 text-white' : 'bg-black/5 text-[#0F1222]'
-                }`}
-              >
-                <ArrowRight className="w-5 h-5" />
-              </div>
-            </button>
           </div>
         </main>
       </div>
