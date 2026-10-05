@@ -6,7 +6,6 @@ import {
   ServicosData,
   DEFAULT_SERVICOS_DATA,
   DEFAULT_FOOTER,
-  DEFAULT_MANIFESTO,
   sanitizeServicosData,
 } from '../data/servicos';
 import {
@@ -278,9 +277,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       clearTimeout(cloudTimeoutRef.current);
     }
 
-    cloudTimeoutRef.current = setTimeout(() => {
-      syncToCloud(newCases, newSobre, newGrids, currentServicos, baseText);
-    }, 1500);
+    await syncToCloud(newCases, newSobre, newGrids, currentServicos, baseText);
   };
 
   const setGridLadoA = (cols: 1 | 2 | 3) => {
@@ -547,57 +544,49 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const reorderCaseImages = async (slug: string, sourceIdx: number, targetIdx: number) => {
     if (sourceIdx === targetIdx) return;
-    const updatedCasesList = cases.map((c) => {
-      if (c.slug !== slug) return c;
-      const newImgs = [...c.imgs];
-      const [moved] = newImgs.splice(sourceIdx, 1);
-      newImgs.splice(targetIdx, 0, moved);
-      return { ...c, imgs: newImgs };
-    });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Ordem das peças/imagens atualizada');
+    const targetCase = cases.find((c) => c.slug === slug);
+    if (!targetCase || !targetCase.imgs) return;
+    const newImgs = [...targetCase.imgs];
+    const [moved] = newImgs.splice(sourceIdx, 1);
+    newImgs.splice(targetIdx, 0, moved);
+    const updatedCasesList = cases.map((c) => (c.slug === slug ? { ...c, imgs: newImgs } : c));
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Ordem das imagens atualizada');
   };
 
   const addCaseImage = async (slug: string, url: string) => {
-    if (!url.trim()) return;
     const updatedCasesList = cases.map((c) => {
       if (c.slug !== slug) return c;
-      return { ...c, imgs: [...c.imgs, url.trim()] };
+      const currentImgs = Array.isArray(c.imgs) ? c.imgs : [];
+      return { ...c, imgs: [...currentImgs, url] };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Nova peça/imagem adicionada');
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Imagem adicionada');
   };
 
   const removeCaseImage = async (slug: string, index: number) => {
     const updatedCasesList = cases.map((c) => {
       if (c.slug !== slug) return c;
-      const newImgs = c.imgs.filter((_, i) => i !== index);
-      return { ...c, imgs: newImgs };
+      const currentImgs = Array.isArray(c.imgs) ? c.imgs : [];
+      return { ...c, imgs: currentImgs.filter((_, i) => i !== index) };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Peça removida');
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Imagem removida');
   };
 
   const reorderCaseVideos = async (slug: string, sourceIdx: number, targetIdx: number) => {
     if (sourceIdx === targetIdx) return;
-    const updatedCasesList = cases.map((c) => {
-      if (c.slug !== slug) return c;
-      const newYt = [...c.yt];
-      const [moved] = newYt.splice(sourceIdx, 1);
-      newYt.splice(targetIdx, 0, moved);
-      return { ...c, yt: newYt };
-    });
+    const targetCase = cases.find((c) => c.slug === slug);
+    if (!targetCase || !targetCase.yt) return;
+    const newYt = [...targetCase.yt];
+    const [moved] = newYt.splice(sourceIdx, 1);
+    newYt.splice(targetIdx, 0, moved);
+    const updatedCasesList = cases.map((c) => (c.slug === slug ? { ...c, yt: newYt } : c));
     await commitChanges(updatedCasesList, sobre, gridSettings, 'Ordem dos vídeos atualizada');
   };
 
-  const addCaseVideo = async (slug: string, input: string) => {
-    if (!input.trim()) return;
-    let videoId = input.trim();
-    if (videoId.includes('v=')) {
-      videoId = videoId.split('v=')[1]?.split('&')[0] || videoId;
-    } else if (videoId.includes('youtu.be/')) {
-      videoId = videoId.split('youtu.be/')[1]?.split('?')[0] || videoId;
-    }
+  const addCaseVideo = async (slug: string, ytId: string) => {
     const updatedCasesList = cases.map((c) => {
       if (c.slug !== slug) return c;
-      return { ...c, yt: [...c.yt, videoId] };
+      const currentYt = Array.isArray(c.yt) ? c.yt : [];
+      return { ...c, yt: [...currentYt, ytId] };
     });
     await commitChanges(updatedCasesList, sobre, gridSettings, 'Vídeo adicionado');
   };
@@ -605,8 +594,8 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const removeCaseVideo = async (slug: string, index: number) => {
     const updatedCasesList = cases.map((c) => {
       if (c.slug !== slug) return c;
-      const newYt = c.yt.filter((_, i) => i !== index);
-      return { ...c, yt: newYt };
+      const currentYt = Array.isArray(c.yt) ? c.yt : [];
+      return { ...c, yt: currentYt.filter((_, i) => i !== index) };
     });
     await commitChanges(updatedCasesList, sobre, gridSettings, 'Vídeo removido');
   };
@@ -614,87 +603,84 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateCaseBlocks = async (slug: string, blocks: CaseBlock[]) => {
     const updatedCasesList = cases.map((c) => {
       if (c.slug !== slug) return c;
-      const text = blocks
-        .filter((b) => b.type === 'text')
-        .flatMap((b) => (b.value || '').split(/\n\s*\n/).filter((p: string) => p.trim()));
-      const yt = blocks.filter((b) => b.type === 'video').map((b) => b.value);
-      const imgs = blocks.filter((b) => b.type === 'image').map((b) => b.value);
-      return {
-        ...c,
-        blocks,
-        text,
-        yt,
-        imgs,
-      };
+      return { ...c, blocks };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Blocos atualizados');
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Layout do projeto atualizado');
   };
 
   const updateSobreField = async <K extends keyof SobreData>(field: K, value: SobreData[K]) => {
-    const updatedSobre = { ...sobre, [field]: value };
+    const updatedSobre = sanitizeSobreData({ ...sobre, [field]: value });
     await commitChanges(cases, updatedSobre, gridSettings, 'Seção Sobre atualizada');
   };
 
   const updateSobreBioParagraph = async (index: number, value: string) => {
-    const newBio = [...sobre.bio];
-    newBio[index] = value;
-    const updatedSobre = { ...sobre, bio: newBio };
-    await commitChanges(cases, updatedSobre, gridSettings, 'Biografia atualizada');
+    const currentBio = Array.isArray(sobre.bio) ? [...sobre.bio] : [];
+    currentBio[index] = value;
+    await updateSobreField('bio', currentBio);
   };
 
   const addSobreBioParagraph = async () => {
-    const updatedSobre = {
-      ...sobre,
-      bio: [...sobre.bio, 'Novo parágrafo da biografia. Clique para editar.'],
-    };
-    await commitChanges(cases, updatedSobre, gridSettings, 'Novo parágrafo da bio adicionado');
+    const currentBio = Array.isArray(sobre.bio) ? [...sobre.bio] : [];
+    currentBio.push('Novo parágrafo...');
+    await updateSobreField('bio', currentBio);
   };
 
   const removeSobreBioParagraph = async (index: number) => {
-    const updatedSobre = {
-      ...sobre,
-      bio: sobre.bio.filter((_, i) => i !== index),
-    };
-    await commitChanges(cases, updatedSobre, gridSettings, 'Parágrafo da bio removido');
+    const currentBio = Array.isArray(sobre.bio) ? sobre.bio.filter((_, i) => i !== index) : [];
+    await updateSobreField('bio', currentBio);
   };
 
   const updateSobreStat = async (statKey: keyof SobreData['stats'], value: string) => {
-    const updatedSobre = {
-      ...sobre,
-      stats: {
-        ...sobre.stats,
-        [statKey]: value,
-      },
-    };
-    await commitChanges(cases, updatedSobre, gridSettings, 'Estatística atualizada');
+    const updatedStats = { ...sobre.stats, [statKey]: value };
+    await updateSobreField('stats', updatedStats);
   };
 
   const updateSobreTypography = async (key: keyof SobreTypography, value: any) => {
-    const updatedSobre = {
-      ...sobre,
-      typography: {
-        ...sobre.typography,
-        [key]: value,
-      },
+    const currentTypo: SobreTypography = sobre.typography || {
+      fontSize: 'base',
+      fontWeight: 'normal',
+      titleSize: 'xl',
     };
-    await commitChanges(cases, updatedSobre, gridSettings, 'Tipografia atualizada');
+    const updatedTypo: SobreTypography = { ...currentTypo, [key]: value };
+    await updateSobreField('typography', updatedTypo);
   };
 
   const addSobreSegment = async (segment: string) => {
-    if (!segment.trim()) return;
-    const updatedSobre = {
-      ...sobre,
-      segments: [...sobre.segments, segment.trim()],
-    };
-    await commitChanges(cases, updatedSobre, gridSettings, 'Segmento adicionado');
+    const currentSegments = Array.isArray(sobre.segments) ? [...sobre.segments, segment] : [segment];
+    await updateSobreField('segments', currentSegments);
   };
 
   const removeSobreSegment = async (index: number) => {
-    const updatedSobre = {
-      ...sobre,
-      segments: sobre.segments.filter((_, i) => i !== index),
-    };
-    await commitChanges(cases, updatedSobre, gridSettings, 'Segmento removido');
+    const currentSegments = Array.isArray(sobre.segments) ? sobre.segments.filter((_, i) => i !== index) : [];
+    await updateSobreField('segments', currentSegments);
+  };
+
+  const saveChanges = async () => {
+    await syncToCloud(cases, sobre, gridSettings, servicos, 'Todas as alterações salvas');
+  };
+
+  const resetToOriginal = async () => {
+    if (!window.confirm('Tem certeza que deseja restaurar o portfólio para os dados originais de fábrica? Todas as edições não exportadas serão perdidas.')) {
+      return;
+    }
+    setCases(ORIGINAL_CASES);
+    setSobre(ORIGINAL_SOBRE_DATA);
+    setGridSettings({ gridLadoA: 2, gridLadoB: 3, gridBonus: 2 });
+    setServicos({ ...DEFAULT_SERVICOS_DATA });
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(ORIGINAL_CASES));
+      localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(ORIGINAL_SOBRE_DATA));
+      localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify({ gridLadoA: 2, gridLadoB: 3, gridBonus: 2 }));
+      localStorage.setItem(STORAGE_LAYOUT_KEY, '2');
+      localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(DEFAULT_SERVICOS_DATA));
+    } catch (e) {}
+    await syncToCloud(
+      ORIGINAL_CASES,
+      ORIGINAL_SOBRE_DATA,
+      { gridLadoA: 2, gridLadoB: 3, gridBonus: 2 },
+      DEFAULT_SERVICOS_DATA,
+      'Portfólio restaurado para o original'
+    );
   };
 
   const addNewCase = async (caseData: {
@@ -708,130 +694,60 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     yt?: string[];
     gridSpan?: GridSpanType;
   }): Promise<CaseItem> => {
-    const baseSlug = caseData.name
+    const slug = caseData.name
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '') || `projeto-${Date.now()}`;
+      .replace(/^-+|-+$/g, '') || `case-${Date.now()}`;
 
-    let finalSlug = baseSlug;
-    let counter = 1;
-    while (cases.some((c) => c.slug === finalSlug)) {
-      finalSlug = `${baseSlug}-${counter++}`;
-    }
-
-    const countOnLado = cases.filter((c) => c.lado === caseData.lado).length;
-    const faixaNum = countOnLado + 1;
-    const faixa = `FAIXA ${faixaNum < 10 ? '0' + faixaNum : faixaNum}`;
-
-    const newCaseItem: CaseItem = {
-      slug: finalSlug,
+    const newCase: CaseItem = {
+      slug,
+      name: caseData.name,
+      concept: caseData.concept,
       lado: caseData.lado,
-      faixa,
-      name: caseData.name.trim(),
-      concept: caseData.concept.trim(),
-      deliv: caseData.deliv?.trim() || 'PROJETO & CONCEITO',
+      faixa: caseData.lado === 'A' ? 'Lado A' : caseData.lado === 'B' ? 'Lado B' : 'Faixa Bônus',
       gridSpan: caseData.gridSpan || 'half',
-      cover:
-        caseData.cover.trim() ||
-        'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80',
-      text: caseData.text.length > 0 ? caseData.text : [caseData.concept],
+      deliv: caseData.deliv || 'PROJETO & CONCEITO',
+      cover: caseData.cover,
+      text: caseData.text,
       imgs: caseData.imgs || [],
       yt: caseData.yt || [],
-      blocks: [
-        {
-          id: `block-${Date.now()}-1`,
-          type: 'text',
-          value: caseData.text.join('\n\n') || caseData.concept,
-        },
-      ],
     };
 
-    const newCasesList = [newCaseItem, ...cases];
-    await commitChanges(newCasesList, sobre, gridSettings, `Projeto "${newCaseItem.name}" adicionado`);
-
-    return newCaseItem;
-  };
-
-  const saveChanges = async () => {
-    if (cloudTimeoutRef.current) {
-      clearTimeout(cloudTimeoutRef.current);
-    }
-    await syncToCloud(cases, sobre, gridSettings, servicos, 'Alterações sincronizadas');
+    const newCasesList = [newCase, ...cases];
+    await commitChanges(newCasesList, sobre, gridSettings, 'Novo projeto adicionado');
+    return newCase;
   };
 
   const exportCasesJson = () => {
-    try {
-      const dataStr = JSON.stringify(cases, null, 2);
-      const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'cases.json';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      showToast('Ficheiro cases.json descarregado com sucesso!');
-    } catch (e) {
-      console.error(e);
-      showToast('Erro ao gerar ficheiro JSON.');
-    }
+    const payload = {
+      cases,
+      sobre,
+      servicos,
+      gridSettings,
+      exportedAt: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `portfolio-thiago-esteves-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Download do backup JSON iniciado!');
   };
 
   const exportCasesTs = () => {
-    try {
-      const code = `import { CaseItem } from '../types';\n\nexport const CASES: CaseItem[] = ${JSON.stringify(cases, null, 2)};\n`;
-      const blob = new Blob([code], { type: 'text/typescript;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'cases.ts';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      showToast('Ficheiro cases.ts pronto para substituir em src/data/cases.ts!');
-    } catch (e) {
-      console.error(e);
-      showToast('Erro ao gerar ficheiro TypeScript.');
-    }
-  };
-
-  const resetToOriginal = async () => {
-    if (window.confirm('Tem certeza de que deseja restaurar a ordem e os textos originais do portfólio?')) {
-      if (cloudTimeoutRef.current) {
-        clearTimeout(cloudTimeoutRef.current);
-      }
-      setIsSaving(true);
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(STORAGE_SOBRE_KEY);
-      localStorage.removeItem(STORAGE_SERVICOS_KEY);
-      localStorage.removeItem(STORAGE_GRIDS_KEY);
-      setCases(ORIGINAL_CASES);
-      setSobre(ORIGINAL_SOBRE_DATA);
-      setServicos(DEFAULT_SERVICOS_DATA);
-      setHasChanges(false);
-
-      try {
-        const cloudPromise = saveCloudPortfolio(ORIGINAL_CASES, ORIGINAL_SOBRE_DATA, gridSettings, DEFAULT_SERVICOS_DATA);
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('timeout')), 6000)
-        );
-        const cloudRes: any = await Promise.race([cloudPromise, timeoutPromise]).catch(() => ({ success: false }));
-
-        if (cloudRes.success) {
-          showToast('☁️ Portfólio restaurado com sucesso na NUVEM!');
-        } else {
-          showToast('💻 Portfólio restaurado no Navegador (Nuvem Offline).');
-        }
-      } catch (e) {
-        showToast('💻 Portfólio restaurado no Navegador (Offline).');
-      } finally {
-        setIsSaving(false);
-      }
-    }
+    const content = `// Backup gerado em ${new Date().toLocaleString()}\nexport const CASES = ${JSON.stringify(cases, null, 2)};\n`;
+    const blob = new Blob([content], { type: 'text/typescript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cases-export-${new Date().toISOString().slice(0, 10)}.ts`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Download do arquivo TypeScript iniciado!');
   };
 
   return (
@@ -898,12 +814,10 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 };
 
-export const useCms = () => {
+export const useCms = (): CmsContextType => {
   const context = useContext(CmsContext);
   if (!context) {
     throw new Error('useCms must be used within a CmsProvider');
   }
   return context;
 };
-
-export default CmsContext;
