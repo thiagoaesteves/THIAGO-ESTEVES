@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { CaseItem, CaseBlock, GridSpanType } from '../types';
 import { CASES as ORIGINAL_CASES } from '../data/cases';
 import { SobreData, ORIGINAL_SOBRE_DATA, SobreTypography } from '../data/sobre';
@@ -16,7 +16,6 @@ import {
   SectionGridSettings,
 } from '../lib/firebase';
 
-// Storage keys for resilient local fallback cache
 const STORAGE_KEY = 'thiago_portfolio_custom_cases_v19';
 const STORAGE_SOBRE_KEY = 'thiago_portfolio_custom_sobre_v2';
 const STORAGE_SERVICOS_KEY = 'thiago_portfolio_custom_servicos_v4';
@@ -115,6 +114,8 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [activeNotification, setActiveNotification] = useState<string | null>(null);
 
+  const cloudTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const [cases, setCases] = useState<CaseItem[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -204,6 +205,37 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, 4500);
   };
 
+  const syncToCloud = async (
+    targetCases: CaseItem[],
+    targetSobre: SobreData,
+    targetGrids: SectionGridSettings,
+    targetServicos: ServicosData,
+    msg: string
+  ) => {
+    setIsSaving(true);
+    try {
+      const cloudPromise = saveCloudPortfolio(targetCases, targetSobre, targetGrids, targetServicos);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Cloud timeout')), 6000)
+      );
+
+      const cloudRes: any = await Promise.race([cloudPromise, timeoutPromise]).catch(() => ({ success: false }));
+
+      if (cloudRes.success) {
+        setHasChanges(false);
+        showToast(`☁️ ${msg} (Salvo na NUVEM)`);
+      } else {
+        setHasChanges(true);
+        showToast(`💻 ${msg} (Salvo no Navegador - Nuvem Offline)`);
+      }
+    } catch (err) {
+      setHasChanges(true);
+      showToast(`💻 ${msg} (Salvo no Navegador - Offline)`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const commitChanges = async (
     newCases: CaseItem[],
     newSobre: SobreData,
@@ -230,7 +262,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSobre(newSobre);
     setGridSettings(newGrids);
 
-    // 1. Grava imediatamente no navegador (localStorage)
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newCases));
       localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(newSobre));
@@ -241,29 +272,15 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Erro ao atualizar cache local:', e);
     }
 
-    // 2. Tenta sincronizar com a nuvem com timeout de segurança (6 segundos) e finally garantido
-    setIsSaving(true);
-    try {
-      const cloudPromise = saveCloudPortfolio(newCases, newSobre, newGrids, currentServicos);
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Cloud timeout')), 6000)
-      );
+    setHasChanges(true);
 
-      const cloudRes: any = await Promise.race([cloudPromise, timeoutPromise]).catch(() => ({ success: false }));
-
-      if (cloudRes.success) {
-        setHasChanges(false);
-        showToast(`☁️ ${baseText} (Salvo na NUVEM)`);
-      } else {
-        setHasChanges(true);
-        showToast(`💻 ${baseText} (Salvo no Navegador - Nuvem Offline)`);
-      }
-    } catch (err) {
-      setHasChanges(true);
-      showToast(`💻 ${baseText} (Salvo no Navegador - Offline)`);
-    } finally {
-      setIsSaving(false);
+    if (cloudTimeoutRef.current) {
+      clearTimeout(cloudTimeoutRef.current);
     }
+
+    cloudTimeoutRef.current = setTimeout(() => {
+      syncToCloud(newCases, newSobre, newGrids, currentServicos, baseText);
+    }, 1500);
   };
 
   const setGridLadoA = (cols: 1 | 2 | 3) => {
@@ -738,7 +755,10 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const saveChanges = async () => {
-    await commitChanges(cases, sobre, gridSettings, servicos, 'Alterações sincronizadas');
+    if (cloudTimeoutRef.current) {
+      clearTimeout(cloudTimeoutRef.current);
+    }
+    await syncToCloud(cases, sobre, gridSettings, servicos, 'Alterações sincronizadas');
   };
 
   const exportCasesJson = () => {
@@ -781,6 +801,9 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const resetToOriginal = async () => {
     if (window.confirm('Tem certeza de que deseja restaurar a ordem e os textos originais do portfólio?')) {
+      if (cloudTimeoutRef.current) {
+        clearTimeout(cloudTimeoutRef.current);
+      }
       setIsSaving(true);
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(STORAGE_SOBRE_KEY);
