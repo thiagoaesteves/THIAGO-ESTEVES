@@ -55,17 +55,9 @@ export const CaseCard: React.FC<CaseCardProps> = ({
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const coverFileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    // BLINDAGEM TOTAL NO MODO EDIÇÃO: Se estiver a editar, bloqueia absolutamente qualquer abertura de modal ao clicar no card
-    if (isEditMode) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-
-    // Impede o comportamento de salto de link padrão no clique esquerdo normal
-    // permitindo que abra o modal suavemente na mesma página.
-    e.preventDefault();
+  const handleCardClick = () => {
+    // BLINDAGEM TOTAL NO MODO EDIÇÃO: Se estiver no modo edição, o card nunca abre o modal ao ser clicado diretamente
+    if (isEditMode) return;
     onSelect(item);
   };
 
@@ -77,9 +69,8 @@ export const CaseCard: React.FC<CaseCardProps> = ({
     : 'bg-[#FF4FA0]';
 
   return (
-    <a
+    <div
       id={`card-${item.slug}`}
-      href={`#${item.slug}`}
       draggable={isEditMode}
       onDragStart={(e) => {
         if (!isEditMode) return;
@@ -410,7 +401,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
               </span>
             )}
 
-            {/* Nome do Projeto (Limpo, sem caixa, com forte drop-shadow) */}
+            {/* Nome do Projeto */}
             {isEditMode ? (
               <input
                 type="text"
@@ -427,7 +418,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
               </h3>
             )}
 
-            {/* Conceito (Limpo, sem caixa, com forte drop-shadow) */}
+            {/* Conceito */}
             {isEditMode ? (
               <textarea
                 value={item.concept}
@@ -481,7 +472,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
           />
         </div>
       </div>
-    </a>
+    </div>
   );
 };
 
