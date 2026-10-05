@@ -56,23 +56,15 @@ export const CaseCard: React.FC<CaseCardProps> = ({
   const coverFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // BLINDAGEM TOTAL NO MODO EDIÇÃO: Se estiver a editar, bloqueia absolutamente qualquer abertura de modal ao clicar no card
     if (isEditMode) {
-      const target = e.target as HTMLElement;
-      if (
-        target.closest('button') ||
-        target.closest('input') ||
-        target.closest('textarea') ||
-        target.closest('[contenteditable="true"]') ||
-        target.closest('.cms-control')
-      ) {
-        return;
-      }
       e.preventDefault();
+      e.stopPropagation();
       return;
     }
+
     // Impede o comportamento de salto de link padrão no clique esquerdo normal
     // permitindo que abra o modal suavemente na mesma página.
-    // O botão direito / Ctrl+Click continua abrindo em nova aba nativamente.
     e.preventDefault();
     onSelect(item);
   };
@@ -157,7 +149,10 @@ export const CaseCard: React.FC<CaseCardProps> = ({
 
       {/* CMS Drag & Control Bar on top of card */}
       {isEditMode && (
-        <div className="cms-control flex flex-wrap items-center justify-between gap-2 mb-2 p-2 bg-black/90 text-white select-none z-30 relative rounded-none">
+        <div 
+          className="cms-control flex flex-wrap items-center justify-between gap-2 mb-2 p-2 bg-black/90 text-white select-none z-30 relative rounded-none"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 px-2 py-0.5 text-[11px] font-mono-code font-bold bg-[#2340FF] text-white">
               <GripVertical className="w-3 h-3" />
@@ -281,14 +276,17 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             </span>
             <button
               type="button"
-              onClick={() => setIsEditingCover(false)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditingCover(false);
+              }}
               className="text-xs text-gray-400 hover:text-red-400 font-mono-code"
             >
               Fechar
             </button>
           </div>
 
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap gap-2 items-center" onClick={(e) => e.stopPropagation()}>
             <input
               ref={coverFileInputRef}
               type="file"
@@ -315,7 +313,10 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             <button
               type="button"
               disabled={isUploadingCover}
-              onClick={() => coverFileInputRef.current?.click()}
+              onClick={(e) => {
+                e.stopPropagation();
+                coverFileInputRef.current?.click();
+              }}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2340FF] text-white text-xs font-mono-code font-bold cursor-pointer disabled:opacity-50"
             >
               {isUploadingCover ? (
@@ -340,7 +341,8 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             />
             <button
               type="button"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 updateCaseField(item.slug, 'cover', coverInput);
                 setIsEditingCover(false);
               }}
@@ -372,7 +374,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 pointer-events-none" />
 
           {/* Top Right Floating DELIV (Limpo, sem badge) */}
-          <div className="absolute top-4 right-4 sm:top-5 sm:right-5 z-20">
+          <div className="absolute top-4 right-4 sm:top-5 sm:right-5 z-20" onClick={(e) => e.stopPropagation()}>
             {isEditMode ? (
               <input
                 type="text"
@@ -392,7 +394,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
           <div className="relative z-20 w-full" />
 
           {/* Bottom Area: FAIXA com badge blur, Nome e Conceito limpos flutuando */}
-          <div className="relative z-20 mt-auto flex flex-col items-start text-left w-full gap-1.5 max-w-[85%]">
+          <div className="relative z-20 mt-auto flex flex-col items-start text-left w-full gap-1.5 max-w-[85%]" onClick={(e) => { if (isEditMode) e.stopPropagation(); }}>
             {/* FAIXA com badge blur */}
             {isEditMode ? (
               <input
@@ -482,3 +484,5 @@ export const CaseCard: React.FC<CaseCardProps> = ({
     </a>
   );
 };
+
+export default CaseCard;

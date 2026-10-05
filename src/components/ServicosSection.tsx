@@ -114,9 +114,9 @@ export const ServicosSection: React.FC = () => {
   return (
     <div
       id="servicos"
-      className="border-t border-[#DADCE3] bg-[#0F1222] relative z-10 w-full scroll-mt-[74px] sm:scroll-mt-[80px]"
+      className="border-t border-[#DADCE3] bg-[#0F1222] relative z-10 w-full scroll-mt-[74px] sm:scroll-mt-[80px] pb-0 mb-0"
     >
-      <section className="w-full bg-[#0F1222] text-[#0F1222] flex flex-col">
+      <section className="w-full bg-[#0F1222] text-[#0F1222] flex flex-col m-0 p-0">
         
         {/* Bloco Superior com Fundo Claro */}
         <div className="bg-[#F6F7F2] w-full pt-6 pb-5 sm:pt-8 sm:pb-6 text-[#0F1222]">
@@ -191,7 +191,7 @@ export const ServicosSection: React.FC = () => {
                 </div>
               </div>
 
-              {/* Categorias & Entregas 01 a 04 (Borda inferior removida) */}
+              {/* Categorias & Entregas 01 a 04 */}
               <div className="mt-3 sm:mt-4">
                 {isEditMode && (
                   <div className="py-1 text-xs font-mono-code text-[#2340FF] font-bold flex items-center gap-1">
@@ -289,7 +289,7 @@ export const ServicosSection: React.FC = () => {
         </div>
 
         {/* BARRA DE RODAPÉ // 05 */}
-        <div className="bg-[#0F1222] text-[#F6F7F2] w-full max-w-full py-4 sm:py-5 overflow-hidden box-border">
+        <div className="bg-[#0F1222] text-[#F6F7F2] w-full max-w-full py-4 sm:py-5 m-0 border-b-0 overflow-hidden box-border">
           <div className="max-w-[1320px] 2xl:max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 2xl:px-24 w-full">
             <div className="max-w-[1140px] 2xl:max-w-[1440px] space-y-1.5">
               <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full">
