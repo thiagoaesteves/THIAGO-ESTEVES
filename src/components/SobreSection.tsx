@@ -46,6 +46,16 @@ export const SobreSection: React.FC = () => {
 
   const currentTitle = sobre.title || 'Quem é do Méier não bobéia.';
 
+  const cleanName = (sobre.name || 'Thiago Esteves')
+    .replace(/\s*undefined\b/gi, '')
+    .trim() || 'Thiago Esteves';
+  const cleanRole = (sobre.role || 'Creative Copywriter & Storyteller')
+    .replace(/\s*undefined\b/gi, '')
+    .trim() || 'Creative Copywriter & Storyteller';
+  const cleanBadge = (sobre.badge || 'Based in Brazil · Available Worldwide')
+    .replace(/\s*undefined\b/gi, '')
+    .trim() || 'Based in Brazil · Available Worldwide';
+
   const rawBio = Array.isArray(sobre.bio) ? sobre.bio : [currentTitle];
   const normalizedBioItems = rawBio.map((item) => {
     if (typeof item === 'string') {
@@ -119,7 +129,7 @@ export const SobreSection: React.FC = () => {
             <div className="relative w-[240px] sm:w-[265px] lg:w-[295px] xl:w-[310px] aspect-[4/5] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.35)] border border-white/20 bg-[#0F1222] group flex flex-col">
               <img
                 src={sobre.photoUrl}
-                alt={`${sobre.name} · ${sobre.role}`}
+                alt={`${cleanName} · ${cleanRole}`}
                 className="w-full h-full object-cover object-top sm:object-center transition-transform duration-700 ease-out group-hover:scale-105 absolute inset-0"
                 loading="lazy"
                 referrerPolicy="no-referrer"
@@ -160,15 +170,42 @@ export const SobreSection: React.FC = () => {
 
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent pointer-events-none" />
 
-              <div className="mt-auto relative z-10 p-3.5 sm:p-4 lg:p-4.5 flex flex-col items-start text-left">
-                <h3 className="font-disp font-extrabold text-lg sm:text-xl lg:text-[22px] xl:text-[24px] text-white tracking-tight leading-tight">
-                  {sobre.name}
-                </h3>
-                <p className="font-serif-it text-xs sm:text-sm lg:text-[14px] xl:text-[15px] text-[#AFC0FF] italic leading-snug mt-0.5">
-                  {sobre.role}
-                </p>
+              <div className="mt-auto relative z-10 p-3.5 sm:p-4 lg:p-4.5 flex flex-col items-start text-left w-full">
+                {isEditMode ? (
+                  <div className="space-y-1 w-full bg-black/60 p-2 rounded-lg border border-white/20 mb-1">
+                    <input
+                      type="text"
+                      value={cleanName}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\s*undefined\b/gi, '').trim();
+                        updateSobreField('name', val);
+                      }}
+                      className="font-disp font-extrabold text-sm text-white bg-black/50 border border-white/30 rounded px-1.5 py-0.5 w-full focus:outline-none focus:border-[#D4FF3A]"
+                      placeholder="Nome..."
+                    />
+                    <input
+                      type="text"
+                      value={cleanRole}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\s*undefined\b/gi, '').trim();
+                        updateSobreField('role', val);
+                      }}
+                      className="font-serif-it text-xs text-[#AFC0FF] bg-black/50 border border-white/30 rounded px-1.5 py-0.5 w-full focus:outline-none focus:border-[#D4FF3A]"
+                      placeholder="Cargo..."
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <h3 className="font-disp font-extrabold text-lg sm:text-xl lg:text-[22px] xl:text-[24px] text-white tracking-tight leading-tight">
+                      {cleanName}
+                    </h3>
+                    <p className="font-serif-it text-xs sm:text-sm lg:text-[14px] xl:text-[15px] text-[#AFC0FF] italic leading-snug mt-0.5">
+                      {cleanRole}
+                    </p>
+                  </>
+                )}
                 <span className="font-mono-code text-[9px] sm:text-[10px] lg:text-[11px] uppercase tracking-wider text-[#D4FF3A] font-semibold block leading-normal mt-1.5 select-none">
-                  {sobre.badge}
+                  {cleanBadge}
                 </span>
               </div>
             </div>

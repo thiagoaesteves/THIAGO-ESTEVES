@@ -3,6 +3,13 @@ import { CaseItem, CaseBlock, GridSpanType } from '../types';
 import { CASES as ORIGINAL_CASES } from '../data/cases';
 import { SobreData, ORIGINAL_SOBRE_DATA, SobreTypography } from '../data/sobre';
 import {
+  ServicosData,
+  DEFAULT_SERVICOS_DATA,
+  DEFAULT_FOOTER,
+  DEFAULT_MANIFESTO,
+  sanitizeServicosData,
+} from '../data/servicos';
+import {
   fetchCloudPortfolio,
   saveCloudPortfolio,
   testFirestoreConnection,
@@ -12,6 +19,7 @@ import {
 // Storage keys for resilient local fallback cache
 const STORAGE_KEY = 'thiago_portfolio_custom_cases_v19';
 const STORAGE_SOBRE_KEY = 'thiago_portfolio_custom_sobre_v2';
+const STORAGE_SERVICOS_KEY = 'thiago_portfolio_custom_servicos_v4';
 const STORAGE_LAYOUT_KEY = 'thiago_portfolio_grid_columns';
 const STORAGE_GRIDS_KEY = 'thiago_portfolio_section_grids_v1';
 
@@ -24,6 +32,7 @@ interface CmsContextType {
   changePassword: () => void;
   cases: CaseItem[];
   sobre: SobreData;
+  servicos: ServicosData;
   gridLadoA: 1 | 2 | 3;
   gridLadoB: 1 | 2 | 3;
   gridBonus: 1 | 2 | 3;
@@ -57,6 +66,7 @@ interface CmsContextType {
   updateSobreTypography: (key: keyof SobreTypography, value: any) => Promise<void>;
   addSobreSegment: (segment: string) => Promise<void>;
   removeSobreSegment: (index: number) => Promise<void>;
+  updateServicosField: (field: string, value: any) => Promise<void>;
   saveChanges: () => Promise<void>;
   resetToOriginal: () => Promise<void>;
   exportModalOpen: boolean;
@@ -81,6 +91,20 @@ interface CmsContextType {
 }
 
 const CmsContext = createContext<CmsContextType | undefined>(undefined);
+
+const sanitizeSobreData = (data: any): SobreData => {
+  const merged: SobreData = { ...ORIGINAL_SOBRE_DATA, ...(data || {}) };
+  if (typeof merged.name === 'string') {
+    merged.name = merged.name.replace(/\s*undefined\b/gi, '').trim() || 'Thiago Esteves';
+  }
+  if (typeof merged.role === 'string') {
+    merged.role = merged.role.replace(/\s*undefined\b/gi, '').trim() || 'Creative Copywriter & Storyteller';
+  }
+  if (typeof merged.badge === 'string') {
+    merged.badge = merged.badge.replace(/\s*undefined\b/gi, '').trim() || 'Based in Brazil · Available Worldwide';
+  }
+  return merged;
+};
 
 export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
@@ -121,7 +145,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object') {
-          return { ...ORIGINAL_SOBRE_DATA, ...parsed };
+          return sanitizeSobreData(parsed);
         }
       }
     } catch (e) {
@@ -147,6 +171,35 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { gridLadoA: 2, gridLadoB: 3, gridBonus: 2 };
   });
 
+  const [servicos, setServicos] = useState<ServicosData>(() => {
+    try {
+      // Limpeza forçada de chaves antigas ou corrompidas do localStorage
+      localStorage.removeItem('thiago_portfolio_custom_servicos_v1');
+      localStorage.removeItem('thiago_portfolio_custom_servicos_v2');
+      localStorage.removeItem('thiago_portfolio_custom_servicos_v3');
+
+      const saved = localStorage.getItem(STORAGE_SERVICOS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          const sanitized = sanitizeServicosData(parsed);
+          // Se o footer estiver vazio ou com texto em falta no cache, garante o footer padrão
+          if (!sanitized.footer?.badge || sanitized.footer.badge.trim() === '') {
+            sanitized.footer = { ...DEFAULT_FOOTER };
+          }
+          return sanitized;
+        }
+      }
+    } catch (e) {
+      console.error('Erro ao ler dados de Serviços do localStorage:', e);
+    }
+    // Grava imediatamente o padrão no localStorage para forçar estado consistente
+    try {
+      localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(DEFAULT_SERVICOS_DATA));
+    } catch (e) {}
+    return { ...DEFAULT_SERVICOS_DATA };
+  });
+
   const showToast = (msg: string) => {
     setActiveNotification(msg);
     setTimeout(() => {
@@ -154,7 +207,28 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, 4500);
   };
 
-  const commitChanges = async (newCases: CaseItem[], newSobre: SobreData, newGrids: SectionGridSettings, successMsg?: string) => {
+  const commitChanges = async (
+    newCases: CaseItem[],
+    newSobre: SobreData,
+    newGrids: SectionGridSettings,
+    newServicosOrMsg?: ServicosData | string,
+    successMsg?: string
+  ) => {
+    let currentServicos = servicos;
+    let baseText = 'Alterações salvas';
+
+    if (typeof newServicosOrMsg === 'string') {
+      baseText = newServicosOrMsg;
+    } else if (newServicosOrMsg && typeof newServicosOrMsg === 'object') {
+      currentServicos = sanitizeServicosData(newServicosOrMsg);
+      setServicos(currentServicos);
+      if (successMsg) {
+        baseText = successMsg;
+      }
+    } else if (successMsg) {
+      baseText = successMsg;
+    }
+
     setCases(newCases);
     setSobre(newSobre);
     setGridSettings(newGrids);
@@ -164,15 +238,14 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(newSobre));
       localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(newGrids));
       localStorage.setItem(STORAGE_LAYOUT_KEY, String(newGrids.gridLadoA));
+      localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(currentServicos));
     } catch (e) {
       console.warn('Erro ao atualizar cache local:', e);
     }
 
     setIsSaving(true);
-    const cloudRes = await saveCloudPortfolio(newCases, newSobre, newGrids);
+    const cloudRes = await saveCloudPortfolio(newCases, newSobre, newGrids, currentServicos);
     setIsSaving(false);
-
-    const baseText = successMsg || 'Alterações salvas';
 
     if (cloudRes.success) {
       setHasChanges(false);
@@ -185,21 +258,29 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const setGridLadoA = (cols: 1 | 2 | 3) => {
     const updated = { ...gridSettings, gridLadoA: cols };
-    commitChanges(cases, sobre, updated, 'Grid do Lado A atualizado');
+    commitChanges(cases, sobre, updated, servicos, 'Grid do Lado A atualizado');
   };
 
   const setGridLadoB = (cols: 1 | 2 | 3) => {
     const updated = { ...gridSettings, gridLadoB: cols };
-    commitChanges(cases, sobre, updated, 'Grid do Lado B atualizado');
+    commitChanges(cases, sobre, updated, servicos, 'Grid do Lado B atualizado');
   };
 
   const setGridBonus = (cols: 1 | 2 | 3) => {
     const updated = { ...gridSettings, gridBonus: cols };
-    commitChanges(cases, sobre, updated, 'Grid da Faixa Bônus atualizado');
+    commitChanges(cases, sobre, updated, servicos, 'Grid da Faixa Bônus atualizado');
   };
 
   const setGridColumns = (cols: 1 | 2 | 3) => {
     setGridLadoA(cols);
+  };
+
+  const updateServicosField = async (field: string, value: any) => {
+    const updated = sanitizeServicosData({
+      ...servicos,
+      [field]: value,
+    });
+    await commitChanges(cases, sobre, gridSettings, updated, 'Serviços atualizados');
   };
 
   useEffect(() => {
@@ -207,24 +288,44 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     fetchCloudPortfolio()
       .then((cloudData) => {
-        const hasLocalEdits = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(STORAGE_SOBRE_KEY);
-        
-        if (!hasLocalEdits) {
-          if (cloudData.cases && Array.isArray(cloudData.cases) && cloudData.cases.length > 0) {
-            setCases(cloudData.cases);
-            try {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudData.cases));
-            } catch (e) {}
+        if (cloudData.cases && Array.isArray(cloudData.cases) && cloudData.cases.length > 0) {
+          setCases(cloudData.cases);
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudData.cases));
+          } catch (e) {}
+        }
+        if (cloudData.sobre && typeof cloudData.sobre === 'object') {
+          const sanitized = sanitizeSobreData(cloudData.sobre);
+          setSobre(sanitized);
+          try {
+            localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(sanitized));
+          } catch (e) {}
+        }
+        if (cloudData.servicos && typeof cloudData.servicos === 'object') {
+          const sanitizedServicos = sanitizeServicosData(cloudData.servicos);
+          // Se qualquer campo do footer vier vazio da nuvem, força o valor padrão do footer
+          if (!sanitizedServicos.footer?.badge || sanitizedServicos.footer.badge.trim() === '') {
+            sanitizedServicos.footer.badge = DEFAULT_FOOTER.badge;
           }
-          if (cloudData.sobre && typeof cloudData.sobre === 'object') {
-            setSobre(cloudData.sobre);
-            try {
-              localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(cloudData.sobre));
-            } catch (e) {}
+          if (!sanitizedServicos.footer?.line1 || sanitizedServicos.footer.line1.trim() === '') {
+            sanitizedServicos.footer.line1 = DEFAULT_FOOTER.line1;
           }
+          if (!sanitizedServicos.footer?.line2 || sanitizedServicos.footer.line2.trim() === '') {
+            sanitizedServicos.footer.line2 = DEFAULT_FOOTER.line2;
+          }
+          setServicos(sanitizedServicos);
+          try {
+            localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(sanitizedServicos));
+          } catch (e) {}
+        } else {
+          // Se não veio nada da nuvem, assegura que o estado e o cache usem DEFAULT_SERVICOS_DATA
+          setServicos({ ...DEFAULT_SERVICOS_DATA });
+          try {
+            localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(DEFAULT_SERVICOS_DATA));
+          } catch (e) {}
         }
 
-        if (cloudData.gridSettings && !localStorage.getItem(STORAGE_GRIDS_KEY)) {
+        if (cloudData.gridSettings) {
           setGridSettings(cloudData.gridSettings);
           try {
             localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(cloudData.gridSettings));
@@ -629,7 +730,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const saveChanges = async () => {
-    await commitChanges(cases, sobre, gridSettings, 'Alterações sincronizadas');
+    await commitChanges(cases, sobre, gridSettings, servicos, 'Alterações sincronizadas');
   };
 
   const exportCasesJson = () => {
@@ -675,12 +776,14 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsSaving(true);
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(STORAGE_SOBRE_KEY);
+      localStorage.removeItem(STORAGE_SERVICOS_KEY);
       localStorage.removeItem(STORAGE_GRIDS_KEY);
       setCases(ORIGINAL_CASES);
       setSobre(ORIGINAL_SOBRE_DATA);
+      setServicos(DEFAULT_SERVICOS_DATA);
       setHasChanges(false);
 
-      const cloudRes = await saveCloudPortfolio(ORIGINAL_CASES, ORIGINAL_SOBRE_DATA, gridSettings);
+      const cloudRes = await saveCloudPortfolio(ORIGINAL_CASES, ORIGINAL_SOBRE_DATA, gridSettings, DEFAULT_SERVICOS_DATA);
       setIsSaving(false);
       
       if (cloudRes.success) {
@@ -702,6 +805,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         changePassword,
         cases,
         sobre,
+        servicos,
         gridLadoA: gridSettings.gridLadoA,
         gridLadoB: gridSettings.gridLadoB,
         gridBonus: gridSettings.gridBonus,
@@ -735,6 +839,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateSobreTypography,
         addSobreSegment,
         removeSobreSegment,
+        updateServicosField,
         saveChanges,
         resetToOriginal,
         exportModalOpen,
