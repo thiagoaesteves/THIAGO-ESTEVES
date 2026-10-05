@@ -119,13 +119,13 @@ export const ServicosSection: React.FC = () => {
       <section className="w-full bg-[#0F1222] text-[#0F1222] flex flex-col m-0 p-0">
         
         {/* Bloco Superior com Fundo Claro */}
-        <div className="bg-[#F6F7F2] w-full pt-6 pb-5 sm:pt-8 sm:pb-6 text-[#0F1222]">
+        <div className="bg-[#F6F7F2] w-full pt-6 pb-2.5 sm:pt-8 sm:pb-3.5 text-[#0F1222]">
           <div className="max-w-[1320px] 2xl:max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 2xl:px-24 w-full">
-            <div className="max-w-[1140px] 2xl:max-w-[1440px]">
+            <div className="w-full max-w-[1333px]">
               
               {/* Header & Manifesto Intro */}
               <div className="space-y-1.5">
-                <span className="font-mono-code text-[10px] sm:text-xs uppercase tracking-widest text-[#2340FF] font-bold block mb-1">
+                <span className="font-mono-code text-[10px] sm:text-xs uppercase tracking-widest text-[#2340FF] font-bold block mb-4">
                   Especialidades &amp; Craft
                 </span>
 
@@ -288,8 +288,8 @@ export const ServicosSection: React.FC = () => {
           </div>
         </div>
 
-        {/* BARRA DE RODAPÉ // 05 */}
-        <div className="bg-[#0F1222] text-[#F6F7F2] w-full max-w-full py-4 sm:py-5 m-0 border-b-0 overflow-hidden box-border">
+        {/* BARRA DE RODAPÉ // 05 (Altura expandida e texto alinhado verticalmente ao centro) */}
+        <div className="bg-[#0F1222] text-[#F6F7F2] w-full max-w-full py-10 sm:py-14 m-0 border-b-0 overflow-hidden box-border flex flex-col justify-center">
           <div className="max-w-[1320px] 2xl:max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 2xl:px-24 w-full">
             <div className="max-w-[1140px] 2xl:max-w-[1440px] space-y-1.5">
               <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full">
