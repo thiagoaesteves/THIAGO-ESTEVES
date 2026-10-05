@@ -91,7 +91,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [activeNotification, setActiveNotification] = useState<string | null>(null);
 
-  // Initial load from local cache fallback
   const [cases, setCases] = useState<CaseItem[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -144,9 +143,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           };
         }
       }
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) {}
     return { gridLadoA: 2, gridLadoB: 3, gridBonus: 2 };
   });
 
@@ -154,10 +151,9 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActiveNotification(msg);
     setTimeout(() => {
       setActiveNotification((curr) => (curr === msg ? null : curr));
-    }, 3500);
+    }, 4500);
   };
 
-  // Função centralizada para persistir dados localmente e sincronizar automaticamente com a nuvem
   const commitChanges = async (newCases: CaseItem[], newSobre: SobreData, newGrids: SectionGridSettings, successMsg?: string) => {
     setCases(newCases);
     setSobre(newSobre);
@@ -176,35 +172,36 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cloudRes = await saveCloudPortfolio(newCases, newSobre, newGrids);
     setIsSaving(false);
 
+    const baseText = successMsg || 'Alterações salvas';
+
     if (cloudRes.success) {
       setHasChanges(false);
-      if (successMsg) showToast(successMsg);
+      showToast(`☁️ ${baseText} (Salvo na NUVEM)`);
     } else {
       setHasChanges(true);
-      showToast('Salvo localmente (offline ou erro na nuvem).');
+      showToast(`💻 ${baseText} (Salvo apenas no NAVEGADOR - Erro na nuvem)`);
     }
   };
 
   const setGridLadoA = (cols: 1 | 2 | 3) => {
     const updated = { ...gridSettings, gridLadoA: cols };
-    commitChanges(cases, sobre, updated, 'Grid do Lado A atualizado e salvo na nuvem.');
+    commitChanges(cases, sobre, updated, 'Grid do Lado A atualizado');
   };
 
   const setGridLadoB = (cols: 1 | 2 | 3) => {
     const updated = { ...gridSettings, gridLadoB: cols };
-    commitChanges(cases, sobre, updated, 'Grid do Lado B atualizado e salvo na nuvem.');
+    commitChanges(cases, sobre, updated, 'Grid do Lado B atualizado');
   };
 
   const setGridBonus = (cols: 1 | 2 | 3) => {
     const updated = { ...gridSettings, gridBonus: cols };
-    commitChanges(cases, sobre, updated, 'Grid da Faixa Bônus atualizado e salvo na nuvem.');
+    commitChanges(cases, sobre, updated, 'Grid da Faixa Bônus atualizado');
   };
 
   const setGridColumns = (cols: 1 | 2 | 3) => {
     setGridLadoA(cols);
   };
 
-  // Load cloud data safely on startup
   useEffect(() => {
     testFirestoreConnection();
 
@@ -345,16 +342,15 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [isEditMode]);
 
-  // Funções de atualização equipadas com sincronização automática com a nuvem
   const updateCaseField = async (slug: string, field: keyof CaseItem, value: any) => {
     const updatedCasesList = cases.map((c) => (c.slug === slug ? { ...c, [field]: value } : c));
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Alteração salva na nuvem.');
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Campo atualizado');
   };
 
   const updateCaseGridSpan = async (slug: string, span: GridSpanType) => {
     const updatedCasesList = cases.map((c) => (c.slug === slug ? { ...c, gridSpan: span } : c));
     const spanLabel = span === 'full' ? 'Destaque (100%)' : span === 'half' ? 'Médio (50%)' : 'Compacto (33%)';
-    await commitChanges(updatedCasesList, sobre, gridSettings, `Layout alterado para ${spanLabel} e salvo na nuvem.`);
+    await commitChanges(updatedCasesList, sobre, gridSettings, `Layout alterado para ${spanLabel}`);
   };
 
   const updateCaseParagraph = async (slug: string, index: number, value: string) => {
@@ -364,7 +360,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       newText[index] = value;
       return { ...c, text: newText };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings);
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Parágrafo atualizado');
   };
 
   const addCaseParagraph = async (slug: string) => {
@@ -372,7 +368,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (c.slug !== slug) return c;
       return { ...c, text: [...c.text, 'Novo parágrafo de texto...'] };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Novo parágrafo adicionado e salvo.');
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Novo parágrafo adicionado');
   };
 
   const removeCaseParagraph = async (slug: string, index: number) => {
@@ -381,7 +377,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const newText = c.text.filter((_, i) => i !== index);
       return { ...c, text: newText };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Parágrafo removido e salvo.');
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Parágrafo removido');
   };
 
   const reorderCases = async (draggedSlug: string, targetSlug: string) => {
@@ -396,7 +392,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     moved.lado = targetItem.lado;
     newCases.splice(toIndex, 0, moved);
 
-    await commitChanges(newCases, sobre, gridSettings, 'Ordem dos projetos atualizada na nuvem!');
+    await commitChanges(newCases, sobre, gridSettings, 'Ordem dos projetos atualizada');
   };
 
   const moveCaseOrder = async (slug: string, direction: 'up' | 'down') => {
@@ -420,7 +416,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [moved] = newCases.splice(fromGlobalIndex, 1);
     newCases.splice(toGlobalIndex, 0, moved);
 
-    await commitChanges(newCases, sobre, gridSettings, 'Projeto movido e salvo na nuvem.');
+    await commitChanges(newCases, sobre, gridSettings, 'Projeto movido');
   };
 
   const reorderCaseImages = async (slug: string, sourceIdx: number, targetIdx: number) => {
@@ -432,7 +428,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       newImgs.splice(targetIdx, 0, moved);
       return { ...c, imgs: newImgs };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Ordem das peças/imagens atualizada!');
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Ordem das peças/imagens atualizada');
   };
 
   const addCaseImage = async (slug: string, url: string) => {
@@ -441,7 +437,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (c.slug !== slug) return c;
       return { ...c, imgs: [...c.imgs, url.trim()] };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Nova peça/imagem adicionada!');
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Nova peça/imagem adicionada');
   };
 
   const removeCaseImage = async (slug: string, index: number) => {
@@ -450,7 +446,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const newImgs = c.imgs.filter((_, i) => i !== index);
       return { ...c, imgs: newImgs };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Peça removida.');
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Peça removida');
   };
 
   const reorderCaseVideos = async (slug: string, sourceIdx: number, targetIdx: number) => {
@@ -462,7 +458,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       newYt.splice(targetIdx, 0, moved);
       return { ...c, yt: newYt };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Ordem dos vídeos atualizada!');
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Ordem dos vídeos atualizada');
   };
 
   const addCaseVideo = async (slug: string, input: string) => {
@@ -477,7 +473,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (c.slug !== slug) return c;
       return { ...c, yt: [...c.yt, videoId] };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Vídeo adicionado!');
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Vídeo adicionado');
   };
 
   const removeCaseVideo = async (slug: string, index: number) => {
@@ -486,7 +482,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const newYt = c.yt.filter((_, i) => i !== index);
       return { ...c, yt: newYt };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Vídeo removido.');
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Vídeo removido');
   };
 
   const updateCaseBlocks = async (slug: string, blocks: CaseBlock[]) => {
@@ -505,19 +501,19 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         imgs,
       };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings);
+    await commitChanges(updatedCasesList, sobre, gridSettings, 'Blocos atualizados');
   };
 
   const updateSobreField = async <K extends keyof SobreData>(field: K, value: SobreData[K]) => {
     const updatedSobre = { ...sobre, [field]: value };
-    await commitChanges(cases, updatedSobre, gridSettings, 'Seção Sobre atualizada na nuvem.');
+    await commitChanges(cases, updatedSobre, gridSettings, 'Seção Sobre atualizada');
   };
 
   const updateSobreBioParagraph = async (index: number, value: string) => {
     const newBio = [...sobre.bio];
     newBio[index] = value;
     const updatedSobre = { ...sobre, bio: newBio };
-    await commitChanges(cases, updatedSobre, gridSettings);
+    await commitChanges(cases, updatedSobre, gridSettings, 'Biografia atualizada');
   };
 
   const addSobreBioParagraph = async () => {
@@ -525,7 +521,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...sobre,
       bio: [...sobre.bio, 'Novo parágrafo da biografia. Clique para editar.'],
     };
-    await commitChanges(cases, updatedSobre, gridSettings, 'Novo parágrafo adicionado.');
+    await commitChanges(cases, updatedSobre, gridSettings, 'Novo parágrafo da bio adicionado');
   };
 
   const removeSobreBioParagraph = async (index: number) => {
@@ -533,7 +529,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...sobre,
       bio: sobre.bio.filter((_, i) => i !== index),
     };
-    await commitChanges(cases, updatedSobre, gridSettings, 'Parágrafo removido.');
+    await commitChanges(cases, updatedSobre, gridSettings, 'Parágrafo da bio removido');
   };
 
   const updateSobreStat = async (statKey: keyof SobreData['stats'], value: string) => {
@@ -544,7 +540,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         [statKey]: value,
       },
     };
-    await commitChanges(cases, updatedSobre, gridSettings);
+    await commitChanges(cases, updatedSobre, gridSettings, 'Estatística atualizada');
   };
 
   const updateSobreTypography = async (key: keyof SobreTypography, value: any) => {
@@ -555,7 +551,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         [key]: value,
       },
     };
-    await commitChanges(cases, updatedSobre, gridSettings);
+    await commitChanges(cases, updatedSobre, gridSettings, 'Tipografia atualizada');
   };
 
   const addSobreSegment = async (segment: string) => {
@@ -564,7 +560,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...sobre,
       segments: [...sobre.segments, segment.trim()],
     };
-    await commitChanges(cases, updatedSobre, gridSettings, 'Segmento adicionado!');
+    await commitChanges(cases, updatedSobre, gridSettings, 'Segmento adicionado');
   };
 
   const removeSobreSegment = async (index: number) => {
@@ -572,7 +568,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...sobre,
       segments: sobre.segments.filter((_, i) => i !== index),
     };
-    await commitChanges(cases, updatedSobre, gridSettings, 'Segmento removido.');
+    await commitChanges(cases, updatedSobre, gridSettings, 'Segmento removido');
   };
 
   const addNewCase = async (caseData: {
@@ -627,13 +623,13 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     const newCasesList = [newCaseItem, ...cases];
-    await commitChanges(newCasesList, sobre, gridSettings, `Projeto "${newCaseItem.name}" publicado na nuvem!`);
+    await commitChanges(newCasesList, sobre, gridSettings, `Projeto "${newCaseItem.name}" adicionado`);
 
     return newCaseItem;
   };
 
   const saveChanges = async () => {
-    await commitChanges(cases, sobre, gridSettings, 'Todas as alterações foram salvas e sincronizadas com sucesso!');
+    await commitChanges(cases, sobre, gridSettings, 'Alterações sincronizadas');
   };
 
   const exportCasesJson = () => {
@@ -684,9 +680,14 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSobre(ORIGINAL_SOBRE_DATA);
       setHasChanges(false);
 
-      await saveCloudPortfolio(ORIGINAL_CASES, ORIGINAL_SOBRE_DATA, gridSettings);
+      const cloudRes = await saveCloudPortfolio(ORIGINAL_CASES, ORIGINAL_SOBRE_DATA, gridSettings);
       setIsSaving(false);
-      showToast('Portfólio restaurado com sucesso!');
+      
+      if (cloudRes.success) {
+        showToast('☁️ Portfólio restaurado com sucesso na NUVEM!');
+      } else {
+        showToast('💻 Portfólio restaurado apenas no NAVEGADOR (Erro na nuvem).');
+      }
     }
   };
 

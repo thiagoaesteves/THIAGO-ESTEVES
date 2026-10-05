@@ -3,18 +3,17 @@ import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCM-syKpAFXDfFjnjf62aZgaxgWqzDQ68s",
-  authDomain: "gen-lang-client-0423855874.firebaseapp.com",
-  projectId: "gen-lang-client-0423855874",
-  storageBucket: "gen-lang-client-0423855874.firebasestorage.app",
+  authDomain: "ai-studio-thiagoesteves-9fb46c9e-ff07-461c-b108-042469fb0e6.firebaseapp.com",
+  projectId: "ai-studio-thiagoesteves-9fb46c9e-ff07-461c-b108-042469fb0e6",
+  storageBucket: "ai-studio-thiagoesteves-9fb46c9e-ff07-461c-b108-042469fb0e6.firebasestorage.app",
   messagingSenderId: "11081994761",
   appId: "1:11081994761:web:3bfb6452764b1e0dec5ed8"
 };
 
-// Inicialização segura
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Ligação correta ao banco de dados personalizado visível na sua imagem
-export const db = getFirestore(app, "ai-studio-thiagoesteves-9fb46c9e-ff07-461c-b108-042469fb0e6");
+// Liga à base de dados padrão do Project ID correto
+export const db = getFirestore(app);
 
 export interface SectionGridSettings {
   gridLadoA: 1 | 2 | 3;
@@ -22,7 +21,6 @@ export interface SectionGridSettings {
   gridBonus: 1 | 2 | 3;
 }
 
-// Apontando para a coleção real visível no painel
 const PORTFOLIO_DOC_REF = doc(db, "portfolio_content", "cases");
 
 export async function fetchCloudPortfolio(): Promise<{
