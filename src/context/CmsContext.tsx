@@ -173,7 +173,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [servicos, setServicos] = useState<ServicosData>(() => {
     try {
-      // Limpeza forçada de chaves antigas ou corrompidas do localStorage
       localStorage.removeItem('thiago_portfolio_custom_servicos_v1');
       localStorage.removeItem('thiago_portfolio_custom_servicos_v2');
       localStorage.removeItem('thiago_portfolio_custom_servicos_v3');
@@ -183,7 +182,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object') {
           const sanitized = sanitizeServicosData(parsed);
-          // Se o footer estiver vazio ou com texto em falta no cache, garante o footer padrão
           if (!sanitized.footer?.badge || sanitized.footer.badge.trim() === '') {
             sanitized.footer = { ...DEFAULT_FOOTER };
           }
@@ -193,7 +191,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.error('Erro ao ler dados de Serviços do localStorage:', e);
     }
-    // Grava imediatamente o padrão no localStorage para forçar estado consistente
     try {
       localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(DEFAULT_SERVICOS_DATA));
     } catch (e) {}
@@ -233,6 +230,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSobre(newSobre);
     setGridSettings(newGrids);
 
+    // 1. Grava imediatamente no navegador (localStorage)
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newCases));
       localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(newSobre));
@@ -243,16 +241,28 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Erro ao atualizar cache local:', e);
     }
 
+    // 2. Tenta sincronizar com a nuvem com timeout de segurança (6 segundos) e finally garantido
     setIsSaving(true);
-    const cloudRes = await saveCloudPortfolio(newCases, newSobre, newGrids, currentServicos);
-    setIsSaving(false);
+    try {
+      const cloudPromise = saveCloudPortfolio(newCases, newSobre, newGrids, currentServicos);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Cloud timeout')), 6000)
+      );
 
-    if (cloudRes.success) {
-      setHasChanges(false);
-      showToast(`☁️ ${baseText} (Salvo na NUVEM)`);
-    } else {
+      const cloudRes: any = await Promise.race([cloudPromise, timeoutPromise]).catch(() => ({ success: false }));
+
+      if (cloudRes.success) {
+        setHasChanges(false);
+        showToast(`☁️ ${baseText} (Salvo na NUVEM)`);
+      } else {
+        setHasChanges(true);
+        showToast(`💻 ${baseText} (Salvo no Navegador - Nuvem Offline)`);
+      }
+    } catch (err) {
       setHasChanges(true);
-      showToast(`💻 ${baseText} (Salvo apenas no NAVEGADOR - Erro na nuvem)`);
+      showToast(`💻 ${baseText} (Salvo no Navegador - Offline)`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -303,7 +313,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         if (cloudData.servicos && typeof cloudData.servicos === 'object') {
           const sanitizedServicos = sanitizeServicosData(cloudData.servicos);
-          // Se qualquer campo do footer vier vazio da nuvem, força o valor padrão do footer
           if (!sanitizedServicos.footer?.badge || sanitizedServicos.footer.badge.trim() === '') {
             sanitizedServicos.footer.badge = DEFAULT_FOOTER.badge;
           }
@@ -318,7 +327,6 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(sanitizedServicos));
           } catch (e) {}
         } else {
-          // Se não veio nada da nuvem, assegura que o estado e o cache usem DEFAULT_SERVICOS_DATA
           setServicos({ ...DEFAULT_SERVICOS_DATA });
           try {
             localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(DEFAULT_SERVICOS_DATA));
@@ -783,13 +791,22 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setServicos(DEFAULT_SERVICOS_DATA);
       setHasChanges(false);
 
-      const cloudRes = await saveCloudPortfolio(ORIGINAL_CASES, ORIGINAL_SOBRE_DATA, gridSettings, DEFAULT_SERVICOS_DATA);
-      setIsSaving(false);
-      
-      if (cloudRes.success) {
-        showToast('☁️ Portfólio restaurado com sucesso na NUVEM!');
-      } else {
-        showToast('💻 Portfólio restaurado apenas no NAVEGADOR (Erro na nuvem).');
+      try {
+        const cloudPromise = saveCloudPortfolio(ORIGINAL_CASES, ORIGINAL_SOBRE_DATA, gridSettings, DEFAULT_SERVICOS_DATA);
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), 6000)
+        );
+        const cloudRes: any = await Promise.race([cloudPromise, timeoutPromise]).catch(() => ({ success: false }));
+
+        if (cloudRes.success) {
+          showToast('☁️ Portfólio restaurado com sucesso na NUVEM!');
+        } else {
+          showToast('💻 Portfólio restaurado no Navegador (Nuvem Offline).');
+        }
+      } catch (e) {
+        showToast('💻 Portfólio restaurado no Navegador (Offline).');
+      } finally {
+        setIsSaving(false);
       }
     }
   };
