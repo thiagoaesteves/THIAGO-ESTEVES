@@ -48,6 +48,13 @@ export interface SectionGridSettings {
   gridBonus: 1 | 2 | 3;
 }
 
+// Chaves de armazenamento do localStorage para sincronização com a nuvem
+export const STORAGE_KEY = 'thiago_portfolio_custom_cases_v19';
+export const STORAGE_SOBRE_KEY = 'thiago_portfolio_custom_sobre_v2';
+export const STORAGE_SERVICOS_KEY = 'thiago_portfolio_custom_servicos_v4';
+export const STORAGE_LAYOUT_KEY = 'thiago_portfolio_grid_columns';
+export const STORAGE_GRIDS_KEY = 'thiago_portfolio_section_grids_v1';
+
 // Referências aos documentos do Firestore na coleção 'portfolio_content'
 export const PORTFOLIO_DOC_REF = doc(db, "portfolio_content", "cases");
 const DOC_LADO_A_REF = doc(db, "portfolio_content", "cases_lado_a");
@@ -66,8 +73,10 @@ export function cleanForFirestore<T>(data: T): T {
 
 /**
  * Busca os dados mais recentes do portfólio na nuvem.
- * Consulta de forma resiliente tanto a API do Servidor (/api/portfolio),
- * o Google Firestore e o JsonBin (quando configurado), consolidando a versão mais recente.
+ * Dá PRIORIDADE ABSOLUTA E OBRIGATÓRIA à leitura direta do documento unificado
+ * PORTFOLIO_DOC_REF (coleção 'portfolio_content', documento 'cases') no Firestore.
+ * Se o documento existir, retorna-o imediatamente para a aplicação, atualizando
+ * o localStorage e ignorando dados locais antigos, garantindo exibição instantânea.
  */
 export async function fetchCloudPortfolio(): Promise<{
   cases?: any[];
@@ -76,24 +85,50 @@ export async function fetchCloudPortfolio(): Promise<{
   gridSettings?: SectionGridSettings;
   updatedAt?: string;
 }> {
-  let serverData: any = null;
-  let firestoreData: any = null;
-  let jsonBinData: any = null;
-
-  // 1. Consulta a API do Servidor (/api/portfolio)
+  // 1. PRIORIDADE ABSOLUTA E OBRIGATÓRIA: Leitura direta do documento unificado PORTFOLIO_DOC_REF no Firestore
   try {
-    const res = await fetch('/api/portfolio');
-    if (res.ok) {
-      const json = await res.json();
-      if (json && json.success && json.data) {
-        serverData = json.data;
+    let snap = await getDocFromServer(PORTFOLIO_DOC_REF).catch(() => null);
+    if (!snap || !snap.exists()) {
+      snap = await getDoc(PORTFOLIO_DOC_REF).catch(() => null);
+    }
+
+    if (snap && snap.exists()) {
+      const data = snap.data();
+      if (data && (Array.isArray(data.cases) || data.sobre || data.servicos)) {
+        // Atualiza imediatamente o localStorage para anular dados locais defasados
+        try {
+          if (Array.isArray(data.cases) && data.cases.length > 0) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data.cases));
+          }
+          if (data.sobre && typeof data.sobre === 'object') {
+            localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(data.sobre));
+          }
+          if (data.servicos && typeof data.servicos === 'object') {
+            localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(data.servicos));
+          }
+          if (data.gridSettings) {
+            localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(data.gridSettings));
+            localStorage.setItem(STORAGE_LAYOUT_KEY, String(data.gridSettings.gridLadoA || 2));
+          }
+        } catch (storageErr) {
+          console.warn('Aviso ao sincronizar localStorage com Firestore:', storageErr);
+        }
+
+        // Retorna imediatamente os dados oficiais do Firestore unificado para a aplicação
+        return {
+          cases: Array.isArray(data.cases) ? data.cases : undefined,
+          sobre: data.sobre || undefined,
+          servicos: data.servicos || undefined,
+          gridSettings: data.gridSettings || undefined,
+          updatedAt: data.updatedAt || undefined,
+        };
       }
     }
-  } catch (err) {
-    console.warn('Aviso ao consultar /api/portfolio:', err);
+  } catch (firestoreErr) {
+    console.warn('Aviso na leitura direta de PORTFOLIO_DOC_REF no Firestore:', firestoreErr);
   }
 
-  // 2. Consulta o Firestore
+  // 2. FALLBACK 1: Documentos particionados no Firestore (caso documento unificado não exista)
   try {
     const [docA, docB, docBonus, docMeta] = await Promise.all([
       getDoc(DOC_LADO_A_REF).catch(() => null),
@@ -115,39 +150,47 @@ export async function fetchCloudPortfolio(): Promise<{
       const metaData = docMeta && docMeta.exists() ? docMeta.data() : {};
       const combinedCases = [...casesA, ...casesB, ...casesBonus];
 
-      firestoreData = {
+      if (combinedCases.length > 0) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(combinedCases));
+        } catch (e) {}
+      }
+
+      return {
         cases: combinedCases.length > 0 ? combinedCases : undefined,
         sobre: metaData.sobre || undefined,
         servicos: metaData.servicos || undefined,
         gridSettings: metaData.gridSettings || undefined,
         updatedAt: metaData.updatedAt || undefined,
       };
-    } else {
-      const snap = await getDoc(PORTFOLIO_DOC_REF).catch(() => null);
-      if (snap && snap.exists()) {
-        const data = snap.data();
-        firestoreData = {
-          cases: Array.isArray(data.cases) ? data.cases : undefined,
-          sobre: data.sobre || undefined,
-          servicos: data.servicos || undefined,
-          gridSettings: data.gridSettings || undefined,
-          updatedAt: data.updatedAt || undefined,
-        };
-      }
     }
-  } catch (error) {
-    console.warn('Aviso ao buscar dados do Firestore:', error);
+  } catch (partitionErr) {
+    console.warn('Aviso ao buscar dados particionados do Firestore:', partitionErr);
   }
 
-  // 3. Consulta JsonBin (se configurado)
+  // 3. FALLBACK 2: API do Servidor (/api/portfolio)
+  let serverData: any = null;
+  try {
+    const res = await fetch('/api/portfolio');
+    if (res.ok) {
+      const json = await res.json();
+      if (json && json.success && json.data) {
+        serverData = json.data;
+      }
+    }
+  } catch (err) {
+    console.warn('Aviso ao consultar /api/portfolio:', err);
+  }
+
+  // 4. FALLBACK 3: JsonBin (se configurado)
+  let jsonBinData: any = null;
   try {
     jsonBinData = await fetchJsonBin();
   } catch (err) {
     console.warn('Aviso ao buscar dados do JsonBin:', err);
   }
 
-  // Compara os timestamps para usar a fonte mais recente
-  const candidates = [serverData, firestoreData, jsonBinData].filter(Boolean);
+  const candidates = [serverData, jsonBinData].filter(Boolean);
   if (candidates.length === 0) return {};
 
   candidates.sort((a, b) => {
