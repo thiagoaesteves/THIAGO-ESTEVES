@@ -6,6 +6,7 @@ import {
   Edit3,
   Upload,
   Loader2,
+  Trash2,
 } from 'lucide-react';
 import { CaseItem, GridSpanType } from '../types';
 import { useCms } from '../context/CmsContext';
@@ -39,7 +40,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
   positionIndex,
   columns = 2,
 }) => {
-  const { isEditMode, reorderCases, moveCaseOrder, updateCaseField, updateCaseGridSpan } = useCms();
+  const { isEditMode, reorderCases, moveCaseOrder, updateCaseField, updateCaseGridSpan, deleteCase } = useCms();
   const isLadoA = item.lado === 'A';
   const currentSpan: GridSpanType = item.gridSpan || (featured ? 'full' : 'half');
   const isFullWidth = currentSpan === 'full';
@@ -251,6 +252,23 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             >
               <Edit3 className="w-3 h-3" /> Peças
             </button>
+
+            {/* Botão de Excluir Case */}
+            {deleteCase && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (window.confirm(`Tem a certeza de que deseja eliminar o projeto "${item.name}"?`)) {
+                    deleteCase(item.slug);
+                  }
+                }}
+                className="p-1.5 bg-red-600/80 hover:bg-red-600 text-white cursor-pointer transition-colors"
+                title="Eliminar projeto"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </div>
       )}
