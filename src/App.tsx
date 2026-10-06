@@ -16,7 +16,28 @@ import { AddCaseModal } from './components/AddCaseModal';
 import { CmsProvider, useCms } from './context/CmsContext';
 import { CaseItem, GridSpanType } from './types';
 
-const getCaseSpanClass = (item: CaseItem, idx: number, isSectionBonus = false) => {
+const getCaseSpanClass = (
+  item: CaseItem,
+  idx: number,
+  isSectionBonus = false,
+  isEditMode = false,
+  gridCols: 1 | 2 | 3 = 2
+) => {
+  if (isEditMode) {
+    if (gridCols === 1) {
+      return 'col-span-1 md:col-span-12';
+    }
+    if (gridCols === 3) {
+      const span = item.gridSpan;
+      if (span === 'full') return 'col-span-1 md:col-span-12';
+      return 'col-span-1 sm:col-span-6 md:col-span-4';
+    }
+    // gridCols === 2
+    const span = item.gridSpan;
+    if (span === 'full' || (!span && idx === 0)) return 'col-span-1 md:col-span-12';
+    return 'col-span-1 sm:col-span-6 md:col-span-6';
+  }
+
   const span = item.gridSpan || (isSectionBonus && idx === 0 ? 'full' : idx === 0 ? 'full' : 'half');
   switch (span) {
     case 'full':
@@ -44,7 +65,8 @@ function PortfolioApp() {
     isEditMode, 
     isAddModalOpen, 
     setIsAddModalOpen,
-    updateCaseField
+    updateCaseField,
+    gridColumns,
   } = useCms();
 
   const [selectedCase, setSelectedCase] = useState<CaseItem | null>(null);
@@ -149,7 +171,7 @@ function PortfolioApp() {
                   const currentSpan = item.gridSpan || (idx === 0 ? 'full' : 'half');
                   const currentRatio = item.cardRatio || 'original';
                   return (
-                    <div key={item.slug} className={getCaseSpanClass(item, idx, false)}>
+                    <div key={item.slug} className={getCaseSpanClass(item, idx, false, isEditMode, gridColumns)}>
                       {/* Barra de controle individual acima de cada card no Modo Edição */}
                       {isEditMode && (
                         <div className="mb-2.5 p-2 bg-[#181C32] text-white rounded-xl border border-white/15 flex flex-col gap-2 shadow-lg">
@@ -239,6 +261,7 @@ function PortfolioApp() {
                         onSelect={handleOpenCase}
                         featured={currentSpan === 'full'}
                         positionIndex={idx + 1}
+                        columns={gridColumns}
                       />
                     </div>
                   );
@@ -279,7 +302,7 @@ function PortfolioApp() {
                   const currentSpan = item.gridSpan || (idx === 0 ? 'full' : 'half');
                   const currentRatio = item.cardRatio || 'original';
                   return (
-                    <div key={item.slug} className={getCaseSpanClass(item, idx, false)}>
+                    <div key={item.slug} className={getCaseSpanClass(item, idx, false, isEditMode, gridColumns)}>
                       {isEditMode && (
                         <div className="mb-2.5 p-2 bg-[#181C32] text-white rounded-xl border border-white/15 flex flex-col gap-2 shadow-lg">
                           <div className="flex items-center justify-between">
@@ -366,6 +389,7 @@ function PortfolioApp() {
                         dark
                         featured={currentSpan === 'full'}
                         positionIndex={idx + 1}
+                        columns={gridColumns}
                       />
                     </div>
                   );
@@ -409,7 +433,7 @@ function PortfolioApp() {
                   const currentSpan = item.gridSpan || (idx === 0 ? 'full' : 'half');
                   const currentRatio = item.cardRatio || 'original';
                   return (
-                    <div key={item.slug} className={getCaseSpanClass(item, idx, true)}>
+                    <div key={item.slug} className={getCaseSpanClass(item, idx, true, isEditMode, gridColumns)}>
                       {isEditMode && (
                         <div className="mb-2.5 p-2 bg-[#0F1222] text-white rounded-xl border border-black/20 flex flex-col gap-2 shadow-lg">
                           <div className="flex items-center justify-between">
@@ -496,6 +520,7 @@ function PortfolioApp() {
                         bonus
                         featured={currentSpan === 'full'}
                         positionIndex={idx + 1}
+                        columns={gridColumns}
                       />
                     </div>
                   );

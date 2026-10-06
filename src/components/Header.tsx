@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { useCms } from '../context/CmsContext';
 
 export const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isEditMode, gridColumns, setGridColumns } = useCms();
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
     e.preventDefault();
@@ -121,6 +123,29 @@ export const Header: React.FC = () => {
             >
               Headliner
             </a>
+
+            {/* Seletor de Colunas Discreto no Cabeçalho (Modo Edição) */}
+            {isEditMode && (
+              <div className="hidden lg:flex items-center gap-1 bg-black/40 border border-white/20 rounded-md px-2 py-0.5 text-xs font-mono-code mr-1">
+                <span className="text-[10px] text-[#AFC0FF] font-bold uppercase mr-1">Colunas:</span>
+                {([1, 2, 3] as const).map((cols) => (
+                  <button
+                    key={cols}
+                    type="button"
+                    onClick={() => setGridColumns(cols)}
+                    className={`px-1.5 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer ${
+                      gridColumns === cols
+                        ? 'bg-[#D4FF3A] text-[#0F1222] font-black'
+                        : 'text-white/70 hover:text-white hover:bg-white/10'
+                    }`}
+                    title={`Ajustar grid para ${cols} ${cols === 1 ? 'coluna' : 'colunas'}`}
+                  >
+                    {cols}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <a
               id="nav-contato"
               href="#contato"

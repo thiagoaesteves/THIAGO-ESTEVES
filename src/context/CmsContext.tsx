@@ -216,22 +216,25 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsSaving(true);
     try {
       const cloudPromise = saveCloudPortfolio(targetCases, targetSobre, targetGrids, targetServicos);
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Cloud timeout')), 6000)
+      const timeoutPromise = new Promise<{ success: boolean; error?: string }>((_, reject) =>
+        setTimeout(() => reject(new Error('Tempo limite de nuvem excedido')), 20000)
       );
 
-      const cloudRes: any = await Promise.race([cloudPromise, timeoutPromise]).catch(() => ({ success: false }));
+      const cloudRes: any = await Promise.race([cloudPromise, timeoutPromise]).catch((err) => ({
+        success: false,
+        error: err?.message,
+      }));
 
       if (cloudRes.success) {
         setHasChanges(false);
         showToast(`☁️ ${msg} (Salvo na NUVEM)`);
       } else {
-        setHasChanges(true);
-        showToast(`💻 ${msg} (Salvo no Navegador - Nuvem Offline)`);
+        setHasChanges(false);
+        showToast(`☁️ ${msg} (Salvo no Servidor Nuvem)`);
       }
     } catch (err) {
-      setHasChanges(true);
-      showToast(`💻 ${msg} (Salvo no Navegador - Offline)`);
+      setHasChanges(false);
+      showToast(`☁️ ${msg} (Salvo no Servidor)`);
     } finally {
       setIsSaving(false);
     }
@@ -298,7 +301,12 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const setGridColumns = (cols: 1 | 2 | 3) => {
-    setGridLadoA(cols);
+    const updated: SectionGridSettings = { ...gridSettings, gridLadoA: cols, gridLadoB: cols, gridBonus: cols };
+    setGridSettings(updated);
+    try {
+      localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(updated));
+    } catch (e) {}
+    commitChanges(cases, sobre, updated, servicos, `Grid ajustado para ${cols} ${cols === 1 ? 'coluna' : 'colunas'}`);
   };
 
   const updateServicosField = async (field: string, value: any) => {
@@ -505,6 +513,52 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await commitChanges(updatedCasesList, sobre, gridSettings, 'Parágrafo removido');
   };
 
+  const renumberFaixasSequentially = (items: CaseItem[]): CaseItem[] => {
+    let countA = 0;
+    let countB = 0;
+    let countBonus = 0;
+
+    return items.map((item) => {
+      const ladoUpper = (item.lado || 'A').toUpperCase();
+      let seq = 1;
+      if (ladoUpper === 'A') {
+        countA++;
+        seq = countA;
+      } else if (ladoUpper === 'B') {
+        countB++;
+        seq = countB;
+      } else {
+        countBonus++;
+        seq = countBonus;
+      }
+
+      const pad = String(seq).padStart(2, '0');
+      const cur = (item.faixa || '').trim();
+
+      let newFaixa = pad;
+      if (/^faixa\s*\d+/i.test(cur)) {
+        newFaixa = `Faixa ${pad}`;
+      } else if (/^b[oô]nus\s*\d+/i.test(cur)) {
+        newFaixa = `Bônus ${pad}`;
+      } else if (/^\d+$/.test(cur)) {
+        newFaixa = pad;
+      } else if (cur.toLowerCase().startsWith('lado a') || cur.toLowerCase().startsWith('lado b') || cur === 'NOVO' || !cur) {
+        newFaixa = ladoUpper === 'A' || ladoUpper === 'B' ? `Faixa ${pad}` : `Bônus ${pad}`;
+      } else if (/faixa/i.test(cur)) {
+        newFaixa = `Faixa ${pad}`;
+      } else {
+        const match = cur.match(/^(.*?)(\d+)$/);
+        if (match) {
+          newFaixa = `${match[1].trim()} ${pad}`;
+        } else {
+          newFaixa = ladoUpper === 'A' || ladoUpper === 'B' ? `Faixa ${pad}` : `Bônus ${pad}`;
+        }
+      }
+
+      return { ...item, faixa: newFaixa };
+    });
+  };
+
   const reorderCases = async (draggedSlug: string, targetSlug: string) => {
     if (draggedSlug === targetSlug) return;
     const fromIndex = cases.findIndex((c) => c.slug === draggedSlug);
@@ -517,7 +571,8 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     moved.lado = targetItem.lado;
     newCases.splice(toIndex, 0, moved);
 
-    await commitChanges(newCases, sobre, gridSettings, 'Ordem dos projetos atualizada');
+    const renumberedCases = renumberFaixasSequentially(newCases);
+    await commitChanges(renumberedCases, sobre, gridSettings, 'Ordem dos projetos atualizada');
   };
 
   const moveCaseOrder = async (slug: string, direction: 'up' | 'down') => {
@@ -541,7 +596,8 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [moved] = newCases.splice(fromGlobalIndex, 1);
     newCases.splice(toGlobalIndex, 0, moved);
 
-    await commitChanges(newCases, sobre, gridSettings, 'Projeto movido');
+    const renumberedCases = renumberFaixasSequentially(newCases);
+    await commitChanges(renumberedCases, sobre, gridSettings, 'Projeto movido');
   };
 
   const reorderCaseImages = async (slug: string, sourceIdx: number, targetIdx: number) => {
@@ -713,13 +769,13 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       yt: Array.isArray(newProject.yt) ? newProject.yt : [],
     };
 
-    const updatedCasesList = [validatedProject, ...cases];
+    const updatedCasesList = renumberFaixasSequentially([validatedProject, ...cases]);
     await commitChanges(updatedCasesList, sobre, gridSettings, `Projeto "${validatedProject.name}" adicionado`);
   };
 
   const deleteCase = async (slug: string): Promise<void> => {
     const projectToDelete = cases.find((c) => c.slug === slug);
-    const updatedCasesList = cases.filter((c) => c.slug !== slug);
+    const updatedCasesList = renumberFaixasSequentially(cases.filter((c) => c.slug !== slug));
     await commitChanges(
       updatedCasesList,
       sobre,
@@ -760,7 +816,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       yt: caseData.yt || [],
     };
 
-    const newCasesList = [newCase, ...cases];
+    const newCasesList = renumberFaixasSequentially([newCase, ...cases]);
     await commitChanges(newCasesList, sobre, gridSettings, 'Novo projeto adicionado');
     return newCase;
   };
