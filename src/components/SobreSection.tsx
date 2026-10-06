@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Upload, Loader2, Type, Sliders, Sparkles } from 'lucide-react';
 import { useCms } from '../context/CmsContext';
 import { convertFileToBase64 } from '../utils/imageUpload';
+import { ORIGINAL_SOBRE_DATA } from '../data/sobre';
 
 const FONT_SIZE_MAP: Record<string, string> = {
   sm: 'text-sm',
@@ -44,28 +45,34 @@ export const SobreSection: React.FC = () => {
   } = useCms();
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
-  const currentTitle = sobre.title || 'Quem é do Méier não bobéia.';
+  // Fallback seguro consolidado para evitar qualquer TypeError se sobre estiver indefinido
+  const safeSobre = { ...ORIGINAL_SOBRE_DATA, ...(sobre || {}) };
 
-  const cleanName = (sobre.name || 'Thiago Esteves')
+  const currentTitle = safeSobre?.title || ORIGINAL_SOBRE_DATA.title || 'Quem é do Méier não bobéia.';
+
+  const cleanName = (safeSobre?.name || ORIGINAL_SOBRE_DATA.name || 'Thiago Esteves')
     .replace(/\s*undefined\b/gi, '')
     .trim() || 'Thiago Esteves';
-  const cleanRole = (sobre.role || 'Creative Copywriter & Storyteller')
+  const cleanRole = (safeSobre?.role || ORIGINAL_SOBRE_DATA.role || 'Creative Copywriter & Storyteller')
     .replace(/\s*undefined\b/gi, '')
     .trim() || 'Creative Copywriter & Storyteller';
-  const cleanBadge = (sobre.badge || 'Based in Brazil · Available Worldwide')
+  const cleanBadge = (safeSobre?.badge || ORIGINAL_SOBRE_DATA.badge || 'Based in Brazil · Available Worldwide')
     .replace(/\s*undefined\b/gi, '')
     .trim() || 'Based in Brazil · Available Worldwide';
 
-  const rawBio = Array.isArray(sobre.bio) ? sobre.bio : [currentTitle];
+  const rawBio = Array.isArray(safeSobre?.bio) && safeSobre.bio.length > 0 
+    ? safeSobre.bio 
+    : (ORIGINAL_SOBRE_DATA.bio || [currentTitle]);
+
   const normalizedBioItems = rawBio.map((item) => {
     if (typeof item === 'string') {
       return { text: item, color: 'white', style: 'normal', size: 'normal' };
     }
     return {
-      text: item.text || '',
-      color: item.color || 'white',
-      style: item.style || 'normal',
-      size: item.size || 'normal',
+      text: item?.text || '',
+      color: item?.color || 'white',
+      style: item?.style || 'normal',
+      size: item?.size || 'normal',
     };
   });
 
@@ -75,10 +82,11 @@ export const SobreSection: React.FC = () => {
       !item.text.toLowerCase().includes('quem é do méier')
   );
 
-  const fontSizeKey = sobre.typography?.fontSize || 'base';
-  const titleSizeKey = sobre.typography?.titleSize || 'lg';
+  const fontSizeKey = safeSobre?.typography?.fontSize || 'base';
+  const titleSizeKey = safeSobre?.typography?.titleSize || 'lg';
   const globalBodySizeClass = FONT_SIZE_MAP[fontSizeKey] || FONT_SIZE_MAP.base;
   const titleSizeClass = TITLE_SIZE_MAP[titleSizeKey] || TITLE_SIZE_MAP.lg;
+  const photoUrl = safeSobre?.photoUrl || ORIGINAL_SOBRE_DATA.photoUrl;
 
   const titleParts = currentTitle.includes('Méier')
     ? [
@@ -128,7 +136,7 @@ export const SobreSection: React.FC = () => {
           <div className="lg:col-span-5 flex justify-center lg:justify-start items-center">
             <div className="relative w-[240px] sm:w-[265px] lg:w-[295px] xl:w-[310px] aspect-[4/5] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.35)] border border-white/20 bg-[#0F1222] group flex flex-col">
               <img
-                src={sobre.photoUrl}
+                src={photoUrl}
                 alt={`${cleanName} · ${cleanRole}`}
                 className="w-full h-full object-cover object-top sm:object-center transition-transform duration-700 ease-out group-hover:scale-105 absolute inset-0"
                 loading="lazy"
@@ -341,14 +349,14 @@ export const SobreSection: React.FC = () => {
                 REPERTÓRIO
               </span>
               <span className="font-disp text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-white block leading-none pt-0.5">
-                {sobre.stats?.stat2Number || '50+'}
+                {safeSobre?.stats?.stat2Number || ORIGINAL_SOBRE_DATA.stats.stat2Number || '50+'}
               </span>
               <div className="space-y-0.5 pt-0.5">
                 <span className="text-white text-[10px] sm:text-[11px] font-mono-code font-bold uppercase tracking-wider block leading-tight">
-                  {sobre.stats?.stat2Label || 'marcas atendidas'}
+                  {safeSobre?.stats?.stat2Label || ORIGINAL_SOBRE_DATA.stats.stat2Label || 'marcas atendidas'}
                 </span>
                 <span className="text-[#AFC0FF] text-[10px] sm:text-[11px] font-mono-code block leading-tight">
-                  {sobre.stats?.stat2Sub || 'nacionais e multinacionais'}
+                  {safeSobre?.stats?.stat2Sub || ORIGINAL_SOBRE_DATA.stats.stat2Sub || 'nacionais e multinacionais'}
                 </span>
               </div>
             </div>
@@ -358,14 +366,14 @@ export const SobreSection: React.FC = () => {
                 TURNÊS
               </span>
               <span className="font-disp text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-white block leading-none pt-0.5">
-                {sobre.stats?.stat3Number || '3 + 3'}
+                {safeSobre?.stats?.stat3Number || ORIGINAL_SOBRE_DATA.stats.stat3Number || '3 + 3'}
               </span>
               <div className="space-y-0.5 pt-0.5">
                 <span className="text-white text-[10px] sm:text-[11px] font-mono-code font-bold uppercase tracking-wider block leading-tight">
-                  {sobre.stats?.stat3Label || 'praças & países'}
+                  {safeSobre?.stats?.stat3Label || ORIGINAL_SOBRE_DATA.stats.stat3Label || 'praças & países'}
                 </span>
                 <span className="text-[#AFC0FF] text-[10px] sm:text-[11px] font-mono-code block leading-tight">
-                  {sobre.stats?.stat3Sub || 'RJ, Sul, SP · Brasil, EUA & Espanha'}
+                  {safeSobre?.stats?.stat3Sub || ORIGINAL_SOBRE_DATA.stats.stat3Sub || 'RJ, Sul, SP · Brasil, EUA & Espanha'}
                 </span>
               </div>
             </div>
@@ -375,14 +383,14 @@ export const SobreSection: React.FC = () => {
                 BAGAGEM
               </span>
               <span className="font-disp text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-white block leading-none pt-0.5">
-                {sobre.stats?.stat1Number || '15+'}
+                {safeSobre?.stats?.stat1Number || ORIGINAL_SOBRE_DATA.stats.stat1Number || '15+'}
               </span>
               <div className="space-y-0.5 pt-0.5">
                 <span className="text-white text-[10px] sm:text-[11px] font-mono-code font-bold uppercase tracking-wider block leading-tight">
-                  {sobre.stats?.stat1Label || 'anos de estrada'}
+                  {safeSobre?.stats?.stat1Label || ORIGINAL_SOBRE_DATA.stats.stat1Label || 'anos de estrada'}
                 </span>
                 <span className="text-[#AFC0FF] text-[10px] sm:text-[11px] font-mono-code block leading-tight">
-                  {sobre.stats?.stat1Sub || 'e muita história pra contar'}
+                  {safeSobre?.stats?.stat1Sub || ORIGINAL_SOBRE_DATA.stats.stat1Sub || 'e muita história pra contar'}
                 </span>
               </div>
             </div>
