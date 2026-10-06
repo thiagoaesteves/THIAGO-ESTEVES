@@ -44,6 +44,7 @@ export interface CaseItem {
   gridSpan?: GridSpanType;
   cardRatio?: CardRatioType;
   cardAlign?: CardAlignType;
+  textAlign?: 'left' | 'center' | 'right';
   summary?: string;
   challenge?: string;
   solution?: string;

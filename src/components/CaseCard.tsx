@@ -8,6 +8,9 @@ import {
   Loader2,
   Trash2,
   Plus,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
 } from 'lucide-react';
 import { CaseItem, GridSpanType } from '../types';
 import { useCms } from '../context/CmsContext';
@@ -28,7 +31,7 @@ const FORMAT_CLASS_MAP: Record<string, string> = {
   square: 'aspect-square',
   quadrado: 'aspect-square',
   vertical: 'aspect-[4/5]',
-  horizontal: 'aspect-[16/9]',
+  horizontal: 'aspect-[21/9]',
 };
 
 export const CaseCard: React.FC<CaseCardProps> = ({
@@ -45,8 +48,12 @@ export const CaseCard: React.FC<CaseCardProps> = ({
   const currentSpan: GridSpanType = item.gridSpan || (featured ? 'full' : 'half');
   const isFullWidth = currentSpan === 'full';
 
-  const currentFormat = (item.coverFormat || item.format || item.aspectRatio || 'original').toLowerCase();
+  const currentFormat = (item.coverFormat || item.cardRatio || item.format || item.aspectRatio || 'original').toLowerCase();
   const coverAspectClass = FORMAT_CLASS_MAP[currentFormat] || 'aspect-[16/9]';
+
+  const currentAlign: 'left' | 'center' | 'right' = item.textAlign || item.cardAlign || 'left';
+  const textAlignClass = currentAlign === 'center' ? 'text-center' : currentAlign === 'right' ? 'text-right' : 'text-left';
+  const alignContainerClass = currentAlign === 'center' ? 'items-center text-center mx-auto' : currentAlign === 'right' ? 'items-end text-right ml-auto' : 'items-start text-left';
 
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -211,6 +218,35 @@ export const CaseCard: React.FC<CaseCardProps> = ({
                   {fmt.label}
                 </button>
               ))}
+            </div>
+
+            {/* Alinhamento Toggle (Esquerda, Centro, Direita) */}
+            <div className="flex items-center gap-0.5 bg-white/10 p-0.5 text-[11px] font-mono">
+              {[
+                { id: 'left' as const, label: 'Esq', icon: AlignLeft, title: 'Alinhar à Esquerda' },
+                { id: 'center' as const, label: 'Centro', icon: AlignCenter, title: 'Alinhar ao Centro' },
+                { id: 'right' as const, label: 'Dir', icon: AlignRight, title: 'Alinhar à Direita' },
+              ].map((al) => {
+                const Icon = al.icon;
+                const isActive = currentAlign === al.id;
+                return (
+                  <button
+                    key={al.id}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      updateCaseField(item.slug, 'textAlign', al.id);
+                    }}
+                    className={`px-1.5 py-0.5 text-[10px] font-bold uppercase transition-all cursor-pointer flex items-center gap-0.5 ${
+                      isActive ? 'bg-[#D4FF3A] text-black font-black' : 'text-white/70 hover:bg-white/20'
+                    }`}
+                    title={al.title}
+                  >
+                    <Icon className="w-3 h-3" />
+                    <span>{al.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
             <button
@@ -410,17 +446,17 @@ export const CaseCard: React.FC<CaseCardProps> = ({
 
           <div className="relative z-20 w-full" />
 
-          <div className="relative z-20 mt-auto flex flex-col items-start text-left w-full gap-1.5 max-w-[85%]" onClick={(e) => { if (isEditMode) e.stopPropagation(); }}>
+          <div className={`relative z-20 mt-auto flex flex-col ${alignContainerClass} w-full gap-1.5 max-w-[85%]`} onClick={(e) => { if (isEditMode) e.stopPropagation(); }}>
             {isEditMode ? (
               <input
                 type="text"
                 value={item.faixa}
                 onClick={(e) => e.stopPropagation()}
                 onChange={(e) => updateCaseField(item.slug, 'faixa', e.target.value)}
-                className="bg-black/60 backdrop-blur-sm text-[#D4FF3A] px-2.5 py-1 text-[11px] font-mono font-bold uppercase tracking-wider focus:outline-none w-28 rounded-none shadow"
+                className={`bg-black/60 backdrop-blur-sm text-[#D4FF3A] px-2.5 py-1 text-[11px] font-mono font-bold uppercase tracking-wider focus:outline-none w-28 rounded-none shadow ${textAlignClass}`}
               />
             ) : (
-              <span className="bg-black/60 backdrop-blur-sm text-[#D4FF3A] px-2.5 py-1 text-[11px] font-mono font-bold uppercase tracking-wider shadow">
+              <span className={`bg-black/60 backdrop-blur-sm text-[#D4FF3A] px-2.5 py-1 text-[11px] font-mono font-bold uppercase tracking-wider shadow ${textAlignClass}`}>
                 {item.faixa}
               </span>
             )}
@@ -431,12 +467,12 @@ export const CaseCard: React.FC<CaseCardProps> = ({
                 value={item.name}
                 onClick={(e) => e.stopPropagation()}
                 onChange={(e) => updateCaseField(item.slug, 'name', e.target.value)}
-                className="w-full bg-black/30 backdrop-blur-[2px] text-white font-disp font-bold tracking-tight text-2xl sm:text-3xl md:text-4xl px-2 py-1 focus:outline-none rounded-none border border-white/20"
+                className={`w-full bg-black/30 backdrop-blur-[2px] text-white font-disp font-bold tracking-tight text-2xl sm:text-3xl md:text-4xl px-2 py-1 focus:outline-none rounded-none border border-white/20 ${textAlignClass}`}
               />
             ) : (
-              <h3 className={`font-disp font-bold tracking-tight leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] ${
+              <h3 className={`font-disp font-bold tracking-tight leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] w-full ${
                 isFullWidth ? 'text-3xl sm:text-4xl md:text-[40px]' : 'text-2xl sm:text-3xl'
-              }`}>
+              } ${textAlignClass}`}>
                 {item.name}
               </h3>
             )}
@@ -447,10 +483,10 @@ export const CaseCard: React.FC<CaseCardProps> = ({
                 rows={2}
                 onClick={(e) => e.stopPropagation()}
                 onChange={(e) => updateCaseField(item.slug, 'concept', e.target.value)}
-                className="w-full bg-black/30 backdrop-blur-[2px] text-white/95 text-xs sm:text-sm p-1.5 focus:outline-none resize-none rounded-none border border-white/20"
+                className={`w-full bg-black/30 backdrop-blur-[2px] text-white/95 text-xs sm:text-sm p-1.5 focus:outline-none resize-none rounded-none border border-white/20 ${textAlignClass}`}
               />
             ) : (
-              <p className="text-white/90 text-xs sm:text-sm font-sans drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] line-clamp-2">
+              <p className={`text-white/90 text-xs sm:text-sm font-sans drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] line-clamp-2 w-full ${textAlignClass}`}>
                 {item.concept}
               </p>
             )}

@@ -27,14 +27,22 @@ const getCaseSpanClass = (
     if (gridCols === 1) {
       return 'col-span-1 md:col-span-12';
     }
-    if (gridCols === 3) {
-      const span = item.gridSpan;
-      if (span === 'full') return 'col-span-1 md:col-span-12';
+    const span = item.gridSpan;
+    if (span === 'full' || (!span && idx === 0)) {
+      return 'col-span-1 md:col-span-12';
+    }
+    if (span === 'third' || span === 'third-center' || span === 'third-right') {
+      if (span === 'third-center') return 'col-span-1 sm:col-span-6 md:col-span-4 md:col-start-5 mx-auto w-full';
+      if (span === 'third-right') return 'col-span-1 sm:col-span-6 md:col-span-4 ml-auto';
       return 'col-span-1 sm:col-span-6 md:col-span-4';
     }
-    // gridCols === 2
-    const span = item.gridSpan;
-    if (span === 'full' || (!span && idx === 0)) return 'col-span-1 md:col-span-12';
+    if (gridCols === 3) {
+      if (span === 'half') return 'col-span-1 sm:col-span-6 md:col-span-6';
+      return 'col-span-1 sm:col-span-6 md:col-span-4';
+    }
+    // gridCols === 2 or default
+    if (span === 'half-center') return 'col-span-1 md:col-span-6 md:col-start-4 mx-auto w-full';
+    if (span === 'half-right') return 'col-span-1 sm:col-span-6 md:col-span-6 ml-auto';
     return 'col-span-1 sm:col-span-6 md:col-span-6';
   }
 
@@ -244,7 +252,10 @@ function PortfolioApp() {
                                   <button
                                     key={ratio}
                                     type="button"
-                                    onClick={() => updateCaseField(item.slug, 'cardRatio', ratio)}
+                                    onClick={() => {
+                                      updateCaseField(item.slug, 'cardRatio', ratio);
+                                      updateCaseField(item.slug, 'coverFormat', ratio);
+                                    }}
                                     className={`px-1.5 py-0.5 rounded capitalize ${currentRatio === ratio ? 'bg-[#2340FF] text-white font-bold' : 'text-white/50 hover:text-white'}`}
                                   >
                                     {ratio === 'square' ? 'Quadrado' : ratio === 'vertical' ? 'Vertical' : ratio === 'horizontal' ? 'Horizontal' : 'Original'}
@@ -371,7 +382,10 @@ function PortfolioApp() {
                                   <button
                                     key={ratio}
                                     type="button"
-                                    onClick={() => updateCaseField(item.slug, 'cardRatio', ratio)}
+                                    onClick={() => {
+                                      updateCaseField(item.slug, 'cardRatio', ratio);
+                                      updateCaseField(item.slug, 'coverFormat', ratio);
+                                    }}
                                     className={`px-1.5 py-0.5 rounded capitalize ${currentRatio === ratio ? 'bg-[#FF4FA0] text-white font-bold' : 'text-white/50 hover:text-white'}`}
                                   >
                                     {ratio === 'square' ? 'Quadrado' : ratio === 'vertical' ? 'Vertical' : ratio === 'horizontal' ? 'Horizontal' : 'Original'}
@@ -502,7 +516,10 @@ function PortfolioApp() {
                                   <button
                                     key={ratio}
                                     type="button"
-                                    onClick={() => updateCaseField(item.slug, 'cardRatio', ratio)}
+                                    onClick={() => {
+                                      updateCaseField(item.slug, 'cardRatio', ratio);
+                                      updateCaseField(item.slug, 'coverFormat', ratio);
+                                    }}
                                     className={`px-1.5 py-0.5 rounded capitalize ${currentRatio === ratio ? 'bg-[#D4FF3A] text-[#0F1222] font-bold' : 'text-white/50 hover:text-white'}`}
                                   >
                                     {ratio === 'square' ? 'Quadrado' : ratio === 'vertical' ? 'Vertical' : ratio === 'horizontal' ? 'Horizontal' : 'Original'}
