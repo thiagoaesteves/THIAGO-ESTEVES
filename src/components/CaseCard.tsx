@@ -75,14 +75,16 @@ export const CaseCard: React.FC<CaseCardProps> = ({
     const newProject: CaseItem = {
       slug: newSlug,
       name: 'Novo Projeto',
-      faixa: 'NOVO',
+      faixa: item.faixa || 'NOVO',
       concept: 'Escreva aqui o conceito criativo do projeto...',
       cover: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop',
       deliv: '2026',
-      lado: 'A',
+      lado: item.lado || 'A',
       gridSpan: 'half',
       coverFormat: 'original',
-      pieces: []
+      text: ['Escreva aqui o conceito do projeto...'],
+      imgs: [],
+      yt: [],
     };
 
     addCase(newProject);
@@ -258,33 +260,29 @@ export const CaseCard: React.FC<CaseCardProps> = ({
             </button>
 
             {/* BOTÃO ADICIONAR NOVO PROJETO (Direto na barra do card) */}
-            {addCase && (
-              <button
-                type="button"
-                onClick={handleQuickAddProject}
-                className="p-1.5 bg-[#D4FF3A] hover:bg-lime-300 text-black cursor-pointer transition-colors"
-                title="Adicionar novo projeto"
-              >
-                <Plus className="w-3.5 h-3.5" />
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={handleQuickAddProject}
+              className="p-1.5 bg-[#D4FF3A] hover:bg-lime-300 text-black cursor-pointer transition-colors"
+              title="Adicionar novo projeto"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
 
             {/* BOTÃO EXCLUIR PROJETO */}
-            {deleteCase && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (window.confirm(`Tem a certeza de que deseja eliminar o projeto "${item.name}"?`)) {
-                    deleteCase(item.slug);
-                  }
-                }}
-                className="p-1.5 bg-red-600/80 hover:bg-red-600 text-white cursor-pointer transition-colors"
-                title="Eliminar projeto"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (window.confirm(`Tem a certeza de que deseja eliminar o projeto "${item.name}"?`)) {
+                  deleteCase(item.slug);
+                }
+              }}
+              className="p-1.5 bg-red-600/80 hover:bg-red-600 text-white cursor-pointer transition-colors"
+              title="Eliminar projeto"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       )}

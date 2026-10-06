@@ -26,9 +26,10 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
   onClose,
   onCaseCreated,
 }) => {
-  const { addNewCase } = useCms();
+  const { addCase } = useCms();
 
   const [name, setName] = useState('');
+  const [faixa, setFaixa] = useState('');
   const [concept, setConcept] = useState('');
   const [lado, setLado] = useState<LadoType>('A');
   const [gridSpan, setGridSpan] = useState<GridSpanType>('half');
@@ -93,22 +94,35 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
         .map((y) => y.trim())
         .filter(Boolean);
 
-      const created = await addNewCase({
+      const slug = name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || `projeto-${Date.now()}`;
+
+      const created: CaseItem = {
+        slug,
         name: name.trim(),
         concept: concept.trim(),
+        faixa: faixa.trim() || (lado === 'A' ? 'Lado A' : lado === 'B' ? 'Lado B' : 'Faixa Bônus'),
         lado,
         gridSpan,
         deliv: deliv.trim() || 'PROJETO & CONCEITO',
         cover:
           cover.trim() ||
           'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80',
+        coverFormat: 'original',
         text: paragraphs.length > 0 ? paragraphs : [concept.trim()],
         imgs: parsedImgs,
         yt: parsedYt,
-      });
+      };
+
+      await addCase(created);
 
       // Reset form
       setName('');
+      setFaixa('');
       setConcept('');
       setDeliv('');
       setCover('');
@@ -280,6 +294,20 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
               onChange={(e) => setName(e.target.value)}
               placeholder="Ex: SAMSUNG · GALAXY AI ou VIVO · O TEMPO É VOCÊ"
               className="w-full bg-black/40 border border-white/20 focus:border-[#D4FF3A] rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none transition-colors font-disp font-bold"
+            />
+          </div>
+
+          {/* Categoria / Faixa */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono-code text-[#AFC0FF] font-bold uppercase tracking-wider block">
+              4. Categoria / Faixa:
+            </label>
+            <input
+              type="text"
+              value={faixa}
+              onChange={(e) => setFaixa(e.target.value)}
+              placeholder="Ex: FILME // DIGITAL, BRANDING, CONCEITO..."
+              className="w-full bg-black/40 border border-white/20 focus:border-[#D4FF3A] rounded-xl px-3.5 py-2 text-xs font-mono-code text-white focus:outline-none transition-colors"
             />
           </div>
 

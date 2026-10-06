@@ -71,6 +71,8 @@ interface CmsContextType {
   setExportModalOpen: (val: boolean) => void;
   isAddModalOpen: boolean;
   setIsAddModalOpen: (val: boolean) => void;
+  addCase: (newProject: CaseItem) => Promise<void>;
+  deleteCase: (slug: string) => Promise<void>;
   addNewCase: (caseData: {
     name: string;
     concept: string;
@@ -683,6 +685,49 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
+  const addCase = async (newProject: CaseItem): Promise<void> => {
+    let projectSlug = newProject.slug;
+    if (!projectSlug || cases.some((c) => c.slug === projectSlug)) {
+      const baseSlug = (newProject.name || 'projeto')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || `projeto-${Date.now()}`;
+      projectSlug = cases.some((c) => c.slug === baseSlug) ? `${baseSlug}-${Date.now()}` : baseSlug;
+    }
+
+    const validatedProject: CaseItem = {
+      ...newProject,
+      slug: projectSlug,
+      name: newProject.name || 'Novo Projeto',
+      concept: newProject.concept || '',
+      lado: newProject.lado || 'A',
+      faixa: newProject.faixa || (newProject.lado === 'A' ? 'Lado A' : newProject.lado === 'B' ? 'Lado B' : 'Faixa Bônus'),
+      gridSpan: newProject.gridSpan || 'half',
+      deliv: newProject.deliv || 'PROJETO & CONCEITO',
+      cover: newProject.cover || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop',
+      coverFormat: newProject.coverFormat || 'original',
+      text: Array.isArray(newProject.text) && newProject.text.length > 0 ? newProject.text : [newProject.concept || 'Descrição do projeto...'],
+      imgs: Array.isArray(newProject.imgs) ? newProject.imgs : [],
+      yt: Array.isArray(newProject.yt) ? newProject.yt : [],
+    };
+
+    const updatedCasesList = [validatedProject, ...cases];
+    await commitChanges(updatedCasesList, sobre, gridSettings, `Projeto "${validatedProject.name}" adicionado`);
+  };
+
+  const deleteCase = async (slug: string): Promise<void> => {
+    const projectToDelete = cases.find((c) => c.slug === slug);
+    const updatedCasesList = cases.filter((c) => c.slug !== slug);
+    await commitChanges(
+      updatedCasesList,
+      sobre,
+      gridSettings,
+      projectToDelete ? `Projeto "${projectToDelete.name}" excluído` : 'Projeto excluído'
+    );
+  };
+
   const addNewCase = async (caseData: {
     name: string;
     concept: string;
@@ -802,6 +847,8 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setExportModalOpen,
         isAddModalOpen,
         setIsAddModalOpen,
+        addCase,
+        deleteCase,
         addNewCase,
         activeNotification,
         showToast,
