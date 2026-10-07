@@ -31,6 +31,7 @@ import { convertFileToBase64 } from '../utils/imageUpload';
 import defaultProfilePhoto from '../assets/profile-photo.webp';
 
 export type ProfileFilterPreset = 'none' | 'bw' | 'sepia' | 'vintage' | 'contrast';
+export type ProfileFitMode = 'contain' | 'cover';
 
 export interface ProfileMetadata {
   image_url: string;
@@ -40,17 +41,19 @@ export interface ProfileMetadata {
   brightness: number;
   saturation: number;
   filter_preset: ProfileFilterPreset;
+  fit_mode?: ProfileFitMode;
   updatedAt?: string;
 }
 
 export const DEFAULT_PROFILE_METADATA: ProfileMetadata = {
   image_url: defaultProfilePhoto || '/assets/profile-photo.webp',
-  zoom: 1.45,
+  zoom: 1.0,
   posX: 0,
   posY: 0,
   brightness: 100,
   saturation: 100,
   filter_preset: 'none',
+  fit_mode: 'contain',
 };
 
 const PROFILE_DOC_REF = doc(db, 'config', 'profile');
@@ -162,6 +165,7 @@ export async function saveProfileMetadata(
       brightness: typeof data.brightness === 'number' ? data.brightness : 100,
       saturation: typeof data.saturation === 'number' ? data.saturation : 100,
       filter_preset: data.filter_preset || 'none',
+      fit_mode: data.fit_mode || 'contain',
       updatedAt: new Date().toISOString(),
     });
 
@@ -216,6 +220,7 @@ export function subscribeProfileMetadata(
             brightness: typeof raw.brightness === 'number' ? raw.brightness : 100,
             saturation: typeof raw.saturation === 'number' ? raw.saturation : 100,
             filter_preset: (raw.filter_preset as ProfileFilterPreset) || 'none',
+            fit_mode: (raw.fit_mode as ProfileFitMode) || 'contain',
             updatedAt: raw.updatedAt,
           };
 

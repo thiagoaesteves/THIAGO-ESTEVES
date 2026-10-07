@@ -15,6 +15,7 @@ import {
 import {
   ProfileMetadata,
   ProfileFilterPreset,
+  ProfileFitMode,
   DEFAULT_PROFILE_METADATA,
   uploadProfileToStorage,
   saveProfileMetadata,
@@ -111,9 +112,14 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
       setUploadSource(result.source);
 
       // Atualiza apenas o estado local para pré-visualização imediata (NÃO salva no Firestore até o clique)
+      // Remove corte agressivo automático, ajustando zoom em 1.0 e modo flexível contain
       setProfile((prev) => ({
         ...prev,
         image_url: result.url,
+        zoom: 1.0,
+        posX: 0,
+        posY: 0,
+        fit_mode: 'contain',
       }));
       setHasUnsavedChanges(true);
 
@@ -165,9 +171,10 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
   // Resetar enquadramento e filtros para o padrão (apenas no estado local)
   const handleResetFraming = () => {
     handleProfileChange({
-      zoom: 1.45,
+      zoom: 1.0,
       posX: 0,
       posY: 0,
+      fit_mode: 'contain',
     });
   };
 
@@ -203,8 +210,8 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
     const pctX = (dx / width) * 100;
     const pctY = (dy / height) * 100;
 
-    const newPosX = Math.max(-60, Math.min(60, Math.round(dragStartRef.current.initPosX + pctX)));
-    const newPosY = Math.max(-60, Math.min(60, Math.round(dragStartRef.current.initPosY + pctY)));
+    const newPosX = Math.max(-100, Math.min(100, Math.round(dragStartRef.current.initPosX + pctX)));
+    const newPosY = Math.max(-100, Math.min(100, Math.round(dragStartRef.current.initPosY + pctY)));
 
     setProfile((prev) => ({ ...prev, posX: newPosX, posY: newPosY }));
     setHasUnsavedChanges(true);
@@ -242,8 +249,8 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
     const pctX = (dx / width) * 100;
     const pctY = (dy / height) * 100;
 
-    const newPosX = Math.max(-60, Math.min(60, Math.round(dragStartRef.current.initPosX + pctX)));
-    const newPosY = Math.max(-60, Math.min(60, Math.round(dragStartRef.current.initPosY + pctY)));
+    const newPosX = Math.max(-100, Math.min(100, Math.round(dragStartRef.current.initPosX + pctX)));
+    const newPosY = Math.max(-100, Math.min(100, Math.round(dragStartRef.current.initPosY + pctY)));
 
     setProfile((prev) => ({ ...prev, posX: newPosX, posY: newPosY }));
     setHasUnsavedChanges(true);
@@ -342,7 +349,9 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
             filter: filterStyle,
             transformOrigin: 'center center',
           }}
-          className="w-full h-full object-cover absolute inset-0 pointer-events-none transition-filter duration-150"
+          className={`w-full h-full absolute inset-0 pointer-events-none transition-filter duration-150 ${
+            profile.fit_mode === 'cover' ? 'object-cover' : 'object-contain'
+          }`}
           loading="lazy"
           referrerPolicy="no-referrer"
         />
@@ -462,7 +471,41 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
           {/* CONTEÚDO DA ABA 1: ENQUADRAMENTO (ZOOM & POSIÇÃO X/Y) */}
           {activeTab === 'frame' && (
             <div className="space-y-3">
-              {/* Zoom (Escala) */}
+              {/* Modo de Adaptação / Enquadramento */}
+              <div>
+                <div className="flex items-center justify-between text-[10px] mb-1">
+                  <span className="text-white/80">Enquadramento no Box:</span>
+                  <span className="text-[#D4FF3A] font-bold">
+                    {profile.fit_mode === 'cover' ? 'Preencher Box' : 'Adaptar / Sem Corte'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-1">
+                  <button
+                    type="button"
+                    onClick={() => handleProfileChange({ fit_mode: 'contain' })}
+                    className={`py-1 px-1.5 rounded text-[9px] font-bold transition-all cursor-pointer ${
+                      profile.fit_mode !== 'cover'
+                        ? 'bg-[#D4FF3A] text-[#0F1222]'
+                        : 'bg-white/10 text-white hover:bg-white/20'
+                    }`}
+                  >
+                    Adaptar (Sem Corte)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleProfileChange({ fit_mode: 'cover' })}
+                    className={`py-1 px-1.5 rounded text-[9px] font-bold transition-all cursor-pointer ${
+                      profile.fit_mode === 'cover'
+                        ? 'bg-[#D4FF3A] text-[#0F1222]'
+                        : 'bg-white/10 text-white hover:bg-white/20'
+                    }`}
+                  >
+                    Preencher Box
+                  </button>
+                </div>
+              </div>
+
+              {/* Zoom (Escala flexível de 0.2x a 3.0x permitindo zoom out completo) */}
               <div>
                 <div className="flex items-center justify-between text-[10px] mb-1">
                   <span className="text-[#D4FF3A] flex items-center gap-1">
@@ -472,7 +515,7 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
                 </div>
                 <input
                   type="range"
-                  min="1"
+                  min="0.2"
                   max="3"
                   step="0.05"
                   value={profile.zoom}
@@ -482,17 +525,31 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
                 <div className="flex items-center justify-between gap-1 mt-1 text-[8px] text-white/60">
                   <button
                     type="button"
+                    onClick={() => handleProfileChange({ zoom: 0.3 })}
+                    className="hover:text-[#D4FF3A] cursor-pointer"
+                  >
+                    0.3x
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleProfileChange({ zoom: 0.5 })}
+                    className="hover:text-[#D4FF3A] cursor-pointer"
+                  >
+                    0.5x
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleProfileChange({ zoom: 0.8 })}
+                    className="hover:text-[#D4FF3A] cursor-pointer"
+                  >
+                    0.8x
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => handleProfileChange({ zoom: 1 })}
                     className="hover:text-[#D4FF3A] cursor-pointer"
                   >
                     1.0x
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleProfileChange({ zoom: 1.25 })}
-                    className="hover:text-[#D4FF3A] cursor-pointer"
-                  >
-                    1.25x
                   </button>
                   <button
                     type="button"
@@ -511,7 +568,7 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
                 </div>
               </div>
 
-              {/* Posição Horizontal (X) */}
+              {/* Posição Horizontal (X) com amplitude livre (-100% a 100%) */}
               <div>
                 <div className="flex items-center justify-between text-[10px] mb-1">
                   <span className="text-white/80">Alinhar Horizontal (X):</span>
@@ -519,8 +576,8 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
                 </div>
                 <input
                   type="range"
-                  min="-50"
-                  max="50"
+                  min="-100"
+                  max="100"
                   step="1"
                   value={profile.posX}
                   onChange={(e) => handleProfileChange({ posX: parseInt(e.target.value, 10) })}
@@ -528,7 +585,7 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
                 />
               </div>
 
-              {/* Posição Vertical (Y) */}
+              {/* Posição Vertical (Y) com amplitude livre (-100% a 100%) */}
               <div>
                 <div className="flex items-center justify-between text-[10px] mb-1">
                   <span className="text-white/80">Alinhar Vertical (Y):</span>
@@ -536,8 +593,8 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
                 </div>
                 <input
                   type="range"
-                  min="-50"
-                  max="50"
+                  min="-100"
+                  max="100"
                   step="1"
                   value={profile.posY}
                   onChange={(e) => handleProfileChange({ posY: parseInt(e.target.value, 10) })}
@@ -547,7 +604,7 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
 
               <div className="flex items-center justify-between pt-1">
                 <span className="text-[8px] text-white/50 italic">
-                  Arraste diretamente sobre a foto.
+                  Arraste livremente sobre a foto.
                 </span>
                 <button
                   type="button"
