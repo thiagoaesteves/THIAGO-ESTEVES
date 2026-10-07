@@ -366,36 +366,40 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
         <div className="mt-auto relative z-10 p-3.5 sm:p-4 lg:p-4.5 flex flex-col items-start text-left w-full pointer-events-auto">
           {renderTextLayer ? (
             renderTextLayer
-          ) : isEditMode ? (
-            <div className="space-y-1 w-full bg-black/60 p-2 rounded-lg border border-white/20 mb-1">
-              <input
-                type="text"
-                value={cleanName}
-                readOnly
-                className="font-disp font-extrabold text-sm text-white bg-black/50 border border-white/30 rounded px-1.5 py-0.5 w-full cursor-not-allowed"
-                placeholder="Nome..."
-              />
-              <input
-                type="text"
-                value={cleanRole}
-                readOnly
-                className="font-serif-it text-xs text-[#AFC0FF] bg-black/50 border border-white/30 rounded px-1.5 py-0.5 w-full cursor-not-allowed"
-                placeholder="Cargo..."
-              />
-            </div>
           ) : (
             <>
-              <h3 className="font-disp font-extrabold text-lg sm:text-xl lg:text-[22px] xl:text-[24px] text-white tracking-tight leading-tight">
-                {cleanName}
-              </h3>
-              <p className="font-serif-it text-xs sm:text-sm lg:text-[14px] xl:text-[15px] text-[#AFC0FF] italic leading-snug mt-0.5">
-                {cleanRole}
-              </p>
+              {isEditMode ? (
+                <div className="space-y-1 w-full bg-black/60 p-2 rounded-lg border border-white/20 mb-1">
+                  <input
+                    type="text"
+                    value={cleanName}
+                    readOnly
+                    className="font-disp font-extrabold text-sm text-white bg-black/50 border border-white/30 rounded px-1.5 py-0.5 w-full cursor-not-allowed"
+                    placeholder="Nome..."
+                  />
+                  <input
+                    type="text"
+                    value={cleanRole}
+                    readOnly
+                    className="font-serif-it text-xs text-[#AFC0FF] bg-black/50 border border-white/30 rounded px-1.5 py-0.5 w-full cursor-not-allowed"
+                    placeholder="Cargo..."
+                  />
+                </div>
+              ) : (
+                <>
+                  <h3 className="font-disp font-extrabold text-lg sm:text-xl lg:text-[22px] xl:text-[24px] text-white tracking-tight leading-tight">
+                    {cleanName}
+                  </h3>
+                  <p className="font-serif-it text-xs sm:text-sm lg:text-[14px] xl:text-[15px] text-[#AFC0FF] italic leading-snug mt-0.5">
+                    {cleanRole}
+                  </p>
+                </>
+              )}
+              <span className="font-mono-code text-[9px] sm:text-[10px] lg:text-[11px] uppercase tracking-wider text-[#D4FF3A] font-semibold block leading-normal mt-1.5 select-none">
+                {cleanBadge}
+              </span>
             </>
           )}
-          <span className="font-mono-code text-[9px] sm:text-[10px] lg:text-[11px] uppercase tracking-wider text-[#D4FF3A] font-semibold block leading-normal mt-1.5 select-none">
-            {cleanBadge}
-          </span>
         </div>
       </div>
 

@@ -1,3 +1,5 @@
+import defaultProfilePhoto from '../assets/profile-photo.webp';
+
 export interface SobreTypography {
   fontSize?: 'sm' | 'base' | 'lg' | 'xl';
   fontWeight?: 'normal' | 'medium' | 'semibold' | 'bold';
@@ -31,7 +33,7 @@ export interface SobreData {
 }
 
 export const ORIGINAL_SOBRE_DATA: SobreData = {
-  photoUrl: 'https://cdn.myportfolio.com/1d3f31e9-221e-41c7-bd84-2a081f93562b/bc5e16c3-d424-4341-854b-78011e6a2516_rw_1920.jpeg?h=7f552ace409a0aa0e4d9fdfe434da652',
+  photoUrl: defaultProfilePhoto || '/assets/profile-photo.webp',
   badge: 'Based in Brazil · Available Worldwide',
   name: 'Thiago Esteves',
   role: 'Creative Copywriter & Storyteller',
