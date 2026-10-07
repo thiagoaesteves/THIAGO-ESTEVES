@@ -20,6 +20,7 @@ import {
   uploadProfileToStorage,
   saveProfileMetadata,
   subscribeProfileMetadata,
+  fetchProfileMetadata,
   getProfileFilterCss,
   getProfileTransformCss,
 } from '../lib/profileFirebase';
@@ -56,6 +57,8 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccessMessage, setUploadSuccessMessage] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveErrorMessage, setSaveErrorMessage] = useState<string | null>(null);
+  const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [activeTab, setActiveTab] = useState<'frame' | 'filters' | 'upload'>('frame');
 
@@ -69,33 +72,54 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
   });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 1. SINCRONIZAÇÃO EM TEMPO REAL COM FIRESTORE (onSnapshot)
-  // O listener onSnapshot apenas atualiza a interface local quando houver alteração remota,
-  // SEM reescrever dados de volta para o banco de dados nem disparar commitChanges.
+  // 1. HIDRATAÇÃO PRIORITÁRIA & SINCRONIZAÇÃO EM TEMPO REAL COM FIRESTORE
+  // - Busca direta garantida do Firestore (fetchProfileMetadata) para novas abas / outros navegadores
+  // - Listener onSnapshot para atualizações em tempo real
+  // - Dados do Firestore substituem imediatamente qualquer estado inicial ou padrão
+  // - SEM reescrever dados de volta para o banco de dados de forma automática.
   useEffect(() => {
+    let isMounted = true;
+
+    // Hidratação prioritária e direta do Firestore
+    fetchProfileMetadata()
+      .then((remoteData) => {
+        if (isMounted && remoteData && remoteData.image_url) {
+          setProfile((prev) => ({
+            ...prev,
+            ...remoteData,
+          }));
+        }
+      })
+      .catch((err) => {
+        console.warn('Aviso ao hidratar perfil do Firestore:', err);
+      });
+
+    // Listener contínuo em tempo real (onSnapshot)
     const unsubscribe = subscribeProfileMetadata(
       (remoteData) => {
-        setProfile((prev) => ({
-          ...prev,
-          ...remoteData,
-          image_url: remoteData.image_url || prev.image_url || defaultPhotoUrl,
-        }));
-        // Importante: NÃO chamar onPhotoUpdated aqui dentro para evitar loops de reescrita contínua.
+        if (isMounted && remoteData && remoteData.image_url) {
+          setProfile((prev) => ({
+            ...prev,
+            ...remoteData,
+          }));
+        }
       },
       (err) => {
-        console.warn('Aviso ao sincronizar perfil em tempo real via onSnapshot:', err);
+        console.warn('Aviso no listener em tempo real do Firestore para config/profile:', err);
       }
     );
 
     return () => {
+      isMounted = false;
       unsubscribe();
     };
-  }, [defaultPhotoUrl]);
+  }, []);
 
   // Atualização de campos individuais APENAS no estado local em tempo real (SEM salvar automaticamente)
   const handleProfileChange = useCallback((updates: Partial<ProfileMetadata>) => {
     setProfile((prev) => ({ ...prev, ...updates }));
     setHasUnsavedChanges(true);
+    setSaveErrorMessage(null);
   }, []);
 
   // Upload para o Firebase Storage com tratamento robusto de erros e liberação garantida do loading
@@ -106,6 +130,7 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
     setIsUploading(true);
     setUploadError(null);
     setUploadSuccessMessage(null);
+    setSaveErrorMessage(null);
 
     try {
       const result = await uploadProfileToStorage(file);
@@ -142,29 +167,45 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
   };
 
   // Salvar EXCLUSIVAMENTE mediante ação intencional do usuário no botão "Salvar Alterações"
+  // com bloco try/catch explícito, diagnóstico claro de erros (permissão/conexão) e feedback visual
   const handleManualSave = async () => {
     setSaveStatus('saving');
+    setSaveErrorMessage(null);
+    setSaveSuccessMessage(null);
+
     try {
       const res = await saveProfileMetadata(profile);
       if (res.success) {
         setSaveStatus('saved');
         setHasUnsavedChanges(false);
+        setSaveSuccessMessage('Foto e ajustes salvos com sucesso no Firebase Firestore!');
 
         // Notifica o callback do portfólio apenas quando o usuário salva explicitamente
         if (onPhotoUpdated && profile.image_url) {
           onPhotoUpdated(profile.image_url);
         }
 
-        setTimeout(() => setSaveStatus('idle'), 3000);
+        setTimeout(() => {
+          setSaveStatus('idle');
+          setSaveSuccessMessage(null);
+        }, 3500);
       } else {
-        console.error('Erro ao salvar no Firestore:', res.error);
+        const errorDesc = res.error || 'Falha ao gravar no documento config/profile.';
+        console.error('[Firestore config/profile] Erro no salvamento manual:', errorDesc, res.code);
         setSaveStatus('error');
-        setTimeout(() => setSaveStatus('idle'), 3500);
+        setSaveErrorMessage(errorDesc);
+        setTimeout(() => {
+          setSaveStatus('idle');
+        }, 6000);
       }
-    } catch (err) {
-      console.error('Erro crítico ao salvar no Firestore:', err);
+    } catch (err: any) {
+      const errorDesc = err?.message || 'Erro inesperado ao salvar no Firestore.';
+      console.error('[Firestore config/profile] Erro crítico no salvamento manual:', err);
       setSaveStatus('error');
-      setTimeout(() => setSaveStatus('idle'), 3500);
+      setSaveErrorMessage(errorDesc);
+      setTimeout(() => {
+        setSaveStatus('idle');
+      }, 6000);
     }
   };
 
@@ -276,7 +317,8 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
     <div className="relative flex flex-col items-center lg:items-start select-none">
       {/* Barra de Ações Rápidas no Modo Edição */}
       {isEditMode && (
-        <div className="mb-2 flex items-center justify-between w-full max-w-[310px] gap-2">
+        <>
+          <div className="mb-2 flex items-center justify-between w-full max-w-[310px] gap-2">
           <button
             type="button"
             onClick={() => setIsEditorOpen(!isEditorOpen)}
@@ -324,6 +366,45 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
             )}
           </button>
         </div>
+
+        {/* Feedback visual de erro ao salvar no Firestore */}
+        {saveErrorMessage && (
+          <div className="mb-2 w-full max-w-[310px] text-[9px] font-mono-code text-red-300 bg-red-950/85 border border-red-500/50 p-2.5 rounded-xl flex items-start justify-between gap-1.5 shadow-xl animate-in fade-in duration-200">
+            <div className="flex items-start gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <span className="font-bold text-red-200 block">Falha ao salvar no Firestore:</span>
+                <span className="text-[8px] leading-tight text-red-300/90">{saveErrorMessage}</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSaveErrorMessage(null)}
+              className="text-red-400 hover:text-white cursor-pointer ml-1 p-0.5"
+              aria-label="Fechar mensagem de erro"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        )}
+
+        {/* Feedback visual de sucesso ao salvar no Firestore (quando painel fechado) */}
+        {saveSuccessMessage && !isEditorOpen && (
+          <div className="mb-2 w-full max-w-[310px] text-[9px] font-mono-code text-[#D4FF3A] bg-black/90 border border-[#D4FF3A]/50 p-2 rounded-xl flex items-center justify-between gap-1.5 shadow-xl animate-in fade-in duration-200">
+            <div className="flex items-center gap-1.5">
+              <Check className="w-3.5 h-3.5 text-[#D4FF3A] shrink-0" />
+              <span>{saveSuccessMessage}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSaveSuccessMessage(null)}
+              className="text-white/60 hover:text-white cursor-pointer ml-1 p-0.5"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        )}
+      </>
       )}
 
       {/* BOX PRINCIPAL DA FOTO DE PERFIL */}
@@ -763,6 +844,24 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Feedback visual de salvamento no Firestore dentro do painel */}
+          {saveErrorMessage && (
+            <div className="mt-2.5 text-[8.5px] text-red-300 bg-red-950/85 border border-red-500/50 p-2 rounded-lg flex items-start gap-1.5 animate-in fade-in duration-200">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-400 mt-0.5" />
+              <div className="flex-1">
+                <span className="font-bold block text-red-200">Falha ao salvar no Firestore:</span>
+                <span className="text-[7.5px] leading-tight text-red-300/90">{saveErrorMessage}</span>
+              </div>
+            </div>
+          )}
+
+          {saveSuccessMessage && (
+            <div className="mt-2.5 text-[8.5px] text-[#D4FF3A] bg-[#D4FF3A]/10 border border-[#D4FF3A]/30 p-2 rounded-lg flex items-center gap-1.5 animate-in fade-in duration-200">
+              <Check className="w-3.5 h-3.5 shrink-0 text-[#D4FF3A]" />
+              <span>{saveSuccessMessage}</span>
             </div>
           )}
 
