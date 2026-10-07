@@ -205,14 +205,20 @@ export async function uploadProfileToStorage(file: File): Promise<{
 
 /**
  * Salva os metadados da imagem exclusivamente no documento config/profile do Firestore
- * com tratamento explícito de erros (permissões, conexão, regras de segurança).
+ * com tratamento explícito de erros (permissões, conexão, regras de segurança),
+ * timeout defensivo e garantia de retorno rápido para nunca travar o estado da aplicação.
  */
 export async function saveProfileMetadata(
   data: Partial<ProfileMetadata>
 ): Promise<{ success: boolean; error?: string; code?: string }> {
   try {
     if (!data.image_url || typeof data.image_url !== 'string') {
-      throw new Error('URL da imagem inválida ou vazia.');
+      console.warn('[Firestore config/profile] Tentativa de salvar sem imagem válida.');
+      return {
+        success: false,
+        error: 'Nenhuma foto foi carregada para ser salva.',
+        code: 'invalid-argument',
+      };
     }
 
     const payload = cleanForFirestore({
@@ -227,8 +233,19 @@ export async function saveProfileMetadata(
       updatedAt: new Date().toISOString(),
     });
 
-    // Salva diretamente no documento unificado config/profile do Firestore
-    await setDoc(PROFILE_DOC_REF, payload, { merge: true });
+    console.log('[Firestore config/profile] Iniciando gravação na nuvem...');
+
+    // Timeout defensivo de 12 segundos para a chamada de setDoc nunca travar a Promise
+    const savePromise = setDoc(PROFILE_DOC_REF, payload, { merge: true });
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('Tempo limite de rede excedido ao gravar no Firestore. Verifique sua conexão.'));
+      }, 12000);
+    });
+
+    await Promise.race([savePromise, timeoutPromise]);
+
+    console.log('[Firestore config/profile] Gravação concluída com sucesso!');
 
     // Atualiza o cache local somente após a confirmação de escrita na nuvem
     try {
@@ -249,7 +266,7 @@ export async function saveProfileMetadata(
         'Permissão negada no Firestore: verifique as regras de segurança para o documento "config/profile".';
     } else if (errorCode === 'unavailable') {
       userFriendlyMessage =
-        'Serviço do Firestore indisponível. Verifique sua conexão com a internet.';
+        'Serviço do Firestore temporariamente indisponível. Verifique sua conexão com a internet.';
     } else if (errorCode === 'resource-exhausted') {
       userFriendlyMessage = 'Limite de cota do Firestore atingido temporariamente.';
     } else if (rawMessage) {

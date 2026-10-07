@@ -102,6 +102,8 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
             ...prev,
             ...remoteData,
           }));
+          // Quando dados chegam da nuvem, não há alterações locais pendentes
+          setHasUnsavedChanges(false);
         }
       },
       (err) => {
@@ -167,45 +169,57 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
   };
 
   // Salvar EXCLUSIVAMENTE mediante ação intencional do usuário no botão "Salvar Alterações"
-  // com bloco try/catch explícito, diagnóstico claro de erros (permissão/conexão) e feedback visual
+  // com bloco try/catch/finally explícito: o indicador de salvamento NUNCA fica preso em loop infinito
   const handleManualSave = async () => {
+    if (saveStatus === 'saving') return;
+
     setSaveStatus('saving');
     setSaveErrorMessage(null);
     setSaveSuccessMessage(null);
 
+    let saveOutcome: 'saved' | 'error' = 'error';
+
     try {
+      console.log('[Firestore config/profile] Iniciando salvamento explícito...');
       const res = await saveProfileMetadata(profile);
+
       if (res.success) {
+        saveOutcome = 'saved';
         setSaveStatus('saved');
         setHasUnsavedChanges(false);
         setSaveSuccessMessage('Foto e ajustes salvos com sucesso no Firebase Firestore!');
+        console.log('[Firestore config/profile] Salvamento concluído com êxito.');
 
         // Notifica o callback do portfólio apenas quando o usuário salva explicitamente
         if (onPhotoUpdated && profile.image_url) {
-          onPhotoUpdated(profile.image_url);
+          try {
+            onPhotoUpdated(profile.image_url);
+          } catch (callbackErr) {
+            console.warn('[ProfilePhotoBox] Erro ao disparar callback onPhotoUpdated:', callbackErr);
+          }
         }
-
-        setTimeout(() => {
-          setSaveStatus('idle');
-          setSaveSuccessMessage(null);
-        }, 3500);
       } else {
+        saveOutcome = 'error';
         const errorDesc = res.error || 'Falha ao gravar no documento config/profile.';
-        console.error('[Firestore config/profile] Erro no salvamento manual:', errorDesc, res.code);
+        console.error('[Firestore config/profile] Erro retornado no salvamento:', errorDesc, res.code);
         setSaveStatus('error');
         setSaveErrorMessage(errorDesc);
-        setTimeout(() => {
-          setSaveStatus('idle');
-        }, 6000);
       }
     } catch (err: any) {
+      saveOutcome = 'error';
       const errorDesc = err?.message || 'Erro inesperado ao salvar no Firestore.';
-      console.error('[Firestore config/profile] Erro crítico no salvamento manual:', err);
+      console.error('[Firestore config/profile] Exceção crítica no salvamento:', err);
       setSaveStatus('error');
       setSaveErrorMessage(errorDesc);
+    } finally {
+      // GARANTIA OBRIGATÓRIA: o estado "saving" é sempre encerrado e retorna para "idle"
+      const resetDelay = saveOutcome === 'saved' ? 3000 : 5000;
       setTimeout(() => {
-        setSaveStatus('idle');
-      }, 6000);
+        setSaveStatus((current) => (current === 'saving' ? 'idle' : current === saveOutcome ? 'idle' : current));
+        if (saveOutcome === 'saved') {
+          setSaveSuccessMessage(null);
+        }
+      }, resetDelay);
     }
   };
 
