@@ -17,5 +17,12 @@ service cloud.firestore {
       allow create, update, write: if true;
       allow delete: if false;
     }
+
+    match /config/{documentId} {
+      // Allow visitors to read and editor to update profile config in real time
+      allow read: if true;
+      allow create, update, write: if true;
+      allow delete: if false;
+    }
   }
 }

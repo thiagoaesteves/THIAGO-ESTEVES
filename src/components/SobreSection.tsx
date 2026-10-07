@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Upload, Loader2, Type, Sliders, Sparkles } from 'lucide-react';
+import React from 'react';
+import { Type, Sliders, Sparkles } from 'lucide-react';
 import { useCms } from '../context/CmsContext';
-import { convertFileToBase64 } from '../utils/imageUpload';
 import { ORIGINAL_SOBRE_DATA } from '../data/sobre';
+import { ProfilePhotoBox } from './ProfilePhotoBox';
 
 const FONT_SIZE_MAP: Record<string, string> = {
   sm: 'text-sm',
@@ -43,7 +43,6 @@ export const SobreSection: React.FC = () => {
     updateSobreField,
     updateSobreTypography,
   } = useCms();
-  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   // Fallback seguro consolidado para evitar qualquer TypeError se sobre estiver indefinido
   const safeSobre = { ...ORIGINAL_SOBRE_DATA, ...(sobre || {}) };
@@ -134,89 +133,54 @@ export const SobreSection: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 xl:gap-12 items-center">
           
           <div className="lg:col-span-5 flex justify-center lg:justify-start items-center">
-            <div className="relative w-[240px] sm:w-[265px] lg:w-[295px] xl:w-[310px] aspect-[4/5] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.35)] border border-white/20 bg-[#0F1222] group flex flex-col">
-              <img
-                src={photoUrl}
-                alt={`${cleanName} · ${cleanRole}`}
-                className="w-full h-full object-cover object-top sm:object-center transition-transform duration-700 ease-out group-hover:scale-105 absolute inset-0"
-                loading="lazy"
-                referrerPolicy="no-referrer"
-              />
-
-              {isEditMode && (
-                <div className="absolute top-2.5 right-2.5 z-20 bg-black/85 backdrop-blur-md p-2 rounded-xl border border-white/20 shadow-xl max-w-[210px]">
-                  <label className="text-[10px] font-mono-code text-[#D4FF3A] font-bold flex items-center gap-1.5 mb-1">
-                    <Upload className="w-3 h-3" /> Trocar Foto:
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    disabled={isUploadingPhoto}
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      setIsUploadingPhoto(true);
-                      try {
-                        const base64 = await convertFileToBase64(file);
-                        updateSobreField('photoUrl', base64);
-                      } catch (err) {
-                        console.error(err);
-                      } finally {
-                        setIsUploadingPhoto(false);
-                        e.target.value = '';
-                      }
-                    }}
-                    className="text-[9px] font-mono-code text-white file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-[#2340FF] file:text-white cursor-pointer w-full"
-                  />
-                  {isUploadingPhoto && (
-                    <span className="text-[9px] font-mono-code text-[#D4FF3A] flex items-center gap-1 mt-1">
-                      <Loader2 className="w-3 h-3 animate-spin" /> Convertendo...
-                    </span>
+            <ProfilePhotoBox
+              isEditMode={isEditMode}
+              cleanName={cleanName}
+              cleanRole={cleanRole}
+              cleanBadge={cleanBadge}
+              defaultPhotoUrl={photoUrl}
+              onPhotoUpdated={(url) => updateSobreField('photoUrl', url)}
+              renderTextLayer={
+                <>
+                  {isEditMode ? (
+                    <div className="space-y-1 w-full bg-black/60 p-2 rounded-lg border border-white/20 mb-1">
+                      <input
+                        type="text"
+                        value={cleanName}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\s*undefined\b/gi, '').trim();
+                          updateSobreField('name', val);
+                        }}
+                        className="font-disp font-extrabold text-sm text-white bg-black/50 border border-white/30 rounded px-1.5 py-0.5 w-full focus:outline-none focus:border-[#D4FF3A]"
+                        placeholder="Nome..."
+                      />
+                      <input
+                        type="text"
+                        value={cleanRole}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\s*undefined\b/gi, '').trim();
+                          updateSobreField('role', val);
+                        }}
+                        className="font-serif-it text-xs text-[#AFC0FF] bg-black/50 border border-white/30 rounded px-1.5 py-0.5 w-full focus:outline-none focus:border-[#D4FF3A]"
+                        placeholder="Cargo..."
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <h3 className="font-disp font-extrabold text-lg sm:text-xl lg:text-[22px] xl:text-[24px] text-white tracking-tight leading-tight">
+                        {cleanName}
+                      </h3>
+                      <p className="font-serif-it text-xs sm:text-sm lg:text-[14px] xl:text-[15px] text-[#AFC0FF] italic leading-snug mt-0.5">
+                        {cleanRole}
+                      </p>
+                    </>
                   )}
-                </div>
-              )}
-
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent pointer-events-none" />
-
-              <div className="mt-auto relative z-10 p-3.5 sm:p-4 lg:p-4.5 flex flex-col items-start text-left w-full">
-                {isEditMode ? (
-                  <div className="space-y-1 w-full bg-black/60 p-2 rounded-lg border border-white/20 mb-1">
-                    <input
-                      type="text"
-                      value={cleanName}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\s*undefined\b/gi, '').trim();
-                        updateSobreField('name', val);
-                      }}
-                      className="font-disp font-extrabold text-sm text-white bg-black/50 border border-white/30 rounded px-1.5 py-0.5 w-full focus:outline-none focus:border-[#D4FF3A]"
-                      placeholder="Nome..."
-                    />
-                    <input
-                      type="text"
-                      value={cleanRole}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\s*undefined\b/gi, '').trim();
-                        updateSobreField('role', val);
-                      }}
-                      className="font-serif-it text-xs text-[#AFC0FF] bg-black/50 border border-white/30 rounded px-1.5 py-0.5 w-full focus:outline-none focus:border-[#D4FF3A]"
-                      placeholder="Cargo..."
-                    />
-                  </div>
-                ) : (
-                  <>
-                    <h3 className="font-disp font-extrabold text-lg sm:text-xl lg:text-[22px] xl:text-[24px] text-white tracking-tight leading-tight">
-                      {cleanName}
-                    </h3>
-                    <p className="font-serif-it text-xs sm:text-sm lg:text-[14px] xl:text-[15px] text-[#AFC0FF] italic leading-snug mt-0.5">
-                      {cleanRole}
-                    </p>
-                  </>
-                )}
-                <span className="font-mono-code text-[9px] sm:text-[10px] lg:text-[11px] uppercase tracking-wider text-[#D4FF3A] font-semibold block leading-normal mt-1.5 select-none">
-                  {cleanBadge}
-                </span>
-              </div>
-            </div>
+                  <span className="font-mono-code text-[9px] sm:text-[10px] lg:text-[11px] uppercase tracking-wider text-[#D4FF3A] font-semibold block leading-normal mt-1.5 select-none">
+                    {cleanBadge}
+                  </span>
+                </>
+              }
+            />
           </div>
 
           <div className="lg:col-span-7 flex flex-col justify-center space-y-3 sm:space-y-4">

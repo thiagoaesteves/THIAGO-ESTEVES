@@ -8,6 +8,7 @@ import {
   setDoc,
   Firestore 
 } from "firebase/firestore";
+import { getStorage, FirebaseStorage } from "firebase/storage";
 import { fetchJsonBin, saveJsonBin } from "./jsonbin";
 
 // Configuração oficial do projeto Firebase no Google AI Studio
@@ -42,6 +43,15 @@ try {
 
 export const db: Firestore = firestoreInstance;
 
+// Instância do Firebase Storage para upload de arquivos e imagens de perfil
+let storageInstance: FirebaseStorage;
+try {
+  storageInstance = getStorage(app);
+} catch {
+  storageInstance = getStorage();
+}
+export const storage: FirebaseStorage = storageInstance;
+
 export interface SectionGridSettings {
   gridLadoA: 1 | 2 | 3;
   gridLadoB: 1 | 2 | 3;
@@ -55,8 +65,9 @@ export const STORAGE_SERVICOS_KEY = 'thiago_portfolio_custom_servicos_v4';
 export const STORAGE_LAYOUT_KEY = 'thiago_portfolio_grid_columns';
 export const STORAGE_GRIDS_KEY = 'thiago_portfolio_section_grids_v1';
 
-// Referências aos documentos do Firestore na coleção 'portfolio_content'
+// Referências aos documentos do Firestore na coleção 'portfolio_content' e 'config'
 export const PORTFOLIO_DOC_REF = doc(db, "portfolio_content", "cases");
+export const PROFILE_DOC_REF = doc(db, "config", "profile");
 const DOC_LADO_A_REF = doc(db, "portfolio_content", "cases_lado_a");
 const DOC_LADO_B_REF = doc(db, "portfolio_content", "cases_lado_b");
 const DOC_BONUS_REF = doc(db, "portfolio_content", "cases_bonus");

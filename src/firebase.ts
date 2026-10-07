@@ -1,1 +1,1 @@
-export { db } from './lib/firebase';
+export { db, storage } from './lib/firebase';
