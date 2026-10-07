@@ -98,7 +98,8 @@ export function getProfileTransformCss(
 
 /**
  * Faz upload do arquivo para o Firebase Storage e gera uma URL pública.
- * Em caso de erro de rede ou permissão, realiza fallback seguro para Base64.
+ * Possui timeout e bloco try/catch robusto contra falhas de rede e permissão,
+ * com fallback seguro para garantir que a interface nunca fique travada.
  */
 export async function uploadProfileToStorage(file: File): Promise<{
   url: string;
@@ -110,19 +111,39 @@ export async function uploadProfileToStorage(file: File): Promise<{
     const storagePath = `profiles/${timestamp}_${cleanFileName}`;
     const fileRef = ref(storage, storagePath);
 
-    const snapshot = await uploadBytes(fileRef, file, {
-      contentType: file.type || 'image/jpeg',
+    // Timeout de 6 segundos para evitar que a requisição fique travada indefinidamente caso o Storage esteja inacessível
+    const uploadWithTimeout = new Promise<string>(async (resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error('Tempo limite excedido ao comunicar com Firebase Storage.'));
+      }, 6000);
+
+      try {
+        const snapshot = await uploadBytes(fileRef, file, {
+          contentType: file.type || 'image/jpeg',
+        });
+        const downloadUrl = await getDownloadURL(snapshot.ref);
+        clearTimeout(timer);
+        resolve(downloadUrl);
+      } catch (uploadErr) {
+        clearTimeout(timer);
+        reject(uploadErr);
+      }
     });
 
-    const downloadUrl = await getDownloadURL(snapshot.ref);
+    const downloadUrl = await uploadWithTimeout;
     return { url: downloadUrl, source: 'storage' };
-  } catch (storageError) {
-    console.warn(
-      'Aviso: Upload para Firebase Storage encontrou restrição. Usando fallback seguro para manter o fluxo sem interrupção:',
-      storageError
+  } catch (storageError: any) {
+    console.error(
+      'Falha ou restrição no Firebase Storage (uploadBytes/getDownloadURL):',
+      storageError?.message || storageError
     );
-    const base64 = await convertFileToBase64(file);
-    return { url: base64, source: 'fallback_base64' };
+    try {
+      const base64 = await convertFileToBase64(file);
+      return { url: base64, source: 'fallback_base64' };
+    } catch (fallbackError: any) {
+      console.error('Falha ao processar imagem em modo de segurança:', fallbackError);
+      throw new Error('Não foi possível processar o arquivo selecionado.');
+    }
   }
 }
 

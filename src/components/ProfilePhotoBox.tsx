@@ -3,7 +3,6 @@ import {
   Upload,
   Loader2,
   ZoomIn,
-  ZoomOut,
   Move,
   Sliders,
   Check,
@@ -11,7 +10,7 @@ import {
   Sparkles,
   Cloud,
   X,
-  Maximize2
+  AlertCircle
 } from 'lucide-react';
 import {
   ProfileMetadata,
@@ -22,7 +21,6 @@ import {
   subscribeProfileMetadata,
   getProfileFilterCss,
   getProfileTransformCss,
-  FIREBASE_CREDENTIALS,
 } from '../lib/profileFirebase';
 
 interface ProfilePhotoBoxProps {
@@ -54,7 +52,10 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSource, setUploadSource] = useState<'storage' | 'fallback_base64' | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccessMessage, setUploadSuccessMessage] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [activeTab, setActiveTab] = useState<'frame' | 'filters' | 'upload'>('frame');
 
   // Controle de arrastar com mouse/toque dentro do box
@@ -66,142 +67,119 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
     initPosY: 0,
   });
   const containerRef = useRef<HTMLDivElement>(null);
-  const saveTimeoutRef = useRef<any>(null);
 
   // 1. SINCRONIZAÇÃO EM TEMPO REAL COM FIRESTORE (onSnapshot)
+  // O listener onSnapshot apenas atualiza a interface local quando houver alteração remota,
+  // SEM reescrever dados de volta para o banco de dados nem disparar commitChanges.
   useEffect(() => {
     const unsubscribe = subscribeProfileMetadata(
       (remoteData) => {
-        setProfile((prev) => {
-          // Atualiza dados vindos da nuvem
-          const updated: ProfileMetadata = {
-            ...prev,
-            ...remoteData,
-            image_url: remoteData.image_url || prev.image_url || defaultPhotoUrl,
-          };
-          return updated;
-        });
-
-        if (remoteData.image_url && onPhotoUpdated) {
-          onPhotoUpdated(remoteData.image_url);
-        }
+        setProfile((prev) => ({
+          ...prev,
+          ...remoteData,
+          image_url: remoteData.image_url || prev.image_url || defaultPhotoUrl,
+        }));
+        // Importante: NÃO chamar onPhotoUpdated aqui dentro para evitar loops de reescrita contínua.
       },
       (err) => {
-        console.warn('Aviso ao sincronizar perfil em tempo real:', err);
+        console.warn('Aviso ao sincronizar perfil em tempo real via onSnapshot:', err);
       }
     );
 
     return () => {
       unsubscribe();
     };
-  }, [defaultPhotoUrl, onPhotoUpdated]);
+  }, [defaultPhotoUrl]);
 
-  // Função auxiliar de salvamento com debounce
-  const debouncedAutoSave = useCallback((newProfile: ProfileMetadata) => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    setSaveStatus('saving');
-    saveTimeoutRef.current = setTimeout(async () => {
-      const res = await saveProfileMetadata(newProfile);
-      if (res.success) {
-        setSaveStatus('saved');
-        setTimeout(() => setSaveStatus('idle'), 3000);
-      } else {
-        setSaveStatus('error');
-      }
-    }, 1200);
+  // Atualização de campos individuais APENAS no estado local em tempo real (SEM salvar automaticamente)
+  const handleProfileChange = useCallback((updates: Partial<ProfileMetadata>) => {
+    setProfile((prev) => ({ ...prev, ...updates }));
+    setHasUnsavedChanges(true);
   }, []);
 
-  // Atualização de campos individuais com sincronização
-  const handleProfileChange = useCallback(
-    (updates: Partial<ProfileMetadata>, shouldAutoSave = true) => {
-      setProfile((prev) => {
-        const next = { ...prev, ...updates };
-        if (shouldAutoSave && isEditMode) {
-          debouncedAutoSave(next);
-        }
-        return next;
-      });
-    },
-    [isEditMode, debouncedAutoSave]
-  );
-
-  // Upload para o Firebase Storage
+  // Upload para o Firebase Storage com tratamento robusto de erros e liberação garantida do loading
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsUploading(true);
-    setSaveStatus('saving');
+    setUploadError(null);
+    setUploadSuccessMessage(null);
+
     try {
       const result = await uploadProfileToStorage(file);
       setUploadSource(result.source);
 
-      const updatedProfile: ProfileMetadata = {
-        ...profile,
+      // Atualiza apenas o estado local para pré-visualização imediata (NÃO salva no Firestore até o clique)
+      setProfile((prev) => ({
+        ...prev,
         image_url: result.url,
-      };
+      }));
+      setHasUnsavedChanges(true);
 
-      setProfile(updatedProfile);
-
-      if (onPhotoUpdated) {
-        onPhotoUpdated(result.url);
+      const msg =
+        result.source === 'storage'
+          ? 'Foto carregada com sucesso via Firebase Storage! Clique em "Salvar Alterações" para fixar na nuvem.'
+          : 'Foto carregada com sucesso! Clique em "Salvar Alterações" para fixar na nuvem.';
+      setUploadSuccessMessage(msg);
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Falha ao processar o upload da imagem.';
+      console.error('Erro no upload da foto:', err);
+      setUploadError(errorMessage);
+    } finally {
+      // Obrigatoriamente desativa o estado de carregamento para nunca travar a interface
+      setIsUploading(false);
+      if (e.target) {
+        e.target.value = '';
       }
+    }
+  };
 
-      const saveRes = await saveProfileMetadata(updatedProfile);
-      if (saveRes.success) {
+  // Salvar EXCLUSIVAMENTE mediante ação intencional do usuário no botão "Salvar Alterações"
+  const handleManualSave = async () => {
+    setSaveStatus('saving');
+    try {
+      const res = await saveProfileMetadata(profile);
+      if (res.success) {
         setSaveStatus('saved');
-        setTimeout(() => setSaveStatus('idle'), 3500);
+        setHasUnsavedChanges(false);
+
+        // Notifica o callback do portfólio apenas quando o usuário salva explicitamente
+        if (onPhotoUpdated && profile.image_url) {
+          onPhotoUpdated(profile.image_url);
+        }
+
+        setTimeout(() => setSaveStatus('idle'), 3000);
       } else {
+        console.error('Erro ao salvar no Firestore:', res.error);
         setSaveStatus('error');
+        setTimeout(() => setSaveStatus('idle'), 3500);
       }
     } catch (err) {
-      console.error('Erro no upload da foto:', err);
+      console.error('Erro crítico ao salvar no Firestore:', err);
       setSaveStatus('error');
-    } finally {
-      setIsUploading(false);
-      e.target.value = '';
+      setTimeout(() => setSaveStatus('idle'), 3500);
     }
   };
 
-  // Salvar manualmente no Firebase
-  const handleManualSave = async () => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    setSaveStatus('saving');
-    const res = await saveProfileMetadata(profile);
-    if (res.success) {
-      setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 3000);
-    } else {
-      setSaveStatus('error');
-    }
-  };
-
-  // Resetar enquadramento e filtros para o padrão
+  // Resetar enquadramento e filtros para o padrão (apenas no estado local)
   const handleResetFraming = () => {
-    const updated = {
-      ...profile,
-      zoom: 1,
+    handleProfileChange({
+      zoom: 1.45,
       posX: 0,
       posY: 0,
-    };
-    handleProfileChange(updated, true);
+    });
   };
 
   const handleResetFilters = () => {
-    const updated = {
-      ...profile,
+    handleProfileChange({
       brightness: 100,
       saturation: 100,
       filter_preset: 'none' as ProfileFilterPreset,
-    };
-    handleProfileChange(updated, true);
+    });
   };
 
-  // HANDLERS DE ARRASTAR / ALINHAR COM MOUSE
+  // HANDLERS DE ARRASTAR / ALINHAR COM MOUSE (Apenas alteram estado local, sem auto-save)
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!isEditMode) return;
     setIsDragging(true);
@@ -218,29 +196,27 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
     const dx = e.clientX - dragStartRef.current.startX;
     const dy = e.clientY - dragStartRef.current.startY;
 
-    // Sensibilidade baseada no tamanho do box
     const rect = containerRef.current?.getBoundingClientRect();
     const width = rect?.width || 300;
     const height = rect?.height || 375;
 
-    // Converte delta de pixels para porcentagem relativa
     const pctX = (dx / width) * 100;
     const pctY = (dy / height) * 100;
 
     const newPosX = Math.max(-60, Math.min(60, Math.round(dragStartRef.current.initPosX + pctX)));
     const newPosY = Math.max(-60, Math.min(60, Math.round(dragStartRef.current.initPosY + pctY)));
 
-    handleProfileChange({ posX: newPosX, posY: newPosY }, false);
+    setProfile((prev) => ({ ...prev, posX: newPosX, posY: newPosY }));
+    setHasUnsavedChanges(true);
   };
 
   const handleMouseUp = () => {
     if (isDragging) {
       setIsDragging(false);
-      debouncedAutoSave(profile);
     }
   };
 
-  // HANDLERS TOUCH PARA DISPOSITIVOS MÓVEIS
+  // HANDLERS TOUCH PARA DISPOSITIVOS MÓVEIS (Apenas alteram estado local, sem auto-save)
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!isEditMode || e.touches.length === 0) return;
     const touch = e.touches[0];
@@ -269,13 +245,13 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
     const newPosX = Math.max(-60, Math.min(60, Math.round(dragStartRef.current.initPosX + pctX)));
     const newPosY = Math.max(-60, Math.min(60, Math.round(dragStartRef.current.initPosY + pctY)));
 
-    handleProfileChange({ posX: newPosX, posY: newPosY }, false);
+    setProfile((prev) => ({ ...prev, posX: newPosX, posY: newPosY }));
+    setHasUnsavedChanges(true);
   };
 
   const handleTouchEnd = () => {
     if (isDragging) {
       setIsDragging(false);
-      debouncedAutoSave(profile);
     }
   };
 
@@ -291,7 +267,7 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
 
   return (
     <div className="relative flex flex-col items-center lg:items-start select-none">
-      {/* Botão de Abertura do Painel de Edição da Foto (Exclusivo no Modo Edição) */}
+      {/* Barra de Ações Rápidas no Modo Edição */}
       {isEditMode && (
         <div className="mb-2 flex items-center justify-between w-full max-w-[310px] gap-2">
           <button
@@ -307,16 +283,39 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
             {isEditorOpen ? 'Fechar Ajustes' : 'Ajustar Foto & Filtros'}
           </button>
 
-          {saveStatus === 'saving' && (
-            <span className="text-[9px] font-mono-code text-[#D4FF3A] flex items-center gap-1 animate-pulse">
-              <Loader2 className="w-2.5 h-2.5 animate-spin" /> Salvando...
-            </span>
-          )}
-          {saveStatus === 'saved' && (
-            <span className="text-[9px] font-mono-code text-[#D4FF3A] flex items-center gap-1">
-              <Check className="w-2.5 h-2.5" /> Na nuvem
-            </span>
-          )}
+          {/* Botão Explícito de Salvar Alterações */}
+          <button
+            type="button"
+            onClick={handleManualSave}
+            disabled={saveStatus === 'saving'}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono-code font-bold transition-all shadow-md cursor-pointer ${
+              hasUnsavedChanges
+                ? 'bg-[#2340FF] text-white hover:bg-[#1a32cc] border border-[#D4FF3A] animate-pulse'
+                : 'bg-black/80 text-white/90 border border-white/20 hover:bg-black'
+            }`}
+          >
+            {saveStatus === 'saving' ? (
+              <>
+                <Loader2 className="w-3 h-3 animate-spin text-[#D4FF3A]" />
+                <span>Salvando...</span>
+              </>
+            ) : saveStatus === 'saved' ? (
+              <>
+                <Check className="w-3 h-3 text-[#D4FF3A]" />
+                <span>Salvo!</span>
+              </>
+            ) : saveStatus === 'error' ? (
+              <>
+                <AlertCircle className="w-3 h-3 text-red-400" />
+                <span className="text-red-400">Erro</span>
+              </>
+            ) : (
+              <>
+                <Cloud className="w-3 h-3 text-[#D4FF3A]" />
+                <span>Salvar Alterações</span>
+              </>
+            )}
+          </button>
         </div>
       )}
 
@@ -411,7 +410,7 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
           {/* Cabeçalho do Painel */}
           <div className="flex items-center justify-between pb-2 border-b border-white/10 mb-2.5">
             <div className="flex items-center gap-1.5 text-[#D4FF3A] font-bold text-[11px] uppercase">
-              <Sparkles className="w-3.5 h-3.5" /> Estúdio da Foto
+              <Sparkles className="w-3.5 h-3.5" /> Ajustes da Foto
             </div>
             <button
               type="button"
@@ -497,10 +496,10 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleProfileChange({ zoom: 1.5 })}
+                    onClick={() => handleProfileChange({ zoom: 1.45 })}
                     className="hover:text-[#D4FF3A] cursor-pointer"
                   >
-                    1.5x
+                    1.45x
                   </button>
                   <button
                     type="button"
@@ -548,7 +547,7 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
 
               <div className="flex items-center justify-between pt-1">
                 <span className="text-[8px] text-white/50 italic">
-                  Dica: arraste diretamente sobre a foto.
+                  Arraste diretamente sobre a foto.
                 </span>
                 <button
                   type="button"
@@ -641,15 +640,15 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
             </div>
           )}
 
-          {/* CONTEÚDO DA ABA 3: UPLOAD NOVO (FIREBASE STORAGE) */}
+          {/* CONTEÚDO DA ABA 3: UPLOAD NOVO (FIREBASE STORAGE COM TIMEOUT & TRY/CATCH ROBUSTO) */}
           {activeTab === 'upload' && (
             <div className="space-y-3">
               <div>
                 <label className="text-[10px] text-[#D4FF3A] block mb-1 font-bold flex items-center gap-1">
-                  <Upload className="w-3 h-3" /> Upload para Firebase Storage:
+                  <Upload className="w-3 h-3" /> Upload de Nova Foto:
                 </label>
                 <p className="text-[8px] text-white/70 mb-2 leading-tight">
-                  A imagem é enviada automaticamente para a nuvem gerando link público seguro.
+                  Envie uma nova imagem. As alterações só serão salvas no Firebase quando você clicar em "Salvar Alterações".
                 </p>
 
                 <label
@@ -670,7 +669,7 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
                     <div className="flex flex-col items-center gap-1 text-center py-1">
                       <Upload className="w-4 h-4 text-[#D4FF3A]" />
                       <span className="text-[9px] text-white font-bold">
-                        Clique para selecionar nova imagem
+                        Clique para selecionar arquivo
                       </span>
                       <span className="text-[8px] text-white/50">PNG, JPG, WEBP até 10MB</span>
                     </div>
@@ -684,31 +683,59 @@ export const ProfilePhotoBox: React.FC<ProfilePhotoBoxProps> = ({
                   />
                 </label>
 
-                {uploadSource && (
+                {uploadError && (
+                  <div className="mt-2 text-[8px] text-red-400 bg-red-950/40 border border-red-500/30 p-2 rounded-lg flex items-start gap-1.5">
+                    <AlertCircle className="w-3 h-3 shrink-0 text-red-400 mt-0.5" />
+                    <span>{uploadError}</span>
+                  </div>
+                )}
+
+                {uploadSuccessMessage && (
+                  <div className="mt-2 text-[8px] text-[#D4FF3A] bg-[#D4FF3A]/10 border border-[#D4FF3A]/30 p-2 rounded-lg flex items-start gap-1.5">
+                    <Check className="w-3 h-3 shrink-0 text-[#D4FF3A] mt-0.5" />
+                    <span>{uploadSuccessMessage}</span>
+                  </div>
+                )}
+
+                {uploadSource && !uploadError && !uploadSuccessMessage && (
                   <div className="mt-2 text-[8px] text-white/60 flex items-center gap-1">
                     <Check className="w-2.5 h-2.5 text-[#D4FF3A]" />
                     {uploadSource === 'storage'
-                      ? 'Hospedada no Firebase Storage'
-                      : 'Carregada via codificação segura'}
+                      ? 'Imagem hospedada no Firebase Storage'
+                      : 'Imagem em armazenamento seguro'}
                   </div>
                 )}
               </div>
             </div>
           )}
 
-          {/* Rodapé com botão de persistência manual na nuvem */}
+          {/* Rodapé com botão explícito OBRIGATÓRIO de "Salvar Alterações" */}
           <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between gap-2">
             <span className="text-[8px] text-white/50">
-              Sincronização em tempo real (onSnapshot) ativa
+              {hasUnsavedChanges ? 'Alterações pendentes' : 'Tudo salvo'}
             </span>
             <button
               type="button"
               onClick={handleManualSave}
               disabled={saveStatus === 'saving'}
-              className="px-2.5 py-1 bg-[#2340FF] hover:bg-[#1a32cc] text-white text-[9px] font-bold rounded-lg flex items-center gap-1 transition-all shadow-md cursor-pointer disabled:opacity-50"
+              className="px-3 py-1.5 bg-[#2340FF] hover:bg-[#1a32cc] text-white text-[9px] font-bold rounded-lg flex items-center gap-1.5 transition-all shadow-md cursor-pointer disabled:opacity-50"
             >
-              <Cloud className="w-3 h-3 text-[#D4FF3A]" />
-              {saveStatus === 'saving' ? 'Salvando...' : 'Salvar na Nuvem'}
+              {saveStatus === 'saving' ? (
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin text-[#D4FF3A]" />
+                  <span>Salvando...</span>
+                </>
+              ) : saveStatus === 'saved' ? (
+                <>
+                  <Check className="w-3 h-3 text-[#D4FF3A]" />
+                  <span>Salvo!</span>
+                </>
+              ) : (
+                <>
+                  <Cloud className="w-3 h-3 text-[#D4FF3A]" />
+                  <span>Salvar Alterações</span>
+                </>
+              )}
             </button>
           </div>
         </div>
