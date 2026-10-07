@@ -12,11 +12,11 @@ export const ContatoSection: React.FC = () => {
         }
       `}</style>
 
-      <div className="max-w-[1320px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+      <div className="max-w-[1320px] mx-auto w-full px-4 sm:px-6 md:px-8 lg:px-12 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center w-full">
           
           {/* Left Column: Headline & Links */}
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7 w-full">
             <span className="font-mono-code text-xs uppercase tracking-widest text-[#FF4FA0] font-bold block mb-2 sm:mb-3">
               Curtiu?
             </span>
@@ -82,8 +82,8 @@ export const ContatoSection: React.FC = () => {
           </div>
 
           {/* Right Column */}
-          <div className="lg:col-span-5 flex lg:justify-end mt-4 lg:mt-0">
-            <div className="max-w-md space-y-3 sm:space-y-5">
+          <div className="lg:col-span-5 flex lg:justify-end mt-4 lg:mt-0 w-full">
+            <div className="w-full lg:max-w-md space-y-3 sm:space-y-5">
               
               {/* Live Status Indicator */}
               <div className="flex items-center gap-2.5">

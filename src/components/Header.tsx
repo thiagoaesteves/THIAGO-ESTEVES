@@ -203,14 +203,14 @@ export const Header: React.FC = () => {
               onClick={(e) => handleNavClick(e, 'servicos')}
               className="text-[#F6F7F2] py-3 min-h-[44px] flex items-center border-b border-white/10 active:text-[#D4FF3A]"
             >
-              Serviços
+              Backstage
             </a>
             <a
               href="#sobre"
               onClick={(e) => handleNavClick(e, 'sobre')}
               className="text-[#F6F7F2] py-3 min-h-[44px] flex items-center border-b border-white/10 active:text-[#D4FF3A]"
             >
-              Sobre
+              Headliner
             </a>
             <div className="pt-3 pb-1">
               <a

@@ -120,8 +120,8 @@ export const ServicosSection: React.FC = () => {
         
         {/* Bloco Superior com Fundo Claro */}
         <div className="bg-[#F6F7F2] w-full pt-6 pb-2.5 sm:pt-8 sm:pb-3.5 text-[#0F1222]">
-          <div className="max-w-[1320px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 w-full">
-            <div className="w-full max-w-[1333px]">
+          <div className="max-w-[1320px] mx-auto w-full px-4 sm:px-6 md:px-8 lg:px-12">
+            <div className="w-full">
               
               {/* Header & Manifesto Intro */}
               <div className="space-y-1.5">
@@ -129,7 +129,7 @@ export const ServicosSection: React.FC = () => {
                   Especialidades &amp; Craft
                 </span>
 
-                <div className="space-y-2 max-w-[72ch]">
+                <div className="space-y-2 w-full">
                   {isEditMode ? (
                     <div className="space-y-2 p-3 rounded-xl bg-[#0F1222]/5 border border-[#2340FF]/30">
                       <label className="text-[10px] font-mono-code text-[#2340FF] font-bold flex items-center gap-1">
@@ -151,7 +151,7 @@ export const ServicosSection: React.FC = () => {
                       />
                     </div>
                   ) : (
-                    <p className="font-disp font-extrabold text-lg sm:text-2xl md:text-3xl lg:text-[32px] tracking-[-0.03em] leading-[1.06] text-[#0F1222] max-w-4xl">
+                    <p className="font-disp font-extrabold text-lg sm:text-2xl md:text-3xl lg:text-[32px] tracking-[-0.03em] leading-[1.06] text-[#0F1222] w-full">
                       <span className="font-serif-it italic text-[#2340FF] text-[1.18em] leading-none align-[-0.12em] mr-1.5">
                         “
                       </span>
@@ -181,7 +181,7 @@ export const ServicosSection: React.FC = () => {
                       />
                     </div>
                   ) : (
-                    <p className="text-sm sm:text-base md:text-lg lg:text-[19px] font-medium text-[#343848] leading-snug sm:whitespace-nowrap whitespace-normal pt-0.5 max-w-[838.8px]">
+                    <p className="text-sm sm:text-base md:text-lg lg:text-[19px] font-medium text-[#343848] leading-snug sm:whitespace-nowrap whitespace-normal pt-0.5 w-full">
                       {manifesto.subText}{' '}
                       <span className="inline-block bg-[#D4FF3A] text-[#0F1222] px-2 py-0.5 font-bold rounded-[255px_15px_225px_15px/15px_225px_15px_255px] transform -rotate-1 shadow-sm">
                         {manifesto.badge}”
@@ -263,7 +263,7 @@ export const ServicosSection: React.FC = () => {
                           placeholder="Digite um item por linha..."
                         />
                       ) : (
-                        <p className="text-xs sm:text-sm md:text-[13px] lg:text-[14px] 2xl:text-[15px] text-[#343848] font-normal leading-relaxed max-w-4xl 2xl:max-w-5xl">
+                        <p className="text-xs sm:text-sm md:text-[13px] lg:text-[14px] 2xl:text-[15px] text-[#343848] font-normal leading-relaxed w-full">
                           {Array.isArray(item.itens) && item.itens.map((sub: string, sIdx: number) => (
                             <React.Fragment key={sIdx}>
                               <span className="text-[#202433] hover:text-[#2340FF] transition-colors duration-200">
@@ -290,8 +290,8 @@ export const ServicosSection: React.FC = () => {
 
         {/* BARRA DE RODAPÉ // 05 (Altura expandida e texto alinhado verticalmente ao centro) */}
         <div className="bg-[#0F1222] text-[#F6F7F2] w-full max-w-full py-10 sm:py-14 m-0 border-b-0 overflow-hidden box-border flex flex-col justify-center">
-          <div className="max-w-[1320px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 w-full">
-            <div className="max-w-[1140px] space-y-1.5">
+          <div className="max-w-[1320px] mx-auto w-full px-4 sm:px-6 md:px-8 lg:px-12">
+            <div className="w-full space-y-1.5">
               <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full">
                 {isEditMode ? (
                   <input
@@ -326,7 +326,7 @@ export const ServicosSection: React.FC = () => {
                   />
                 </div>
               ) : (
-                <p className="font-disp font-extrabold text-sm sm:text-base md:text-lg lg:text-[20px] leading-tight tracking-tight text-white max-w-4xl break-words">
+                <p className="font-disp font-extrabold text-sm sm:text-base md:text-lg lg:text-[20px] leading-tight tracking-tight text-white w-full break-words">
                   {footer?.line1 || 'Especialista cascudo, ponta firme, sangue nos olhos'}<br />
                   <span className="font-serif-it italic font-normal text-[#AFC0FF]">
                     {footer?.line2 || 'sem nunca abrir mão da criatividade.'}

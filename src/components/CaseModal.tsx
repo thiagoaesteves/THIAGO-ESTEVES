@@ -94,7 +94,8 @@ export const CaseModal: React.FC<CaseModalProps> = ({
   const [addInputVal, setAddInputVal] = useState('');
   const [addAspectVal, setAddAspectVal] = useState<'contain' | 'square' | 'story'>('contain');
   const [addColumnsVal, setAddColumnsVal] = useState<number>(1);
-  const [addScaleVal, setAddScaleVal] = useState<'original' | 'thumb'>('original');
+  const [addScaleVal, setAddScaleVal] = useState<'compact' | 'medium' | 'large'>('large');
+  const [viewingScales, setViewingScales] = useState<Record<string, 'compact' | 'medium' | 'large'>>({});
   const [addVideoColumnsVal, setAddVideoColumnsVal] = useState<number>(1);
   const [uploadingBlockIdx, setUploadingBlockIdx] = useState<number | null>(null);
   const [isUploadingNewImage, setIsUploadingNewImage] = useState(false);
@@ -162,7 +163,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
         value: img,
         aspect: isLhamaSquare ? 'square' : isUnicredStory ? 'story' : 'contain',
         columns: isLhamaSquare ? 3 : isUnicredStory ? 5 : 1,
-        scale: 'original',
+        scale: 'large',
       });
     });
     return list;
@@ -335,9 +336,19 @@ export const CaseModal: React.FC<CaseModalProps> = ({
     updateCaseBlocks(safeItem.slug, newBlocks);
   };
 
-  const updateBlockScale = (idx: number, scale: 'original' | 'thumb') => {
+  const updateBlockScale = (idx: number, scale: 'compact' | 'medium' | 'large') => {
     const newBlocks = currentBlocks.map((b, i) => (i === idx ? { ...b, scale } : b));
     updateCaseBlocks(safeItem.slug, newBlocks);
+  };
+
+  const handleScaleChange = (idx: number, scale: 'compact' | 'medium' | 'large') => {
+    const block = currentBlocks[idx];
+    if (!block) return;
+    const key = block.id || `block-${idx}`;
+    setViewingScales((prev) => ({ ...prev, [key]: scale }));
+    if (isEditMode) {
+      updateBlockScale(idx, scale);
+    }
   };
 
   const unifyAllTextBlocks = () => {
@@ -364,7 +375,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
     value: string = '',
     aspect: CaseBlock['aspect'] = 'contain',
     columns?: number,
-    scale?: 'original' | 'thumb'
+    scale?: 'compact' | 'medium' | 'large'
   ) => {
     const newBlock: CaseBlock = {
       id: `block-${type}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -377,7 +388,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
           : type === 'video'
           ? columns ?? 1
           : undefined,
-      scale: type === 'image' ? scale ?? 'original' : undefined,
+      scale: type === 'image' ? scale ?? 'large' : undefined,
     };
     updateCaseBlocks(safeItem.slug, [...currentBlocks, newBlock]);
   };
@@ -411,7 +422,16 @@ export const CaseModal: React.FC<CaseModalProps> = ({
     const isSquare = currentAspect === 'square';
     const isStory = currentAspect === 'story';
     const currentCols = block.columns ?? (isVideo ? 1 : currentAspect === 'contain' ? 1 : 3);
-    const currentScale = block.scale || 'original';
+    const rawScale = block.scale;
+    const normalizedConfigScale: 'compact' | 'medium' | 'large' =
+      rawScale === 'compact' || rawScale === 'thumb'
+        ? 'compact'
+        : rawScale === 'medium'
+        ? 'medium'
+        : 'large';
+
+    const blockKey = block.id || `block-${idx}`;
+    const effectiveScale = viewingScales[blockKey] || normalizedConfigScale;
 
     const isVimeo = isVideo && isVimeoVideo(block.value);
     const vimeoId = isVimeo ? getVimeoVideoId(block.value) : '';
@@ -439,8 +459,8 @@ export const CaseModal: React.FC<CaseModalProps> = ({
           dragOverBlockIdx === idx ? 'ring-4 ring-[#2340FF] scale-[1.01]' : ''
         } ${
           isEditMode
-            ? 'p-2.5 sm:p-3.5 rounded-xl border border-dashed border-black/20 dark:border-white/20 bg-black/[0.03] dark:bg-white/[0.03] space-y-2.5'
-            : 'w-full'
+            ? 'p-2.5 sm:p-3.5 rounded-xl border border-dashed border-black/20 dark:border-white/20 bg-black/[0.03] dark:bg-white/[0.03] space-y-2.5 mx-auto'
+            : 'w-full mx-auto'
         }`}
       >
         {/* Edit Mode Toolbar with Format and Column Selection Controls */}
@@ -549,27 +569,39 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                     <span className="text-white/50 text-[10px]">Tamanho:</span>
                     <button
                       type="button"
-                      onClick={() => updateBlockScale(idx, 'original')}
+                      onClick={() => handleScaleChange(idx, 'compact')}
                       className={`px-2 py-0.5 rounded text-[10px] font-mono-code cursor-pointer transition-colors ${
-                        currentScale === 'original'
+                        effectiveScale === 'compact'
                           ? 'bg-[#2340FF] text-white font-bold shadow-sm'
                           : 'hover:bg-white/20 text-white/70'
                       }`}
-                      title="Tamanho Original / Arte por Inteiro (max-w-4xl)"
+                      title="Compacta: ideal para capturas de tela menores ou detalhes (max-w-[500px])"
                     >
-                      Original
+                      Compacta
                     </button>
                     <button
                       type="button"
-                      onClick={() => updateBlockScale(idx, 'thumb')}
+                      onClick={() => handleScaleChange(idx, 'medium')}
                       className={`px-2 py-0.5 rounded text-[10px] font-mono-code cursor-pointer transition-colors ${
-                        currentScale === 'thumb'
+                        effectiveScale === 'medium'
                           ? 'bg-[#2340FF] text-white font-bold shadow-sm'
                           : 'hover:bg-white/20 text-white/70'
                       }`}
-                      title="Miniatura Centralizada (max-w-md)"
+                      title="Média: tamanho equilibrado para leitura padrão (max-w-[800px])"
                     >
-                      Miniatura
+                      Média
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleScaleChange(idx, 'large')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-mono-code cursor-pointer transition-colors ${
+                        effectiveScale === 'large'
+                          ? 'bg-[#2340FF] text-white font-bold shadow-sm'
+                          : 'hover:bg-white/20 text-white/70'
+                      }`}
+                      title="Grande / Imersiva: destaque total do layout da peça publicitária (largura útil completa)"
+                    >
+                      Grande
                     </button>
                   </div>
                 )}
@@ -837,16 +869,77 @@ export const CaseModal: React.FC<CaseModalProps> = ({
         {/* 3. IMAGE BLOCK */}
         {isImage && (
           <div
-            className={
+            className={`w-full mx-auto flex flex-col items-center ${
               currentCols === 1
-                ? currentScale === 'thumb'
-                  ? 'w-full max-w-md sm:max-w-lg'
-                  : 'w-full max-w-4xl'
-                : 'w-full'
-            }
+                ? effectiveScale === 'compact'
+                  ? 'max-w-[500px]'
+                  : effectiveScale === 'medium'
+                  ? 'max-w-[800px]'
+                  : 'max-w-full'
+                : 'max-w-full'
+            }`}
           >
+            {/* View Mode Direct Size Controls (Direct in-body layout control replacing popup lightbox) */}
+            {currentCols === 1 && !isEditMode && (
+              <div className="flex items-center justify-center mb-3">
+                <div
+                  className={`inline-flex items-center gap-1 p-1 rounded-full text-xs font-mono-code transition-all shadow-sm ${
+                    isLadoB
+                      ? 'bg-[#151928]/95 border border-white/15 text-white/80 backdrop-blur-sm'
+                      : 'bg-white/95 border border-black/15 text-gray-700 shadow-sm backdrop-blur-sm'
+                  }`}
+                >
+                  <span className="px-2 text-[10px] uppercase font-bold tracking-wider opacity-60">
+                    Tamanho:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleScaleChange(idx, 'compact')}
+                    className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer text-[11px] font-semibold ${
+                      effectiveScale === 'compact'
+                        ? isLadoB
+                          ? 'bg-[#FF4FA0] text-white font-bold shadow-sm'
+                          : 'bg-[#2340FF] text-white font-bold shadow-sm'
+                        : 'hover:bg-black/5 dark:hover:bg-white/10'
+                    }`}
+                    title="Compacta: ideal para capturas de tela menores ou detalhes"
+                  >
+                    Compacta
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleScaleChange(idx, 'medium')}
+                    className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer text-[11px] font-semibold ${
+                      effectiveScale === 'medium'
+                        ? isLadoB
+                          ? 'bg-[#FF4FA0] text-white font-bold shadow-sm'
+                          : 'bg-[#2340FF] text-white font-bold shadow-sm'
+                        : 'hover:bg-black/5 dark:hover:bg-white/10'
+                    }`}
+                    title="Média: tamanho equilibrado para leitura padrão"
+                  >
+                    Média
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleScaleChange(idx, 'large')}
+                    className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer text-[11px] font-semibold ${
+                      effectiveScale === 'large'
+                        ? isLadoB
+                          ? 'bg-[#FF4FA0] text-white font-bold shadow-sm'
+                          : 'bg-[#2340FF] text-white font-bold shadow-sm'
+                        : 'hover:bg-black/5 dark:hover:bg-white/10'
+                    }`}
+                    title="Grande / Imersiva: destaque total do layout da peça"
+                  >
+                    Grande
+                  </button>
+                </div>
+              </div>
+            )}
+
             {isEditMode && (
-              <div className="mb-2 flex flex-wrap items-center gap-2 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-dashed border-black/15 dark:border-white/15">
+              <div className="w-full mb-2 flex flex-wrap items-center gap-2 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-dashed border-black/15 dark:border-white/15">
                 <label className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#2340FF] hover:bg-[#1B34D6] text-white text-[11px] font-mono-code font-bold cursor-pointer transition-colors shadow-sm">
                   {uploadingBlockIdx === idx ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin text-[#D4FF3A]" />
@@ -892,43 +985,27 @@ export const CaseModal: React.FC<CaseModalProps> = ({
             )}
 
             <div
-              className={`relative rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shadow-lg group/img bg-[#E4E6EA]/50 dark:bg-[#151928]/50`}
+              className="w-full rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shadow-lg group/img bg-[#E4E6EA]/50 dark:bg-[#151928]/50 mx-auto transition-all duration-300"
             >
               <img
                 src={block.value}
                 alt={`Peça ${idx + 1} de ${safeItem.name}`}
                 loading="lazy"
                 referrerPolicy="no-referrer"
-                className={`w-full cursor-pointer ${
+                className={`mx-auto block ${
                   currentCols === 1
-                    ? currentScale === 'thumb'
-                      ? 'w-full h-auto object-contain max-w-md sm:max-w-lg block'
-                      : 'w-full h-auto object-contain max-w-4xl block'
+                    ? effectiveScale === 'compact'
+                      ? 'w-full h-auto object-contain max-w-[500px]'
+                      : effectiveScale === 'medium'
+                      ? 'w-full h-auto object-contain max-w-[800px]'
+                      : 'w-full h-auto object-contain max-w-full'
                     : isSquare
-                    ? 'aspect-square object-cover block'
+                    ? 'w-full aspect-square object-cover'
                     : isStory
-                    ? 'aspect-[9/16] object-cover block'
-                    : 'w-full h-auto object-contain block'
+                    ? 'w-full aspect-[9/16] object-cover'
+                    : 'w-full h-auto object-contain'
                 }`}
-                onClick={() =>
-                  !isEditMode &&
-                  onOpenLightbox &&
-                  onOpenLightbox(block.value, `${safeItem.name} - Peça ${idx + 1}`)
-                }
               />
-
-              {!isEditMode && onOpenLightbox && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    onOpenLightbox(block.value, `${safeItem.name} - Peça ${idx + 1}`)
-                  }
-                  className="absolute top-3 right-3 p-2.5 rounded bg-[#0F1222]/80 hover:bg-[#0F1222] text-white hover:text-[#D4FF3A] opacity-0 group-hover/img:opacity-100 transition-opacity backdrop-blur-sm cursor-pointer shadow-md"
-                  title="Ampliar imagem em tela cheia"
-                >
-                  <Maximize2 className="w-4 h-4" />
-                </button>
-              )}
             </div>
           </div>
         )}
@@ -1131,7 +1208,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
               {renderGroups.map((group, gIdx) => {
                  if (group.type === 'single') {
                    return (
-                     <div key={`group-single-${gIdx}`} className="w-full">
+                     <div key={`group-single-${gIdx}`} className="w-full flex flex-col items-center justify-center">
                        {renderBlockCard(group.block, group.originalIdx)}
                      </div>
                    );
@@ -1209,7 +1286,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       onClick={() => {
                         setActiveAddForm(activeAddForm === 'image' ? null : 'image');
                         setAddInputVal('');
-                        setAddScaleVal('original');
+                        setAddScaleVal('large');
                       }}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-colors shadow-sm ${
                         activeAddForm === 'image'
@@ -1515,29 +1592,42 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                           <span className="text-gray-500">Tamanho:</span>
                           <button
                             type="button"
-                            onClick={() => setAddScaleVal('original')}
+                            onClick={() => setAddScaleVal('compact')}
                             className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
-                              addScaleVal === 'original'
+                              addScaleVal === 'compact'
                                 ? 'bg-[#2340FF] text-white font-bold'
                                 : isLadoB
                                 ? 'bg-white/10 hover:bg-white/20 text-white'
                                 : 'bg-black/10 hover:bg-black/20 text-gray-800'
                             }`}
                           >
-                            Original
+                            Compacta
                           </button>
                           <button
                             type="button"
-                            onClick={() => setAddScaleVal('thumb')}
+                            onClick={() => setAddScaleVal('medium')}
                             className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
-                              addScaleVal === 'thumb'
+                              addScaleVal === 'medium'
                                 ? 'bg-[#2340FF] text-white font-bold'
                                 : isLadoB
                                 ? 'bg-white/10 hover:bg-white/20 text-white'
                                 : 'bg-black/10 hover:bg-black/20 text-gray-800'
                             }`}
                           >
-                            Miniatura
+                            Média
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAddScaleVal('large')}
+                            className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
+                              addScaleVal === 'large'
+                                ? 'bg-[#2340FF] text-white font-bold'
+                                : isLadoB
+                                ? 'bg-white/10 hover:bg-white/20 text-white'
+                                : 'bg-black/10 hover:bg-black/20 text-gray-800'
+                            }`}
+                          >
+                            Grande
                           </button>
                         </div>
                       )}
