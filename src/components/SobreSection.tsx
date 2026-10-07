@@ -97,14 +97,14 @@ export const SobreSection: React.FC = () => {
   return (
     <section
       id="sobre"
-      className="w-full bg-[#2340FF] text-white flex flex-col justify-between py-4 sm:py-6 lg:py-8 px-6 sm:px-10 lg:px-16 2xl:px-24 scroll-mt-[54px] sm:scroll-mt-[58px] relative min-h-[calc(100vh-54px)] sm:min-h-[calc(100vh-58px)] min-h-[calc(100dvh-54px)] sm:min-h-[calc(100dvh-58px)] overflow-hidden"
+      className="w-full bg-[#2340FF] text-white flex flex-col justify-between py-6 sm:py-8 lg:py-10 px-4 sm:px-6 md:px-8 lg:px-12 scroll-mt-[54px] sm:scroll-mt-[58px] relative min-h-[calc(100vh-54px)] sm:min-h-[calc(100vh-58px)] min-h-[calc(100dvh-54px)] sm:min-h-[calc(100dvh-58px)] overflow-hidden"
     >
       <div 
         className="absolute inset-0 opacity-[0.035] pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:24px_24px]" 
         aria-hidden="true" 
       />
 
-      <div className="max-w-[1280px] 2xl:max-w-[1500px] w-full mx-auto my-auto flex flex-col justify-between relative z-10 space-y-6 lg:space-y-8">
+      <div className="max-w-[1280px] w-full mx-auto my-auto flex flex-col justify-between relative z-10 space-y-6 lg:space-y-8">
         
         {isEditMode && (
           <div className="flex flex-wrap items-center gap-3 p-2.5 rounded-xl bg-black/80 backdrop-blur-md border border-[#D4FF3A]/30 text-xs font-mono-code mb-1 shadow-xl">

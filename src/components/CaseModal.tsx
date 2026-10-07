@@ -959,7 +959,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
               : 'bg-[#F6F7F2]/95 border-black/10 text-[#0F1222]'
           }`}
         >
-          <div className="max-w-[1240px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 py-3.5 sm:py-4 flex justify-between items-center gap-4">
+          <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-3.5 sm:py-4 flex justify-between items-center gap-4">
             <div className="flex items-center gap-3">
               <span
                 className={`font-mono-code text-xs sm:text-sm uppercase tracking-widest font-semibold ${
@@ -993,7 +993,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
         </header>
 
         {/* Modal Main Content */}
-        <main className="flex-1 w-full max-w-[1240px] 2xl:max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 py-6 sm:py-10 md:py-14">
+        <main className="flex-1 w-full max-w-[1240px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-10 md:py-14">
           
           {/* Container restrito e alinhado rigorosamente à esquerda embaixo do título */}
           <div className="max-w-3xl w-full">

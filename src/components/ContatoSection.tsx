@@ -12,7 +12,7 @@ export const ContatoSection: React.FC = () => {
         }
       `}</style>
 
-      <div className="max-w-[1320px] 2xl:max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 2xl:px-24 relative z-10">
+      <div className="max-w-[1320px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           
           {/* Left Column: Headline & Links */}
@@ -21,7 +21,7 @@ export const ContatoSection: React.FC = () => {
               Curtiu?
             </span>
 
-            <h2 className="font-disp font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl tracking-[-0.04em] leading-[0.94] text-white">
+            <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl tracking-[-0.04em] leading-[0.96] text-white">
               Vamos<br />conversar?
             </h2>
 
@@ -105,8 +105,8 @@ export const ContatoSection: React.FC = () => {
                 Open for full-time opportunities &amp; freelance projects.
               </p>
 
-              {/* Retorno à font-disp original com escala ajustada para uma única linha */}
-              <p className="font-disp font-semibold text-base sm:text-lg md:text-xl tracking-tight uppercase flex items-center flex-nowrap whitespace-nowrap gap-x-2" style={{ color: '#AFC0FF' }}>
+              {/* Retorno à font-disp original com escala ajustada e flexível para mobile e telas grandes */}
+              <p className="font-disp font-semibold text-xs min-[400px]:text-sm sm:text-base md:text-lg lg:text-xl tracking-tight uppercase flex items-center flex-wrap sm:flex-nowrap gap-x-2" style={{ color: '#AFC0FF' }}>
                 <span>BORN TO ERREJOTA · OPEN TO</span>
                 
                 {/* WORK em azul exato com risco manual em rosa */}

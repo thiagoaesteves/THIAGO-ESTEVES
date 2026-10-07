@@ -146,13 +146,13 @@ function PortfolioApp() {
       <main>
         {/* Lado A */}
         <section id="lado-a" className="pt-4 sm:pt-6 md:pt-8 pb-14 sm:pb-18 md:pb-24 bg-[#F6F7F2]">
-          <div className="max-w-[1320px] 2xl:max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 2xl:px-24">
+          <div className="max-w-[1320px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4 sm:mb-6 md:mb-8">
               <div className="max-w-3xl space-y-1">
                 <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block select-text">
                   Lado A
                 </span>
-                <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] 2xl:text-[5.75rem] tracking-[-0.04em] text-[#0F1222] leading-[0.98] select-text">
+                <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] tracking-[-0.04em] text-[#0F1222] leading-[0.98] select-text">
                   Advertising
                 </h2>
               </div>
@@ -285,13 +285,13 @@ function PortfolioApp() {
         {/* Lado B */}
         {casesLadoB.length > 0 && (
           <section id="lado-b" className="pt-4 sm:pt-6 md:pt-8 pb-14 sm:pb-18 md:pb-24 bg-[#0F1222] text-[#F6F7F2] border-t border-[#262A3D]">
-            <div className="max-w-[1320px] 2xl:max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 2xl:px-24">
+            <div className="max-w-[1320px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4 sm:mb-6 md:mb-8">
                 <div className="max-w-3xl space-y-1">
                   <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#FF4FA0] font-bold block select-text">
                     Lado B
                   </span>
-                  <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] 2xl:text-[5.75rem] tracking-[-0.04em] text-white leading-[0.98] select-text">
+                  <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] tracking-[-0.04em] text-white leading-[0.98] select-text">
                     Branding
                   </h2>
                 </div>
@@ -416,13 +416,13 @@ function PortfolioApp() {
         {/* Faixa Bônus */}
         {casesBonus.length > 0 && (
           <section id="faixa-bonus" className="pt-4 sm:pt-6 md:pt-8 pb-14 sm:pb-18 md:pb-24 bg-[#D4FF3A] text-[#0F1222] border-t border-black/10">
-            <div className="max-w-[1320px] 2xl:max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 2xl:px-24">
+            <div className="max-w-[1320px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4 sm:mb-6 md:mb-8">
                 <div className="max-w-4xl space-y-1">
                   <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block select-text">
                     Faixas Bonus · {totalBonus} faixas
                   </span>
-                  <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] 2xl:text-[5.75rem] tracking-[-0.04em] text-[#0F1222] leading-[0.98] select-text">
+                  <h2 className="font-disp font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.25rem] tracking-[-0.04em] text-[#0F1222] leading-[0.98] select-text">
                     Especiais
                   </h2>
                   <p className="font-mono-code text-sm sm:text-base text-[#0F1222]/80 pt-2 font-medium select-text">

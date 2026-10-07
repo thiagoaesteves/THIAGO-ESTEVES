@@ -36,6 +36,25 @@
   }
 }
 
+/* =========================================================================
+   DIRETRIZ DE ESCALONAMENTO PARA TELAS GRANDES E TELEVISORES
+   - Mantém o layout centralizado e proporcional em monitores de 24" e TVs de até 50"
+   - Preserva rigorosamente a escala e respiro de notebook de 14"/15"
+   ========================================================================= */
+@media (min-width: 2560px) {
+  /* Monitores 2K/4K de alta densidade e TVs de até 50" */
+  html {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 3400px) {
+  /* Televisores 4K de até 50" em resolução nativa: escala proporcional suave */
+  html {
+    font-size: 20px;
+  }
+}
+
 .font-disp {
   font-family: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
 }
