@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   ArrowRight,
   Play,
-  Maximize2,
   GripVertical,
   ChevronUp,
   ChevronDown,
@@ -94,8 +93,6 @@ export const CaseModal: React.FC<CaseModalProps> = ({
   const [addInputVal, setAddInputVal] = useState('');
   const [addAspectVal, setAddAspectVal] = useState<'contain' | 'square' | 'story'>('contain');
   const [addColumnsVal, setAddColumnsVal] = useState<number>(1);
-  const [addScaleVal, setAddScaleVal] = useState<'compact' | 'medium' | 'large'>('large');
-  const [viewingScales, setViewingScales] = useState<Record<string, 'compact' | 'medium' | 'large'>>({});
   const [addVideoColumnsVal, setAddVideoColumnsVal] = useState<number>(1);
   const [uploadingBlockIdx, setUploadingBlockIdx] = useState<number | null>(null);
   const [isUploadingNewImage, setIsUploadingNewImage] = useState(false);
@@ -163,7 +160,6 @@ export const CaseModal: React.FC<CaseModalProps> = ({
         value: img,
         aspect: isLhamaSquare ? 'square' : isUnicredStory ? 'story' : 'contain',
         columns: isLhamaSquare ? 3 : isUnicredStory ? 5 : 1,
-        scale: 'large',
       });
     });
     return list;
@@ -215,7 +211,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
         cols = block.columns ?? (normalizedFormat === 'contain' ? 1 : 3);
       }
 
-      // 3. Multi-column media (cols > 1): group consecutive media items (images & videos mixed together) sharing identical columns
+      // 3. Multi-column media (cols > 1): group consecutive media items sharing identical columns
       if (cols > 1) {
         if (currentGrid && currentGrid.columns === cols) {
           currentGrid.items.push({ block, originalIdx: idx });
@@ -336,21 +332,6 @@ export const CaseModal: React.FC<CaseModalProps> = ({
     updateCaseBlocks(safeItem.slug, newBlocks);
   };
 
-  const updateBlockScale = (idx: number, scale: 'compact' | 'medium' | 'large') => {
-    const newBlocks = currentBlocks.map((b, i) => (i === idx ? { ...b, scale } : b));
-    updateCaseBlocks(safeItem.slug, newBlocks);
-  };
-
-  const handleScaleChange = (idx: number, scale: 'compact' | 'medium' | 'large') => {
-    const block = currentBlocks[idx];
-    if (!block) return;
-    const key = block.id || `block-${idx}`;
-    setViewingScales((prev) => ({ ...prev, [key]: scale }));
-    if (isEditMode) {
-      updateBlockScale(idx, scale);
-    }
-  };
-
   const unifyAllTextBlocks = () => {
     const textBlocks = currentBlocks.filter((b) => b.type === 'text');
     if (textBlocks.length <= 1) return;
@@ -374,8 +355,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
     type: CaseBlockType,
     value: string = '',
     aspect: CaseBlock['aspect'] = 'contain',
-    columns?: number,
-    scale?: 'compact' | 'medium' | 'large'
+    columns?: number
   ) => {
     const newBlock: CaseBlock = {
       id: `block-${type}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -388,7 +368,6 @@ export const CaseModal: React.FC<CaseModalProps> = ({
           : type === 'video'
           ? columns ?? 1
           : undefined,
-      scale: type === 'image' ? scale ?? 'large' : undefined,
     };
     updateCaseBlocks(safeItem.slug, [...currentBlocks, newBlock]);
   };
@@ -411,10 +390,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
   };
 
   // Render individual block card
-  const renderBlockCard = (
-    block: CaseBlock,
-    idx: number
-  ) => {
+  const renderBlockCard = (block: CaseBlock, idx: number) => {
     const isImage = block.type === 'image';
     const isVideo = block.type === 'video';
 
@@ -422,16 +398,6 @@ export const CaseModal: React.FC<CaseModalProps> = ({
     const isSquare = currentAspect === 'square';
     const isStory = currentAspect === 'story';
     const currentCols = block.columns ?? (isVideo ? 1 : currentAspect === 'contain' ? 1 : 3);
-    const rawScale = block.scale;
-    const normalizedConfigScale: 'compact' | 'medium' | 'large' =
-      rawScale === 'compact' || rawScale === 'thumb'
-        ? 'compact'
-        : rawScale === 'medium'
-        ? 'medium'
-        : 'large';
-
-    const blockKey = block.id || `block-${idx}`;
-    const effectiveScale = viewingScales[blockKey] || normalizedConfigScale;
 
     const isVimeo = isVideo && isVimeoVideo(block.value);
     const vimeoId = isVimeo ? getVimeoVideoId(block.value) : '';
@@ -562,49 +528,6 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                     </button>
                   ))}
                 </div>
-
-                {/* Seletor de Tamanho / Escala quando 1 coluna por linha */}
-                {currentCols === 1 && (
-                  <div className="flex items-center gap-1 bg-black/40 px-1.5 py-0.5 rounded border border-white/10">
-                    <span className="text-white/50 text-[10px]">Tamanho:</span>
-                    <button
-                      type="button"
-                      onClick={() => handleScaleChange(idx, 'compact')}
-                      className={`px-2 py-0.5 rounded text-[10px] font-mono-code cursor-pointer transition-colors ${
-                        effectiveScale === 'compact'
-                          ? 'bg-[#2340FF] text-white font-bold shadow-sm'
-                          : 'hover:bg-white/20 text-white/70'
-                      }`}
-                      title="Compacta: ideal para capturas de tela menores ou detalhes (max-w-[500px])"
-                    >
-                      Compacta
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleScaleChange(idx, 'medium')}
-                      className={`px-2 py-0.5 rounded text-[10px] font-mono-code cursor-pointer transition-colors ${
-                        effectiveScale === 'medium'
-                          ? 'bg-[#2340FF] text-white font-bold shadow-sm'
-                          : 'hover:bg-white/20 text-white/70'
-                      }`}
-                      title="Média: tamanho equilibrado para leitura padrão (max-w-[800px])"
-                    >
-                      Média
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleScaleChange(idx, 'large')}
-                      className={`px-2 py-0.5 rounded text-[10px] font-mono-code cursor-pointer transition-colors ${
-                        effectiveScale === 'large'
-                          ? 'bg-[#2340FF] text-white font-bold shadow-sm'
-                          : 'hover:bg-white/20 text-white/70'
-                      }`}
-                      title="Grande / Imersiva: destaque total do layout da peça publicitária (largura útil completa)"
-                    >
-                      Grande
-                    </button>
-                  </div>
-                )}
               </div>
             )}
 
@@ -868,76 +791,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
 
         {/* 3. IMAGE BLOCK */}
         {isImage && (
-          <div
-            className={`w-full mx-auto flex flex-col items-center ${
-              currentCols === 1
-                ? effectiveScale === 'compact'
-                  ? 'max-w-[500px]'
-                  : effectiveScale === 'medium'
-                  ? 'max-w-[800px]'
-                  : 'max-w-full'
-                : 'max-w-full'
-            }`}
-          >
-            {/* View Mode Direct Size Controls (Direct in-body layout control replacing popup lightbox) */}
-            {currentCols === 1 && !isEditMode && (
-              <div className="flex items-center justify-center mb-3">
-                <div
-                  className={`inline-flex items-center gap-1 p-1 rounded-full text-xs font-mono-code transition-all shadow-sm ${
-                    isLadoB
-                      ? 'bg-[#151928]/95 border border-white/15 text-white/80 backdrop-blur-sm'
-                      : 'bg-white/95 border border-black/15 text-gray-700 shadow-sm backdrop-blur-sm'
-                  }`}
-                >
-                  <span className="px-2 text-[10px] uppercase font-bold tracking-wider opacity-60">
-                    Tamanho:
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleScaleChange(idx, 'compact')}
-                    className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer text-[11px] font-semibold ${
-                      effectiveScale === 'compact'
-                        ? isLadoB
-                          ? 'bg-[#FF4FA0] text-white font-bold shadow-sm'
-                          : 'bg-[#2340FF] text-white font-bold shadow-sm'
-                        : 'hover:bg-black/5 dark:hover:bg-white/10'
-                    }`}
-                    title="Compacta: ideal para capturas de tela menores ou detalhes"
-                  >
-                    Compacta
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleScaleChange(idx, 'medium')}
-                    className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer text-[11px] font-semibold ${
-                      effectiveScale === 'medium'
-                        ? isLadoB
-                          ? 'bg-[#FF4FA0] text-white font-bold shadow-sm'
-                          : 'bg-[#2340FF] text-white font-bold shadow-sm'
-                        : 'hover:bg-black/5 dark:hover:bg-white/10'
-                    }`}
-                    title="Média: tamanho equilibrado para leitura padrão"
-                  >
-                    Média
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleScaleChange(idx, 'large')}
-                    className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer text-[11px] font-semibold ${
-                      effectiveScale === 'large'
-                        ? isLadoB
-                          ? 'bg-[#FF4FA0] text-white font-bold shadow-sm'
-                          : 'bg-[#2340FF] text-white font-bold shadow-sm'
-                        : 'hover:bg-black/5 dark:hover:bg-white/10'
-                    }`}
-                    title="Grande / Imersiva: destaque total do layout da peça"
-                  >
-                    Grande
-                  </button>
-                </div>
-              </div>
-            )}
-
+          <div className="w-full mx-auto flex flex-col items-center">
             {isEditMode && (
               <div className="w-full mb-2 flex flex-wrap items-center gap-2 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-dashed border-black/15 dark:border-white/15">
                 <label className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#2340FF] hover:bg-[#1B34D6] text-white text-[11px] font-mono-code font-bold cursor-pointer transition-colors shadow-sm">
@@ -984,9 +838,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
               </div>
             )}
 
-            <div
-              className="w-full rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shadow-lg group/img bg-[#E4E6EA]/50 dark:bg-[#151928]/50 mx-auto transition-all duration-300"
-            >
+            <div className="w-full rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shadow-lg group/img bg-[#E4E6EA]/50 dark:bg-[#151928]/50 mx-auto transition-all duration-300">
               <img
                 src={block.value}
                 alt={`Peça ${idx + 1} de ${safeItem.name}`}
@@ -994,11 +846,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                 referrerPolicy="no-referrer"
                 className={`mx-auto block ${
                   currentCols === 1
-                    ? effectiveScale === 'compact'
-                      ? 'w-full h-auto object-contain max-w-[500px]'
-                      : effectiveScale === 'medium'
-                      ? 'w-full h-auto object-contain max-w-[800px]'
-                      : 'w-full h-auto object-contain max-w-full'
+                    ? 'w-full h-auto object-contain'
                     : isSquare
                     ? 'w-full aspect-square object-cover'
                     : isStory
@@ -1071,10 +919,8 @@ export const CaseModal: React.FC<CaseModalProps> = ({
 
         {/* Modal Main Content */}
         <main className="flex-1 w-full max-w-[1240px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-10 md:py-14">
-          
           {/* Container restrito e alinhado rigorosamente à esquerda embaixo do título */}
           <div className="max-w-3xl w-full">
-            
             {/* Header Section */}
             <div className="space-y-2.5 sm:space-y-3.5 mb-8 sm:mb-10">
               <div>
@@ -1146,14 +992,16 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                 )}
 
                 {isEditMode && (
-                  <div className={`flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl border border-dashed font-mono-code text-xs ${
-                    isLadoB
-                      ? 'border-[#D4FF3A] bg-white/5'
-                      : 'border-[#2340FF] bg-black/5'
-                  }`}>
-                    <span className={`text-[10px] px-1 font-bold uppercase ${
-                      isLadoB ? 'text-[#AFC0FF]' : 'text-gray-600'
-                    }`}>
+                  <div
+                    className={`flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl border border-dashed font-mono-code text-xs ${
+                      isLadoB ? 'border-[#D4FF3A] bg-white/5' : 'border-[#2340FF] bg-black/5'
+                    }`}
+                  >
+                    <span
+                      className={`text-[10px] px-1 font-bold uppercase ${
+                        isLadoB ? 'text-[#AFC0FF]' : 'text-gray-600'
+                      }`}
+                    >
                       Formato no Grid:
                     </span>
                     <button
@@ -1206,30 +1054,33 @@ export const CaseModal: React.FC<CaseModalProps> = ({
             {/* Universal Content Flow with Interactive Grid Groups */}
             <div className="space-y-8 sm:space-y-12 mb-16 w-full">
               {renderGroups.map((group, gIdx) => {
-                 if (group.type === 'single') {
-                   return (
-                     <div key={`group-single-${gIdx}`} className="w-full flex flex-col items-center justify-center">
-                       {renderBlockCard(group.block, group.originalIdx)}
-                     </div>
-                   );
-                 }
+                if (group.type === 'single') {
+                  return (
+                    <div
+                      key={`group-single-${gIdx}`}
+                      className="w-full flex flex-col items-center justify-center"
+                    >
+                      {renderBlockCard(group.block, group.originalIdx)}
+                    </div>
+                  );
+                }
 
-                 if (group.type === 'grid') {
-                   const colsClass = getGridColsClass(group.columns);
-                   return (
-                     <div
-                       key={`group-grid-${gIdx}`}
-                       className={`grid ${colsClass} gap-3 sm:gap-4 items-start w-full`}
-                     >
-                       {group.items.map(({ block, originalIdx }) =>
-                         renderBlockCard(block, originalIdx)
-                       )}
-                     </div>
-                   );
-                 }
+                if (group.type === 'grid') {
+                  const colsClass = getGridColsClass(group.columns);
+                  return (
+                    <div
+                      key={`group-grid-${gIdx}`}
+                      className={`grid ${colsClass} gap-3 sm:gap-4 items-start w-full`}
+                    >
+                      {group.items.map(({ block, originalIdx }) =>
+                        renderBlockCard(block, originalIdx)
+                      )}
+                    </div>
+                  );
+                }
 
-                 return null;
-               })}
+                return null;
+              })}
             </div>
 
             {/* Add Block Toolbar in Edit Mode */}
@@ -1286,7 +1137,6 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       onClick={() => {
                         setActiveAddForm(activeAddForm === 'image' ? null : 'image');
                         setAddInputVal('');
-                        setAddScaleVal('large');
                       }}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-colors shadow-sm ${
                         activeAddForm === 'image'
@@ -1463,7 +1313,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                             setIsUploadingNewImage(true);
                             try {
                               const base64 = await processImageUpload(file, 2048, 2048, 0.88);
-                              addBlock('image', base64, addAspectVal, addColumnsVal, addScaleVal);
+                              addBlock('image', base64, addAspectVal, addColumnsVal);
                               setActiveAddForm(null);
                             } catch (err) {
                               console.error('Erro ao converter imagem:', err);
@@ -1490,7 +1340,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       onSubmit={(e) => {
                         e.preventDefault();
                         if (addInputVal.trim()) {
-                          addBlock('image', addInputVal.trim(), addAspectVal, addColumnsVal, addScaleVal);
+                          addBlock('image', addInputVal.trim(), addAspectVal, addColumnsVal);
                           setAddInputVal('');
                           setActiveAddForm(null);
                         }
@@ -1586,51 +1436,6 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                           </button>
                         ))}
                       </div>
-
-                      {addColumnsVal === 1 && (
-                        <div className="flex items-center gap-1.5 ml-2">
-                          <span className="text-gray-500">Tamanho:</span>
-                          <button
-                            type="button"
-                            onClick={() => setAddScaleVal('compact')}
-                            className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
-                              addScaleVal === 'compact'
-                                ? 'bg-[#2340FF] text-white font-bold'
-                                : isLadoB
-                                ? 'bg-white/10 hover:bg-white/20 text-white'
-                                : 'bg-black/10 hover:bg-black/20 text-gray-800'
-                            }`}
-                          >
-                            Compacta
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setAddScaleVal('medium')}
-                            className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
-                              addScaleVal === 'medium'
-                                ? 'bg-[#2340FF] text-white font-bold'
-                                : isLadoB
-                                ? 'bg-white/10 hover:bg-white/20 text-white'
-                                : 'bg-black/10 hover:bg-black/20 text-gray-800'
-                            }`}
-                          >
-                            Média
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setAddScaleVal('large')}
-                            className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
-                              addScaleVal === 'large'
-                                ? 'bg-[#2340FF] text-white font-bold'
-                                : isLadoB
-                                ? 'bg-white/10 hover:bg-white/20 text-white'
-                                : 'bg-black/10 hover:bg-black/20 text-gray-800'
-                            }`}
-                          >
-                            Grande
-                          </button>
-                        </div>
-                      )}
                     </div>
                   </div>
                 )}
@@ -1693,7 +1498,6 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                 </div>
               </button>
             </div>
-
           </div>
         </main>
       </div>

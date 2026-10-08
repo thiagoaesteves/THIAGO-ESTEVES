@@ -342,4 +342,3 @@ export async function testFirestoreConnection(): Promise<boolean> {
 }
 
 export default app;
-
