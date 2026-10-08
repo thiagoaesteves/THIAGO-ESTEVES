@@ -14,6 +14,7 @@ import {
 import { useCms } from '../context/CmsContext';
 import { CaseItem, LadoType, GridSpanType } from '../types';
 import { processImageUpload } from '../utils/imageUpload';
+import { isYouTubeVideo, getYouTubeVideoId, getYouTubeThumbnail } from '../utils/videoUtils';
 
 interface AddCaseModalProps {
   isOpen: boolean;
@@ -109,9 +110,19 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
         lado,
         gridSpan,
         deliv: deliv.trim() || 'PROJETO & CONCEITO',
-        cover:
-          cover.trim() ||
-          'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80',
+        cover: (() => {
+          const trimmedCover = cover.trim();
+          if (trimmedCover) {
+            if (isYouTubeVideo(trimmedCover)) {
+              return getYouTubeThumbnail(trimmedCover, 'maxres');
+            }
+            return trimmedCover;
+          }
+          if (parsedYt.length > 0 && parsedYt[0]) {
+            return getYouTubeThumbnail(parsedYt[0], 'maxres');
+          }
+          return 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80';
+        })(),
         coverFormat: 'original',
         text: paragraphs.length > 0 ? paragraphs : [concept.trim()],
         imgs: parsedImgs,

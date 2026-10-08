@@ -24,6 +24,15 @@ import {
 import { CaseItem, CaseBlock, CaseBlockType, GridSpanType } from '../types';
 import { useCms } from '../context/CmsContext';
 import { processImageUpload } from '../utils/imageUpload';
+import {
+  extractIframeSrc,
+  isVimeoVideo,
+  getVimeoVideoId,
+  getYouTubeVideoId,
+  isYouTubeVideo,
+  getYouTubeThumbnail,
+  getVimeoThumbnail,
+} from '../utils/videoUtils';
 
 interface CaseModalProps {
   item: CaseItem | null;
@@ -32,50 +41,6 @@ interface CaseModalProps {
   allCases: CaseItem[];
   onOpenLightbox?: (imgUrl: string, title: string) => void;
 }
-
-// Helper to extract the src URL if user pastes a full HTML <iframe> embed code
-export const extractIframeSrc = (input: string): string => {
-  if (!input) return '';
-  const trimmed = input.trim();
-  if (trimmed.includes('<iframe') && trimmed.includes('src=')) {
-    const match = trimmed.match(/src=["']([^"']+)["']/i) || trimmed.match(/src=([^ >]+)/i);
-    if (match && match[1]) {
-      return match[1].trim();
-    }
-  }
-  return trimmed;
-};
-
-// Helpers for YouTube and Vimeo video processing
-const isVimeoVideo = (val: string): boolean => {
-  const clean = extractIframeSrc(val);
-  return clean.startsWith('vimeo:') || clean.includes('vimeo.com') || clean.includes('player.vimeo.com');
-};
-
-const getVimeoVideoId = (val: string): string => {
-  const clean = extractIframeSrc(val);
-  if (clean.startsWith('vimeo:')) return clean.replace('vimeo:', '').trim();
-  const match = clean.match(
-    /(?:vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/[^\/]*\/videos\/|album\/(?:\d+\/)?video\/|video\/|)(\d+))/
-  );
-  if (match && match[1]) return match[1];
-  if (/^\d+$/.test(clean.trim())) return clean.trim();
-  return clean.trim();
-};
-
-const getYouTubeVideoId = (val: string): string => {
-  const clean = extractIframeSrc(val);
-  if (clean.includes('v=')) {
-    return clean.split('v=')[1]?.split('&')[0] || clean;
-  }
-  if (clean.includes('youtu.be/')) {
-    return clean.split('youtu.be/')[1]?.split('?')[0] || clean;
-  }
-  if (clean.includes('youtube.com/embed/')) {
-    return clean.split('embed/')[1]?.split('?')[0]?.split('&')[0] || clean;
-  }
-  return clean.trim();
-};
 
 export const CaseModal: React.FC<CaseModalProps> = ({
   item: propItem,
@@ -862,24 +827,38 @@ export const CaseModal: React.FC<CaseModalProps> = ({
 
               <div className="relative aspect-video bg-black rounded-lg overflow-hidden shadow-xl border border-black/10">
                 {playingVideos[block.value] ? (
-                  isVimeo ? (
-                    <iframe
-                      src={`https://player.vimeo.com/video/${vimeoId}?autoplay=1&title=0&byline=0&portrait=0`}
-                      title="Vídeo Vimeo do case"
-                      allow="autoplay; fullscreen; picture-in-picture"
-                      allowFullScreen
-                      className="w-full h-full border-0"
-                    />
-                  ) : (
-                    <iframe
-                      src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`}
-                      title="Vídeo YouTube do case"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      referrerPolicy="strict-origin-when-cross-origin"
-                      allowFullScreen
-                      className="w-full h-full border-0"
-                    />
-                  )
+                  <div className="relative w-full h-full">
+                    {isVimeo ? (
+                      <iframe
+                        src={`https://player.vimeo.com/video/${vimeoId}?autoplay=1&title=0&byline=0&portrait=0`}
+                        title="Vídeo Vimeo do case"
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full border-0"
+                      />
+                    ) : (
+                      <iframe
+                        src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`}
+                        title="Vídeo YouTube do case"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allowFullScreen
+                        className="w-full h-full border-0"
+                      />
+                    )}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPlayingVideos((prev) => ({ ...prev, [block.value]: false }));
+                      }}
+                      className="absolute top-2.5 right-2.5 z-30 px-2.5 py-1 bg-black/85 hover:bg-black text-white text-[11px] font-mono-code rounded backdrop-blur-sm border border-white/20 flex items-center gap-1.5 cursor-pointer shadow-lg transition-transform hover:scale-105"
+                      title="Fechar player"
+                    >
+                      <X className="w-3.5 h-3.5 text-[#D4FF3A]" />
+                      <span>Fechar</span>
+                    </button>
+                  </div>
                 ) : isVimeo ? (
                   /* Vimeo Poster / Play Trigger */
                   <div

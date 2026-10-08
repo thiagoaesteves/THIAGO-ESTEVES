@@ -11,10 +11,20 @@ import {
   AlignLeft,
   AlignCenter,
   AlignRight,
+  Play,
+  X,
 } from 'lucide-react';
 import { CaseItem, GridSpanType } from '../types';
 import { useCms } from '../context/CmsContext';
 import { processImageUpload } from '../utils/imageUpload';
+import {
+  isYouTubeVideo,
+  getYouTubeVideoId,
+  getYouTubeThumbnail,
+  isVimeoVideo,
+  getVimeoVideoId,
+  getVimeoThumbnail,
+} from '../utils/videoUtils';
 
 interface CaseCardProps {
   item: CaseItem;
@@ -45,6 +55,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({
 }) => {
   const { isEditMode, reorderCases, moveCaseOrder, updateCaseField, updateCaseGridSpan, deleteCase, addCase } = useCms();
   const isLadoA = item.lado === 'A';
+  const isLadoB = item.lado === 'B';
   const currentSpan: GridSpanType = item.gridSpan || (featured ? 'full' : 'half');
   const isFullWidth = currentSpan === 'full';
 
@@ -62,9 +73,50 @@ export const CaseCard: React.FC<CaseCardProps> = ({
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const coverFileInputRef = useRef<HTMLInputElement>(null);
 
+  // Detecção padronizada de vídeos (YouTube ou Vimeo)
+  const isCoverYouTube = isYouTubeVideo(item.cover);
+  const isCoverVimeo = isVimeoVideo(item.cover);
+  const hasYtVideo = Array.isArray(item.yt) && item.yt.length > 0 && Boolean(item.yt[0]);
+  const hasVideo = isCoverYouTube || isCoverVimeo || hasYtVideo;
+
+  const youtubeId = isCoverYouTube
+    ? getYouTubeVideoId(item.cover)
+    : hasYtVideo
+    ? getYouTubeVideoId(item.yt[0])
+    : '';
+
+  const vimeoId = isCoverVimeo ? getVimeoVideoId(item.cover) : '';
+
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false);
+  const [thumbFallback, setThumbFallback] = useState(false);
+
+  // Determinar URL de imagem / thumbnail oficial em alta qualidade
+  const displayThumbnailUrl = (() => {
+    if (isCoverYouTube && youtubeId) {
+      return thumbFallback ? getYouTubeThumbnail(youtubeId, 'hq') : getYouTubeThumbnail(youtubeId, 'maxres');
+    }
+    if (isCoverVimeo && vimeoId) {
+      return getVimeoThumbnail(vimeoId);
+    }
+    if (item.cover && !isCoverYouTube && !isCoverVimeo) {
+      return item.cover;
+    }
+    if (youtubeId) {
+      return thumbFallback ? getYouTubeThumbnail(youtubeId, 'hq') : getYouTubeThumbnail(youtubeId, 'maxres');
+    }
+    return item.cover || '';
+  })();
+
   const handleCardClick = () => {
     if (isEditMode) return;
+    if (isPlayingVideo) return;
     onSelect(item);
+  };
+
+  const handlePlayTrigger = (e: React.MouseEvent) => {
+    if (isEditMode) return;
+    e.stopPropagation();
+    setIsPlayingVideo(true);
   };
 
   const bgFrameClass = bonus
@@ -418,15 +470,88 @@ export const CaseCard: React.FC<CaseCardProps> = ({
         <div className={`absolute inset-0 translate-x-1.5 sm:translate-x-2 translate-y-1.5 sm:translate-y-2 ${bgFrameClass} pointer-events-none rounded-none`} />
 
         <div className={`relative z-10 bg-[#1a1e36] overflow-hidden w-full ${coverAspectClass} flex flex-col justify-between p-4 sm:p-6 rounded-none border border-black/30 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] transition-all duration-300`}>
-          <img
-            src={item.cover}
-            alt={`Capa do case ${item.name}`}
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] z-0"
-          />
+          {isPlayingVideo && (youtubeId || vimeoId) ? (
+            <div className="absolute inset-0 z-30 bg-black w-full h-full">
+              {vimeoId ? (
+                <iframe
+                  src={`https://player.vimeo.com/video/${vimeoId}?autoplay=1&title=0&byline=0&portrait=0`}
+                  title={`Vídeo Vimeo - ${item.name}`}
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full border-0"
+                />
+              ) : (
+                <iframe
+                  src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`}
+                  title={`Vídeo YouTube - ${item.name}`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                  className="w-full h-full border-0"
+                />
+              )}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsPlayingVideo(false);
+                }}
+                className="absolute top-3 left-3 z-40 px-2.5 py-1 bg-black/85 hover:bg-black text-white text-[11px] font-mono-code rounded backdrop-blur-sm border border-white/20 flex items-center gap-1.5 cursor-pointer shadow-lg transition-transform hover:scale-105"
+                title="Fechar player"
+              >
+                <X className="w-3.5 h-3.5 text-[#D4FF3A]" />
+                <span>Fechar player</span>
+              </button>
+            </div>
+          ) : (
+            <>
+              <img
+                src={displayThumbnailUrl}
+                alt={`Capa do case ${item.name}`}
+                loading="lazy"
+                referrerPolicy="no-referrer"
+                onError={() => {
+                  if (youtubeId && !thumbFallback) {
+                    setThumbFallback(true);
+                  }
+                }}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] z-0"
+              />
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 pointer-events-none" />
+
+              {/* Botão de Play Estilizado e Limpo sobreposto à capa */}
+              {hasVideo && !isEditMode && (
+                <>
+                  <div className="absolute inset-0 bg-black/25 group-hover:bg-black/10 transition-colors flex items-center justify-center z-15">
+                    <button
+                      type="button"
+                      onClick={handlePlayTrigger}
+                      className={`w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full ${
+                        isLadoA ? 'bg-[#2340FF]' : isLadoB ? 'bg-[#FF4FA0]' : 'bg-[#D4FF3A]'
+                      } group-hover:scale-110 active:scale-95 transition-all flex items-center justify-center text-white shadow-2xl cursor-pointer`}
+                      title="Dá o play"
+                    >
+                      <Play className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 fill-current ml-1 ${
+                        bonus ? 'text-[#0F1222]' : 'text-white'
+                      }`} />
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handlePlayTrigger}
+                    className={`faixa-clip absolute left-4 bottom-4 sm:left-6 sm:bottom-6 text-xs sm:text-sm md:text-base font-bold shadow-md flex items-center gap-1.5 sm:gap-2 transform group-hover:scale-105 transition-transform z-20 cursor-pointer ${
+                      bonus ? 'bg-[#D4FF3A] text-[#0F1222]' : isLadoB ? 'bg-[#FF4FA0] text-white' : 'bg-[#D4FF3A] text-[#0F1222]'
+                    }`}
+                  >
+                    <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
+                    Dá o play
+                  </button>
+                </>
+              )}
+            </>
+          )}
 
           <div className="absolute top-4 right-4 sm:top-5 sm:right-5 z-20" onClick={(e) => e.stopPropagation()}>
             {isEditMode ? (
