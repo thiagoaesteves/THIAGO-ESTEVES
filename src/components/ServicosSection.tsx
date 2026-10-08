@@ -114,13 +114,13 @@ export const ServicosSection: React.FC = () => {
   return (
     <div
       id="servicos"
-      className="border-t border-[#DADCE3] bg-[#0F1222] relative z-10 w-full scroll-mt-[74px] sm:scroll-mt-[80px] pb-0 mb-0"
+      className="border-t border-[#DADCE3] bg-[#0F1222] relative z-10 w-full scroll-mt-[54px] sm:scroll-mt-[58px] pb-0 mb-0 min-h-screen min-h-[100dvh] flex flex-col justify-between"
     >
-      <section className="w-full bg-[#0F1222] text-[#0F1222] flex flex-col m-0 p-0">
+      <section className="w-full bg-[#0F1222] text-[#0F1222] flex flex-col flex-1 justify-between m-0 p-0">
         
         {/* Bloco Superior com Fundo Claro */}
-        <div className="bg-[#F6F7F2] w-full pt-6 pb-2.5 sm:pt-8 sm:pb-3.5 text-[#0F1222]">
-          <div className="max-w-[1320px] mx-auto w-full px-4 sm:px-6 md:px-8 lg:px-12">
+        <div className="bg-[#F6F7F2] w-full flex-1 flex flex-col justify-center pt-8 pb-6 sm:pt-10 sm:pb-8 lg:pt-14 lg:pb-10 text-[#0F1222]">
+          <div className="max-w-[1600px] mx-auto w-full px-6 sm:px-10 lg:px-16">
             <div className="w-full">
               
               {/* Header & Manifesto Intro */}
@@ -288,9 +288,9 @@ export const ServicosSection: React.FC = () => {
           </div>
         </div>
 
-        {/* BARRA DE RODAPÉ // 05 (Altura expandida e texto alinhado verticalmente ao centro) */}
-        <div className="bg-[#0F1222] text-[#F6F7F2] w-full max-w-full py-10 sm:py-14 m-0 border-b-0 overflow-hidden box-border flex flex-col justify-center">
-          <div className="max-w-[1320px] mx-auto w-full px-4 sm:px-6 md:px-8 lg:px-12">
+        {/* BARRA DE RODAPÉ // 05 (Altura expandida e texto alinhado com respiro inferior elegante) */}
+        <div className="bg-[#0F1222] text-[#F6F7F2] w-full max-w-full pt-8 sm:pt-12 pb-14 sm:pb-18 lg:pb-24 m-0 border-b-0 overflow-hidden box-border flex flex-col justify-center">
+          <div className="max-w-[1600px] mx-auto w-full px-6 sm:px-10 lg:px-16">
             <div className="w-full space-y-1.5">
               <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full">
                 {isEditMode ? (

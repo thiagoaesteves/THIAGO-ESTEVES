@@ -1,6 +1,8 @@
 export type LadoType = 'A' | 'B' | 'bonus';
 
 export type CaseBlockType = 'text' | 'video' | 'image';
+export type CaseBlockAlignment = 'left' | 'center' | 'right';
+export type CaseBlockScale = 'compact' | 'medium' | 'large';
 
 export interface CaseBlock {
   id: string;
@@ -10,7 +12,8 @@ export interface CaseBlock {
   caption?: string;
   columns?: any;
   aspect?: any;
-  scale?: any;
+  scale?: CaseBlockScale | string;
+  alignment?: CaseBlockAlignment;
 }
 
 export type GridSpanType =

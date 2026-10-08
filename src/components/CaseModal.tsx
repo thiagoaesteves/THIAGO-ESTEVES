@@ -17,6 +17,9 @@ import {
   Columns,
   Upload,
   Loader2,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
 } from 'lucide-react';
 import { CaseItem, CaseBlock, CaseBlockType, GridSpanType } from '../types';
 import { useCms } from '../context/CmsContext';
@@ -138,6 +141,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
         id: `text-${safeItem.slug}-unified`,
         type: 'text',
         value: safeItem.text.join('\n\n'),
+        alignment: 'left',
       });
     }
     safeItem.yt.forEach((y, idx) => {
@@ -147,6 +151,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
         value: y,
         aspect: 'video',
         columns: 1,
+        alignment: 'center',
       });
     });
     safeItem.imgs.forEach((img, idx) => {
@@ -160,6 +165,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
         value: img,
         aspect: isLhamaSquare ? 'square' : isUnicredStory ? 'story' : 'contain',
         columns: isLhamaSquare ? 3 : isUnicredStory ? 5 : 1,
+        alignment: 'center',
       });
     });
     return list;
@@ -332,6 +338,11 @@ export const CaseModal: React.FC<CaseModalProps> = ({
     updateCaseBlocks(safeItem.slug, newBlocks);
   };
 
+  const updateBlockAlignment = (idx: number, alignment: 'left' | 'center' | 'right') => {
+    const newBlocks = currentBlocks.map((b, i) => (i === idx ? { ...b, alignment } : b));
+    updateCaseBlocks(safeItem.slug, newBlocks);
+  };
+
   const unifyAllTextBlocks = () => {
     const textBlocks = currentBlocks.filter((b) => b.type === 'text');
     if (textBlocks.length <= 1) return;
@@ -355,7 +366,8 @@ export const CaseModal: React.FC<CaseModalProps> = ({
     type: CaseBlockType,
     value: string = '',
     aspect: CaseBlock['aspect'] = 'contain',
-    columns?: number
+    columns?: number,
+    alignment?: 'left' | 'center' | 'right'
   ) => {
     const newBlock: CaseBlock = {
       id: `block-${type}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -368,6 +380,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
           : type === 'video'
           ? columns ?? 1
           : undefined,
+      alignment: alignment || (type === 'text' ? 'left' : 'center'),
     };
     updateCaseBlocks(safeItem.slug, [...currentBlocks, newBlock]);
   };
@@ -393,15 +406,24 @@ export const CaseModal: React.FC<CaseModalProps> = ({
   const renderBlockCard = (block: CaseBlock, idx: number) => {
     const isImage = block.type === 'image';
     const isVideo = block.type === 'video';
+    const isText = block.type === 'text';
 
     const currentAspect = block.aspect || (isVideo ? 'video' : 'contain');
     const isSquare = currentAspect === 'square';
     const isStory = currentAspect === 'story';
     const currentCols = block.columns ?? (isVideo ? 1 : currentAspect === 'contain' ? 1 : 3);
+    const currentAlignment = (block.alignment || (isText ? 'left' : 'center')) as 'left' | 'center' | 'right';
 
     const isVimeo = isVideo && isVimeoVideo(block.value);
     const vimeoId = isVimeo ? getVimeoVideoId(block.value) : '';
     const youtubeId = isVideo && !isVimeo ? getYouTubeVideoId(block.value) : '';
+
+    const cardAlignClass =
+      currentAlignment === 'left'
+        ? 'mr-auto ml-0'
+        : currentAlignment === 'right'
+        ? 'ml-auto mr-0'
+        : 'mx-auto';
 
     return (
       <div
@@ -425,11 +447,11 @@ export const CaseModal: React.FC<CaseModalProps> = ({
           dragOverBlockIdx === idx ? 'ring-4 ring-[#2340FF] scale-[1.01]' : ''
         } ${
           isEditMode
-            ? 'p-2.5 sm:p-3.5 rounded-xl border border-dashed border-black/20 dark:border-white/20 bg-black/[0.03] dark:bg-white/[0.03] space-y-2.5 mx-auto'
-            : 'w-full mx-auto'
-        }`}
+            ? 'p-2.5 sm:p-3.5 rounded-xl border border-dashed border-black/20 dark:border-white/20 bg-black/[0.03] dark:bg-white/[0.03] space-y-2.5 w-full'
+            : 'w-full'
+        } ${cardAlignClass}`}
       >
-        {/* Edit Mode Toolbar with Format and Column Selection Controls */}
+        {/* Edit Mode Toolbar with Format, Size, Column and Alignment Controls */}
         {isEditMode && (
           <div className="flex flex-wrap items-center justify-between gap-1.5 bg-black/85 text-white px-2.5 py-1.5 rounded-lg text-xs font-mono-code select-none border border-white/10 shadow-sm">
             <div className="flex items-center gap-1.5 cursor-grab truncate">
@@ -459,7 +481,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
               </span>
             </div>
 
-            {/* Interactive Image Layout & Columns Controls */}
+            {/* Interactive Image Layout, Columns & Size Controls */}
             {isImage && (
               <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
                 {/* Formato: Horizontal/Inteira, Quadrada, Vertical */}
@@ -557,6 +579,46 @@ export const CaseModal: React.FC<CaseModalProps> = ({
               </div>
             )}
 
+            {/* Alinhamento Independente por Linha/Bloco (Esquerda, Centro, Direita) */}
+            <div className="flex items-center gap-0.5 bg-black/40 px-1.5 py-0.5 rounded border border-white/10">
+              <button
+                type="button"
+                onClick={() => updateBlockAlignment(idx, 'left')}
+                className={`p-1 rounded cursor-pointer transition-colors ${
+                  currentAlignment === 'left'
+                    ? 'bg-[#D4FF3A] text-[#0F1222] font-bold shadow-sm'
+                    : 'hover:bg-white/20 text-white/70'
+                }`}
+                title="Alinhar à Esquerda (justify-start)"
+              >
+                <AlignLeft className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => updateBlockAlignment(idx, 'center')}
+                className={`p-1 rounded cursor-pointer transition-colors ${
+                  currentAlignment === 'center'
+                    ? 'bg-[#D4FF3A] text-[#0F1222] font-bold shadow-sm'
+                    : 'hover:bg-white/20 text-white/70'
+                }`}
+                title="Alinhar ao Centro (mx-auto / text-center)"
+              >
+                <AlignCenter className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => updateBlockAlignment(idx, 'right')}
+                className={`p-1 rounded cursor-pointer transition-colors ${
+                  currentAlignment === 'right'
+                    ? 'bg-[#D4FF3A] text-[#0F1222] font-bold shadow-sm'
+                    : 'hover:bg-white/20 text-white/70'
+                }`}
+                title="Alinhar à Direita (justify-end)"
+              >
+                <AlignRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
             {/* Reorder and Delete Actions */}
             <div className="flex items-center gap-0.5 shrink-0">
               <button
@@ -617,6 +679,12 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                     isLadoB
                       ? 'bg-white/5 border-[#FF4FA0] focus:ring-[#FF4FA0] text-[#F6F7F2] placeholder:text-white/40'
                       : 'bg-white border-[#2340FF] focus:ring-[#2340FF] text-gray-900 placeholder:text-gray-400 shadow-sm'
+                  } ${
+                    currentAlignment === 'center'
+                      ? 'text-center'
+                      : currentAlignment === 'right'
+                      ? 'text-right'
+                      : 'text-left'
                   }`}
                   placeholder="Escreva seu texto corrido aqui. Pressione Enter para criar novos parágrafos..."
                 />
@@ -625,7 +693,15 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                 </span>
               </div>
             ) : (
-              <div className="space-y-4 sm:space-y-6">
+              <div
+                className={`space-y-4 sm:space-y-6 w-full ${
+                  currentAlignment === 'center'
+                    ? 'text-center'
+                    : currentAlignment === 'right'
+                    ? 'text-right'
+                    : 'text-left'
+                }`}
+              >
                 {block.value
                   .split(/\n\s*\n/)
                   .filter((p: string) => p.trim())
@@ -634,6 +710,12 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       key={pIdx}
                       className={`text-base sm:text-xl md:text-2xl lg:text-[1.65rem] leading-[1.45] font-normal whitespace-pre-line break-words ${
                         isLadoB ? 'text-[#D5DBF5]' : 'text-[#343848]'
+                      } ${
+                        currentAlignment === 'center'
+                          ? 'text-center'
+                          : currentAlignment === 'right'
+                          ? 'text-right'
+                          : 'text-left'
                       }`}
                     >
                       {para}
@@ -646,152 +728,178 @@ export const CaseModal: React.FC<CaseModalProps> = ({
 
         {/* 2. VIDEO BLOCK (YouTube and Vimeo support) */}
         {isVideo && (
-          <div className="w-full">
-            {isEditMode && (
-              <div className="mb-2 flex items-center gap-2">
-                <input
-                  type="text"
-                  value={block.value}
-                  onChange={(e) => {
-                    const rawVal = e.target.value.trim();
-                    const clean = extractIframeSrc(rawVal);
-                    if (isVimeoVideo(clean)) {
-                      const vid = getVimeoVideoId(clean);
-                      updateBlockValue(idx, `vimeo:${vid}`);
-                    } else if (clean.includes('youtube.com') || clean.includes('youtu.be')) {
-                      const yid = getYouTubeVideoId(clean);
-                      updateBlockValue(idx, yid);
-                    } else {
-                      updateBlockValue(idx, clean);
+          <div
+            className={`w-full flex ${
+              currentAlignment === 'left'
+                ? 'justify-start'
+                : currentAlignment === 'right'
+                ? 'justify-end'
+                : 'justify-center'
+            }`}
+          >
+            <div
+              className={`w-full ${
+                currentAlignment === 'left'
+                  ? 'mr-auto ml-0'
+                  : currentAlignment === 'right'
+                  ? 'ml-auto mr-0'
+                  : 'mx-auto'
+              }`}
+            >
+              {isEditMode && (
+                <div className="mb-2 flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={block.value}
+                    onChange={(e) => {
+                      const rawVal = e.target.value.trim();
+                      const clean = extractIframeSrc(rawVal);
+                      if (isVimeoVideo(clean)) {
+                        const vid = getVimeoVideoId(clean);
+                        updateBlockValue(idx, `vimeo:${vid}`);
+                      } else if (clean.includes('youtube.com') || clean.includes('youtu.be')) {
+                        const yid = getYouTubeVideoId(clean);
+                        updateBlockValue(idx, yid);
+                      } else {
+                        updateBlockValue(idx, clean);
+                      }
+                    }}
+                    placeholder="ID, link ou <iframe> do YouTube ou Vimeo..."
+                    className={`flex-1 px-3 py-1.5 text-xs font-mono-code rounded border ${
+                      isLadoB
+                        ? 'bg-[#0F1222] border-white/20 text-white placeholder:text-white/40'
+                        : 'bg-white border-black/20 text-gray-900 placeholder:text-gray-400'
+                    }`}
+                  />
+                  <a
+                    href={
+                      isVimeo
+                        ? `https://vimeo.com/${vimeoId}`
+                        : `https://www.youtube.com/watch?v=${youtubeId}`
                     }
-                  }}
-                  placeholder="ID, link ou <iframe> do YouTube ou Vimeo..."
-                  className={`flex-1 px-3 py-1.5 text-xs font-mono-code rounded border ${
-                    isLadoB
-                      ? 'bg-[#0F1222] border-white/20 text-white placeholder:text-white/40'
-                      : 'bg-white border-black/20 text-gray-900 placeholder:text-gray-400'
-                  }`}
-                />
-                <a
-                  href={
-                    isVimeo
-                      ? `https://vimeo.com/${vimeoId}`
-                      : `https://www.youtube.com/watch?v=${youtubeId}`
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-1.5 rounded hover:bg-black/10 dark:hover:bg-white/10 text-xs font-mono-code flex items-center gap-1"
-                  title={isVimeo ? 'Abrir no Vimeo' : 'Abrir no YouTube'}
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              </div>
-            )}
-
-            <div className="relative aspect-video bg-black rounded-lg overflow-hidden shadow-xl border border-black/10">
-              {playingVideos[block.value] ? (
-                isVimeo ? (
-                  <iframe
-                    src={`https://player.vimeo.com/video/${vimeoId}?autoplay=1&title=0&byline=0&portrait=0`}
-                    title="Vídeo Vimeo do case"
-                    allow="autoplay; fullscreen; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full border-0"
-                  />
-                ) : (
-                  <iframe
-                    src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`}
-                    title="Vídeo YouTube do case"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allowFullScreen
-                    className="w-full h-full border-0"
-                  />
-                )
-              ) : isVimeo ? (
-                /* Vimeo Poster / Play Trigger */
-                <div
-                  onClick={() => handlePlayVideo(block.value)}
-                  className="relative w-full h-full cursor-pointer group/vid bg-[#001726] flex items-center justify-center overflow-hidden"
-                >
-                  <img
-                    src={`https://vumbnail.com/${vimeoId}.jpg`}
-                    alt="Miniatura do vídeo Vimeo"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-black/30 group-hover/vid:bg-black/10 transition-colors flex items-center justify-center">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#00ADEF] group-hover/vid:scale-110 transition-transform flex items-center justify-center text-white shadow-2xl">
-                      <Play className="w-7 h-7 sm:w-8 sm:h-8 fill-current ml-1" />
-                    </div>
-                  </div>
-                  <span
-                    className={`faixa-clip absolute left-6 bottom-6 text-base sm:text-lg font-bold shadow-md flex items-center gap-2 transform group-hover/vid:scale-105 transition-transform ${
-                      isLadoB ? 'bg-[#FF4FA0] text-white' : 'bg-[#00ADEF] text-white'
-                    }`}
-                  >
-                    <Play className="w-4 h-4 fill-current" />
-                    Dá o play (Vimeo)
-                  </span>
-                  <a
-                    href={`https://vimeo.com/${vimeoId}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="absolute top-2.5 right-2.5 z-20 px-2.5 py-1 bg-black/70 hover:bg-black text-white text-[11px] font-mono-code rounded backdrop-blur-sm border border-white/20 transition-all flex items-center gap-1.5 opacity-0 group-hover/vid:opacity-100 shadow-md"
+                    className="p-1.5 rounded hover:bg-black/10 dark:hover:bg-white/10 text-xs font-mono-code flex items-center gap-1"
+                    title={isVimeo ? 'Abrir no Vimeo' : 'Abrir no YouTube'}
                   >
-                    <span>Abrir no Vimeo</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-[#00ADEF]" />
-                  </a>
-                </div>
-              ) : (
-                /* YouTube Poster / Play Trigger */
-                <div
-                  onClick={() => handlePlayVideo(block.value)}
-                  className="relative w-full h-full cursor-pointer group/vid"
-                >
-                  <img
-                    src={`https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`}
-                    alt="Miniatura do vídeo"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-black/30 group-hover/vid:bg-black/10 transition-colors flex items-center justify-center">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#2340FF] group-hover/vid:scale-110 transition-transform flex items-center justify-center text-white shadow-2xl">
-                      <Play className="w-7 h-7 sm:w-8 sm:h-8 fill-current ml-1" />
-                    </div>
-                  </div>
-                  <span
-                    className={`faixa-clip absolute left-6 bottom-6 text-base sm:text-lg font-bold shadow-md flex items-center gap-2 transform group-hover/vid:scale-105 transition-transform ${
-                      isLadoB ? 'bg-[#FF4FA0] text-white' : 'bg-[#D4FF3A] text-[#0F1222]'
-                    }`}
-                  >
-                    <Play className="w-4 h-4 fill-current" />
-                    Dá o play
-                  </span>
-                  <a
-                    href={`https://www.youtube.com/watch?v=${youtubeId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="absolute top-2.5 right-2.5 z-20 px-2.5 py-1 bg-black/70 hover:bg-black text-white text-[11px] font-mono-code rounded backdrop-blur-sm border border-white/20 transition-all flex items-center gap-1.5 opacity-0 group-hover/vid:opacity-100 shadow-md"
-                  >
-                    <span>Abrir no YouTube</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-[#D4FF3A]" />
+                    <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>
               )}
+
+              <div className="relative aspect-video bg-black rounded-lg overflow-hidden shadow-xl border border-black/10">
+                {playingVideos[block.value] ? (
+                  isVimeo ? (
+                    <iframe
+                      src={`https://player.vimeo.com/video/${vimeoId}?autoplay=1&title=0&byline=0&portrait=0`}
+                      title="Vídeo Vimeo do case"
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-full border-0"
+                    />
+                  ) : (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`}
+                      title="Vídeo YouTube do case"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                      className="w-full h-full border-0"
+                    />
+                  )
+                ) : isVimeo ? (
+                  /* Vimeo Poster / Play Trigger */
+                  <div
+                    onClick={() => handlePlayVideo(block.value)}
+                    className="relative w-full h-full cursor-pointer group/vid bg-[#001726] flex items-center justify-center overflow-hidden"
+                  >
+                    <img
+                      src={`https://vumbnail.com/${vimeoId}.jpg`}
+                      alt="Miniatura do vídeo Vimeo"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black/30 group-hover/vid:bg-black/10 transition-colors flex items-center justify-center">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#00ADEF] group-hover/vid:scale-110 transition-transform flex items-center justify-center text-white shadow-2xl">
+                        <Play className="w-7 h-7 sm:w-8 sm:h-8 fill-current ml-1" />
+                      </div>
+                    </div>
+                    <span
+                      className={`faixa-clip absolute left-6 bottom-6 text-base sm:text-lg font-bold shadow-md flex items-center gap-2 transform group-hover/vid:scale-105 transition-transform ${
+                        isLadoB ? 'bg-[#FF4FA0] text-white' : 'bg-[#00ADEF] text-white'
+                      }`}
+                    >
+                      <Play className="w-4 h-4 fill-current" />
+                      Dá o play (Vimeo)
+                    </span>
+                    <a
+                      href={`https://vimeo.com/${vimeoId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute top-2.5 right-2.5 z-20 px-2.5 py-1 bg-black/70 hover:bg-black text-white text-[11px] font-mono-code rounded backdrop-blur-sm border border-white/20 transition-all flex items-center gap-1.5 opacity-0 group-hover/vid:opacity-100 shadow-md"
+                    >
+                      <span>Abrir no Vimeo</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-[#00ADEF]" />
+                    </a>
+                  </div>
+                ) : (
+                  /* YouTube Poster / Play Trigger */
+                  <div
+                    onClick={() => handlePlayVideo(block.value)}
+                    className="relative w-full h-full cursor-pointer group/vid"
+                  >
+                    <img
+                      src={`https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`}
+                      alt="Miniatura do vídeo"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black/30 group-hover/vid:bg-black/10 transition-colors flex items-center justify-center">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#2340FF] group-hover/vid:scale-110 transition-transform flex items-center justify-center text-white shadow-2xl">
+                        <Play className="w-7 h-7 sm:w-8 sm:h-8 fill-current ml-1" />
+                      </div>
+                    </div>
+                    <span
+                      className={`faixa-clip absolute left-6 bottom-6 text-base sm:text-lg font-bold shadow-md flex items-center gap-2 transform group-hover/vid:scale-105 transition-transform ${
+                        isLadoB ? 'bg-[#FF4FA0] text-white' : 'bg-[#D4FF3A] text-[#0F1222]'
+                      }`}
+                    >
+                      <Play className="w-4 h-4 fill-current" />
+                      Dá o play
+                    </span>
+                    <a
+                      href={`https://www.youtube.com/watch?v=${youtubeId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute top-2.5 right-2.5 z-20 px-2.5 py-1 bg-black/70 hover:bg-black text-white text-[11px] font-mono-code rounded backdrop-blur-sm border border-white/20 transition-all flex items-center gap-1.5 opacity-0 group-hover/vid:opacity-100 shadow-md"
+                    >
+                      <span>Abrir no YouTube</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-[#D4FF3A]" />
+                    </a>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
 
         {/* 3. IMAGE BLOCK */}
         {isImage && (
-          <div className="w-full mx-auto flex flex-col items-center">
+          <div
+            className={`w-full flex flex-col ${
+              currentAlignment === 'left'
+                ? 'items-start justify-start'
+                : currentAlignment === 'right'
+                ? 'items-end justify-end'
+                : 'items-center justify-center'
+            }`}
+          >
             {isEditMode && (
               <div className="w-full mb-2 flex flex-wrap items-center gap-2 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-dashed border-black/15 dark:border-white/15">
                 <label className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#2340FF] hover:bg-[#1B34D6] text-white text-[11px] font-mono-code font-bold cursor-pointer transition-colors shadow-sm">
@@ -838,7 +946,22 @@ export const CaseModal: React.FC<CaseModalProps> = ({
               </div>
             )}
 
-            <div className="w-full rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shadow-lg group/img bg-[#E4E6EA]/50 dark:bg-[#151928]/50 mx-auto transition-all duration-300">
+            <div
+              onClick={() => {
+                if (!isEditMode && onOpenLightbox) {
+                  onOpenLightbox(block.value, safeItem.name);
+                }
+              }}
+              className={`rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shadow-lg group/img bg-[#E4E6EA]/50 dark:bg-[#151928]/50 transition-all duration-300 ${
+                !isEditMode && onOpenLightbox ? 'cursor-pointer hover:opacity-95' : ''
+              } w-full ${
+                currentAlignment === 'left'
+                  ? 'mr-auto ml-0'
+                  : currentAlignment === 'right'
+                  ? 'ml-auto mr-0'
+                  : 'mx-auto'
+              }`}
+            >
               <img
                 src={block.value}
                 alt={`Peça ${idx + 1} de ${safeItem.name}`}
@@ -1055,10 +1178,18 @@ export const CaseModal: React.FC<CaseModalProps> = ({
             <div className="space-y-8 sm:space-y-12 mb-16 w-full">
               {renderGroups.map((group, gIdx) => {
                 if (group.type === 'single') {
+                  const blockAlign = group.block.alignment || (group.block.type === 'text' ? 'left' : 'center');
+                  const singleJustifyClass =
+                    blockAlign === 'left'
+                      ? 'items-start justify-start'
+                      : blockAlign === 'right'
+                      ? 'items-end justify-end'
+                      : 'items-center justify-center';
+
                   return (
                     <div
                       key={`group-single-${gIdx}`}
-                      className="w-full flex flex-col items-center justify-center"
+                      className={`w-full flex flex-col ${singleJustifyClass}`}
                     >
                       {renderBlockCard(group.block, group.originalIdx)}
                     </div>

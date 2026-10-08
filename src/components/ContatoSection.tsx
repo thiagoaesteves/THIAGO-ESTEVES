@@ -3,7 +3,10 @@ import { Mail, Linkedin, Instagram, ArrowUpRight } from 'lucide-react';
 
 export const ContatoSection: React.FC = () => {
   return (
-    <section id="contato" className="pt-10 pb-16 sm:pt-14 sm:pb-20 md:pt-16 md:pb-24 bg-[#0F1222] text-[#F6F7F2] relative overflow-hidden">
+    <section
+      id="contato"
+      className="min-h-screen min-h-[100dvh] flex flex-col justify-center py-12 sm:py-16 md:py-20 lg:py-24 bg-[#0F1222] text-[#F6F7F2] relative overflow-hidden scroll-mt-[54px] sm:scroll-mt-[58px]"
+    >
       {/* Importação da fonte manuscrita para o efeito de caligrafia */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap');
@@ -12,7 +15,7 @@ export const ContatoSection: React.FC = () => {
         }
       `}</style>
 
-      <div className="max-w-[1320px] mx-auto w-full px-4 sm:px-6 md:px-8 lg:px-12 relative z-10">
+      <div className="max-w-[1600px] mx-auto w-full px-6 sm:px-10 lg:px-16 relative z-10 my-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center w-full">
           
           {/* Left Column: Headline & Links */}
@@ -83,7 +86,7 @@ export const ContatoSection: React.FC = () => {
 
           {/* Right Column */}
           <div className="lg:col-span-5 flex lg:justify-end mt-4 lg:mt-0 w-full">
-            <div className="w-full lg:max-w-md space-y-3 sm:space-y-5">
+            <div className="w-full lg:max-w-xl space-y-3 sm:space-y-5">
               
               {/* Live Status Indicator */}
               <div className="flex items-center gap-2.5">
