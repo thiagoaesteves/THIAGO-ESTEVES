@@ -321,9 +321,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
     const newBlocks = currentBlocks.map((b, i) => {
       if (i !== idx) return b;
       let finalCols = b.columns;
-      if (aspect === 'contain' && (!finalCols || finalCols > 3)) finalCols = 1;
-      if (aspect === 'square' && (!finalCols || finalCols === 1)) finalCols = 3;
-      if (aspect === 'story' && (!finalCols || finalCols === 1)) finalCols = 5;
+      if (!finalCols) {
+        finalCols = aspect === 'contain' ? 1 : aspect === 'story' ? 3 : 2;
+      }
       return {
         ...b,
         aspect,
@@ -524,57 +524,122 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                   </button>
                 </div>
 
-                {/* Seletor de Colunas (Até 5 para Vertical, até 4 para Quadrada, até 3 para Inteira) */}
-                <div className="flex items-center gap-1 bg-black/40 px-1.5 py-0.5 rounded border border-white/10">
-                  <span className="text-white/50 text-[10px] flex items-center gap-0.5">
-                    <Columns className="w-2.5 h-2.5" /> Colunas:
+                {/* Seletor Discreto de Layout para Imagens (Full 100%, 2 Colunas 50%, 3 Colunas 33%) */}
+                <div className="flex items-center gap-1 bg-black/40 px-1.5 py-0.5 rounded border border-white/10 text-[10px] font-mono-code">
+                  <span className="text-white/50 flex items-center gap-0.5 pr-0.5">
+                    <Columns className="w-2.5 h-2.5" /> Layout:
                   </span>
-                  {(currentAspect === 'story'
-                    ? [1, 2, 3, 4, 5]
-                    : currentAspect === 'square'
-                    ? [1, 2, 3, 4]
-                    : [1, 2, 3]
-                  ).map((colNum) => (
-                    <button
-                      key={colNum}
-                      type="button"
-                      onClick={() => updateBlockColumns(idx, colNum)}
-                      className={`px-2 py-0.5 rounded text-[10px] font-mono-code cursor-pointer transition-colors ${
-                        currentCols === colNum
-                          ? 'bg-[#D4FF3A] text-[#0F1222] font-extrabold shadow-sm'
-                          : 'hover:bg-white/20 text-white/80'
-                      }`}
-                      title={`${colNum} coluna${colNum > 1 ? 's' : ''} por linha`}
-                    >
-                      {colNum}
-                    </button>
-                  ))}
+                  <button
+                    type="button"
+                    onClick={() => updateBlockColumns(idx, 1)}
+                    className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-colors ${
+                      currentCols === 1
+                        ? 'bg-[#D4FF3A] text-[#0F1222] font-black shadow-sm'
+                        : 'hover:bg-white/20 text-white/80'
+                    }`}
+                    title="Largura Total / Full: 100% de largura, expandindo até as margens da grade"
+                  >
+                    Full (100%)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateBlockColumns(idx, 2)}
+                    className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-colors ${
+                      currentCols === 2
+                        ? 'bg-[#D4FF3A] text-[#0F1222] font-black shadow-sm'
+                        : 'hover:bg-white/20 text-white/80'
+                    }`}
+                    title="Duas Colunas / Side-by-side: 50% de largura cada, 2 itens lado a lado"
+                  >
+                    2 Colunas (50%)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateBlockColumns(idx, 3)}
+                    className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-colors ${
+                      currentCols === 3
+                        ? 'bg-[#D4FF3A] text-[#0F1222] font-black shadow-sm'
+                        : 'hover:bg-white/20 text-white/80'
+                    }`}
+                    title="Três Colunas: 33% de largura cada, 3 itens por linha"
+                  >
+                    3 Colunas (33%)
+                  </button>
+                  {currentAspect === 'story' && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => updateBlockColumns(idx, 4)}
+                        className={`px-1.5 py-0.5 rounded font-bold cursor-pointer transition-colors ${
+                          currentCols === 4
+                            ? 'bg-[#D4FF3A] text-[#0F1222] font-black shadow-sm'
+                            : 'hover:bg-white/20 text-white/70'
+                        }`}
+                        title="4 Colunas"
+                      >
+                        4 Col
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateBlockColumns(idx, 5)}
+                        className={`px-1.5 py-0.5 rounded font-bold cursor-pointer transition-colors ${
+                          currentCols === 5
+                            ? 'bg-[#D4FF3A] text-[#0F1222] font-black shadow-sm'
+                            : 'hover:bg-white/20 text-white/70'
+                        }`}
+                        title="5 Colunas"
+                      >
+                        5 Col
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             )}
 
-            {/* Interactive Video Columns Controls */}
+            {/* Interactive Video Columns / Layout Controls */}
             {isVideo && (
               <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-                <div className="flex items-center gap-1 bg-black/40 px-1.5 py-0.5 rounded border border-white/10">
-                  <span className="text-white/50 text-[10px] flex items-center gap-0.5">
-                    <Columns className="w-2.5 h-2.5" /> Colunas:
+                <div className="flex items-center gap-1 bg-black/40 px-1.5 py-0.5 rounded border border-white/10 text-[10px] font-mono-code">
+                  <span className="text-white/50 flex items-center gap-0.5 pr-0.5">
+                    <Columns className="w-2.5 h-2.5" /> Layout:
                   </span>
-                  {[1, 2, 3].map((colNum) => (
-                    <button
-                      key={colNum}
-                      type="button"
-                      onClick={() => updateBlockColumns(idx, colNum)}
-                      className={`px-2 py-0.5 rounded text-[10px] font-mono-code cursor-pointer transition-colors ${
-                        currentCols === colNum
-                          ? 'bg-[#D4FF3A] text-[#0F1222] font-extrabold shadow-sm'
-                          : 'hover:bg-white/20 text-white/80'
-                      }`}
-                      title={`${colNum} coluna${colNum > 1 ? 's' : ''} por linha`}
-                    >
-                      {colNum}
-                    </button>
-                  ))}
+                  <button
+                    type="button"
+                    onClick={() => updateBlockColumns(idx, 1)}
+                    className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-colors ${
+                      currentCols === 1
+                        ? 'bg-[#D4FF3A] text-[#0F1222] font-black shadow-sm'
+                        : 'hover:bg-white/20 text-white/80'
+                    }`}
+                    title="Largura Total / Full: 100% de largura, expandindo até as margens da grade"
+                  >
+                    Full (100%)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateBlockColumns(idx, 2)}
+                    className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-colors ${
+                      currentCols === 2
+                        ? 'bg-[#D4FF3A] text-[#0F1222] font-black shadow-sm'
+                        : 'hover:bg-white/20 text-white/80'
+                    }`}
+                    title="Duas Colunas / Side-by-side: 50% de largura cada, 2 itens lado a lado"
+                  >
+                    2 Colunas (50%)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateBlockColumns(idx, 3)}
+                    className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-colors ${
+                      currentCols === 3
+                        ? 'bg-[#D4FF3A] text-[#0F1222] font-black shadow-sm'
+                        : 'hover:bg-white/20 text-white/80'
+                    }`}
+                    title="Três Colunas: 33% de largura cada, 3 itens por linha"
+                  >
+                    3 Colunas (33%)
+                  </button>
                 </div>
               </div>
             )}
@@ -653,7 +718,15 @@ export const CaseModal: React.FC<CaseModalProps> = ({
 
         {/* 1. TEXT BLOCK */}
         {block.type === 'text' && (
-          <div className="w-full">
+          <div
+            className={`w-full max-w-4xl ${
+              currentAlignment === 'center'
+                ? 'mx-auto'
+                : currentAlignment === 'right'
+                ? 'ml-auto'
+                : 'mr-auto'
+            }`}
+          >
             {isEditMode ? (
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
@@ -1007,7 +1080,7 @@ export const CaseModal: React.FC<CaseModalProps> = ({
               : 'bg-[#F6F7F2]/95 border-black/10 text-[#0F1222]'
           }`}
         >
-          <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-3.5 sm:py-4 flex justify-between items-center gap-4">
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-3.5 sm:py-4 flex justify-between items-center gap-4">
             <div className="flex items-center gap-3">
               <span
                 className={`font-mono-code text-xs sm:text-sm uppercase tracking-widest font-semibold ${
@@ -1041,11 +1114,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
         </header>
 
         {/* Modal Main Content */}
-        <main className="flex-1 w-full max-w-[1240px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-10 md:py-14">
-          {/* Container restrito e alinhado rigorosamente à esquerda embaixo do título */}
-          <div className="max-w-3xl w-full">
-            {/* Header Section */}
-            <div className="space-y-2.5 sm:space-y-3.5 mb-8 sm:mb-10">
+        <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-10 md:py-14">
+          {/* Header Section */}
+          <div className="max-w-4xl w-full space-y-2.5 sm:space-y-3.5 mb-8 sm:mb-12">
               <div>
                 {isEditMode ? (
                   <div className="flex items-center gap-2">
@@ -1151,9 +1222,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                           ? 'text-white/70 hover:bg-white/10'
                           : 'text-gray-800 hover:bg-black/10'
                       }`}
-                      title="Médio: O projeto ocupa 50% da largura da linha (Metade)"
+                      title="50% da largura da linha (2 Colunas)"
                     >
-                      Médio (50%)
+                      2 Colunas (50%)
                     </button>
                     <button
                       type="button"
@@ -1165,9 +1236,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                           ? 'text-white/70 hover:bg-white/10'
                           : 'text-gray-800 hover:bg-black/10'
                       }`}
-                      title="Compacto: O projeto ocupa 33% da largura da linha (Terço)"
+                      title="33% da largura da linha (3 Colunas)"
                     >
-                      Compacto (33%)
+                      3 Colunas (33%)
                     </button>
                   </div>
                 )}
@@ -1330,21 +1401,25 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       </button>
                     </div>
                     <div className="flex items-center gap-1.5 text-xs font-mono-code">
-                      <span className="text-gray-500">Colunas:</span>
-                      {[1, 2, 3].map((cols) => (
+                      <span className="text-gray-500">Layout:</span>
+                      {[
+                        { cols: 1, label: 'Full (100%)' },
+                        { cols: 2, label: '2 Colunas (50%)' },
+                        { cols: 3, label: '3 Colunas (33%)' },
+                      ].map(({ cols, label }) => (
                         <button
                           key={cols}
                           type="button"
                           onClick={() => setAddVideoColumnsVal(cols)}
-                          className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
+                          className={`px-2.5 py-1 rounded text-xs font-bold cursor-pointer transition-colors ${
                             addVideoColumnsVal === cols
-                              ? 'bg-[#FF4FA0] text-white font-bold'
+                              ? 'bg-[#FF4FA0] text-white shadow-sm'
                               : isLadoB
                               ? 'bg-white/10 hover:bg-white/20 text-white'
                               : 'bg-black/10 hover:bg-black/20 text-gray-800'
                           }`}
                         >
-                          {cols}
+                          {label}
                         </button>
                       ))}
                     </div>
@@ -1399,21 +1474,25 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       </button>
                     </div>
                     <div className="flex items-center gap-1.5 text-xs font-mono-code">
-                      <span className="text-gray-500">Colunas:</span>
-                      {[1, 2, 3].map((cols) => (
+                      <span className="text-gray-500">Layout:</span>
+                      {[
+                        { cols: 1, label: 'Full (100%)' },
+                        { cols: 2, label: '2 Colunas (50%)' },
+                        { cols: 3, label: '3 Colunas (33%)' },
+                      ].map(({ cols, label }) => (
                         <button
                           key={cols}
                           type="button"
                           onClick={() => setAddVideoColumnsVal(cols)}
-                          className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
+                          className={`px-2.5 py-1 rounded text-xs font-bold cursor-pointer transition-colors ${
                             addVideoColumnsVal === cols
-                              ? 'bg-[#00ADEF] text-white font-bold'
+                              ? 'bg-[#00ADEF] text-white shadow-sm'
                               : isLadoB
                               ? 'bg-white/10 hover:bg-white/20 text-white'
                               : 'bg-black/10 hover:bg-black/20 text-gray-800'
                           }`}
                         >
-                          {cols}
+                          {label}
                         </button>
                       ))}
                     </div>
@@ -1544,26 +1623,25 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                       </label>
 
                       <div className="flex items-center gap-1.5 ml-2">
-                        <span className="text-gray-500">Colunas:</span>
-                        {(addAspectVal === 'story'
-                          ? [1, 2, 3, 4, 5]
-                          : addAspectVal === 'square'
-                          ? [1, 2, 3, 4]
-                          : [1, 2, 3]
-                        ).map((cols) => (
+                        <span className="text-gray-500">Layout:</span>
+                        {[
+                          { cols: 1, label: 'Full (100%)' },
+                          { cols: 2, label: '2 Colunas (50%)' },
+                          { cols: 3, label: '3 Colunas (33%)' },
+                        ].map(({ cols, label }) => (
                           <button
                             key={cols}
                             type="button"
                             onClick={() => setAddColumnsVal(cols)}
-                            className={`px-2 py-0.5 rounded text-xs cursor-pointer ${
+                            className={`px-2.5 py-1 rounded text-xs font-bold cursor-pointer transition-colors ${
                               addColumnsVal === cols
-                                ? 'bg-[#2340FF] text-white font-bold'
+                                ? 'bg-[#2340FF] text-white shadow-sm'
                                 : isLadoB
                                 ? 'bg-white/10 hover:bg-white/20 text-white'
                                 : 'bg-black/10 hover:bg-black/20 text-gray-800'
                             }`}
                           >
-                            {cols}
+                            {label}
                           </button>
                         ))}
                       </div>
@@ -1629,7 +1707,6 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                 </div>
               </button>
             </div>
-          </div>
         </main>
       </div>
     </div>
