@@ -204,10 +204,14 @@ export const CaseModal: React.FC<CaseModalProps> = ({
     return groups;
   }, [currentBlocks]);
 
-  // 6. Keyboard Navigation Effect
+  // 6a. Reset dos players: apenas quando troca de case (e não a cada atualização do Firestore/edição)
+  const currentSlug = safeItem?.slug;
   useEffect(() => {
     setPlayingVideos({});
+  }, [currentSlug]);
 
+  // 6b. Keyboard Navigation Effect
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
@@ -866,8 +870,9 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                     className="relative w-full h-full cursor-pointer group/vid bg-[#001726] flex items-center justify-center overflow-hidden"
                   >
                     <img
-                      src={`https://vumbnail.com/${vimeoId}.jpg`}
+                      src={getVimeoThumbnail(vimeoId)}
                       alt="Miniatura do vídeo Vimeo"
+                      referrerPolicy="no-referrer"
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
@@ -904,11 +909,24 @@ export const CaseModal: React.FC<CaseModalProps> = ({
                     className="relative w-full h-full cursor-pointer group/vid"
                   >
                     <img
-                      src={`https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`}
+                      src={getYouTubeThumbnail(youtubeId, 'maxres')}
                       alt="Miniatura do vídeo"
+                      referrerPolicy="no-referrer"
                       className="w-full h-full object-cover"
+                      onLoad={(e) => {
+                        const img = e.currentTarget;
+                        // Quando não existe maxres, o YouTube pode devolver uma imagem cinza minúscula (120x90)
+                        if (img.naturalWidth <= 120 && img.dataset.fallback !== '1') {
+                          img.dataset.fallback = '1';
+                          img.src = getYouTubeThumbnail(youtubeId, 'hq');
+                        }
+                      }}
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+                        const img = e.currentTarget;
+                        if (img.dataset.fallback !== '1') {
+                          img.dataset.fallback = '1';
+                          img.src = getYouTubeThumbnail(youtubeId, 'hq');
+                        }
                       }}
                     />
                     <div className="absolute inset-0 bg-black/30 group-hover/vid:bg-black/10 transition-colors flex items-center justify-center">
