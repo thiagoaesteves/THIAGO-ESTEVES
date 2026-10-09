@@ -91,7 +91,7 @@ export const BackstageSection: React.FC = () => {
         };
       })
     : defaultEspecialidades;
-  
+
   const manifesto = {
     line1: getFallbackText(backstage.manifesto?.line1, defaultManifesto.line1),
     line2: getFallbackText(backstage.manifesto?.line2, defaultManifesto.line2),
@@ -114,227 +114,234 @@ export const BackstageSection: React.FC = () => {
   return (
     <section
       id="backstage"
-      className="w-full bg-[#F6F7F2] text-[#0F1222] flex flex-col justify-between min-h-screen min-h-[100dvh] scroll-mt-[69px] sm:scroll-mt-[73px]"
+      className="w-full bg-[#F6F7F2] text-[#0F1222] flex flex-col justify-between min-h-[calc(100dvh-69px)] sm:min-h-[calc(100dvh-73px)] scroll-mt-[69px] sm:scroll-mt-[73px]"
     >
       {/* Bloco Superior com Fundo Claro */}
-      <div className="w-full flex-1 flex flex-col justify-center py-16 sm:py-24 px-6 sm:px-10 lg:px-16 text-[#0F1222]">
+      <div className="w-full flex-1 flex flex-col justify-start lg:justify-center pt-8 sm:pt-12 lg:pt-[clamp(0.75rem,3vh,2.5rem)] pb-2 sm:pb-3 lg:pb-[clamp(0.5rem,1.5vh,1.25rem)] px-6 sm:px-10 lg:px-16 text-[#0F1222]">
         <div className="max-w-[1600px] mx-auto w-full">
-            <div className="w-full">
-              
-              {/* Header & Manifesto Intro */}
-              <div className="space-y-1 sm:space-y-1.5">
-                <span className="font-mono-code text-[10px] sm:text-xs uppercase tracking-widest text-[#2340FF] font-bold block mb-1.5 sm:mb-4">
-                  Especialidades &amp; Craft
-                </span>
+          <div className="w-full">
 
-                <div className="space-y-1.5 sm:space-y-2 w-full">
-                  {isEditMode ? (
-                    <div className="space-y-2 p-3 rounded-xl bg-[#0F1222]/5 border border-[#2340FF]/30">
-                      <label className="text-[10px] font-mono-code text-[#2340FF] font-bold flex items-center gap-1">
-                        <Type className="w-3 h-3" /> Editar Manifesto Principal:
-                      </label>
-                      <input
-                        type="text"
-                        value={manifesto.line1}
-                        onChange={(e) => handleUpdate('manifesto', { ...manifesto, line1: e.target.value })}
-                        className="w-full text-sm font-disp font-bold bg-white border border-[#2340FF]/30 p-2 rounded text-[#0F1222]"
-                        placeholder="Linha 1..."
-                      />
-                      <input
-                        type="text"
-                        value={manifesto.line2}
-                        onChange={(e) => handleUpdate('manifesto', { ...manifesto, line2: e.target.value })}
-                        className="w-full text-sm font-disp font-bold bg-white border border-[#2340FF]/30 p-2 rounded text-[#0F1222]"
-                        placeholder="Linha 2..."
-                      />
-                    </div>
-                  ) : (
-                    <p className="font-disp font-extrabold text-base sm:text-2xl md:text-3xl lg:text-[32px] tracking-[-0.03em] leading-tight sm:leading-[1.06] text-[#0F1222] w-full">
-                      <span className="font-serif-it italic text-[#2340FF] text-[1.18em] leading-none align-[-0.12em] mr-1.5">
-                        “
-                      </span>
-                      {manifesto.line1}<br />
-                      {manifesto.line2}
-                    </p>
-                  )}
-                  
-                  {isEditMode ? (
-                    <div className="space-y-2 p-3 rounded-xl bg-[#0F1222]/5 border border-[#2340FF]/30">
-                      <label className="text-[10px] font-mono-code text-[#2340FF] font-bold flex items-center gap-1">
-                        <Type className="w-3 h-3" /> Editar Chamada Secundária e Destaque:
-                      </label>
-                      <input
-                        type="text"
-                        value={manifesto.subText}
-                        onChange={(e) => handleUpdate('manifesto', { ...manifesto, subText: e.target.value })}
-                        className="w-full text-xs font-sans bg-white border border-[#2340FF]/30 p-2 rounded text-[#0F1222]"
-                        placeholder="Texto secundário..."
-                      />
-                      <input
-                        type="text"
-                        value={manifesto.badge}
-                        onChange={(e) => handleUpdate('manifesto', { ...manifesto, badge: e.target.value })}
-                        className="w-full text-xs font-sans bg-white border border-[#2340FF]/30 p-2 rounded text-[#0F1222]"
-                        placeholder="Texto do Badge (ex: Inclusive... todos.)"
-                      />
-                    </div>
-                  ) : (
-                    <p className="text-xs sm:text-base md:text-lg lg:text-[19px] font-medium text-[#343848] leading-snug sm:whitespace-nowrap whitespace-normal pt-0.5 w-full">
-                      {manifesto.subText}{' '}
-                      <span className="inline-block bg-[#D4FF3A] text-[#0F1222] px-2 py-0.5 font-bold rounded-[255px_15px_225px_15px/15px_225px_15px_255px] transform -rotate-1 shadow-sm">
-                        {manifesto.badge}”
-                      </span>
-                    </p>
-                  )}
-                </div>
-              </div>
+            {/* Header & Manifesto Intro */}
+            <div className="space-y-1 sm:space-y-1.5">
+              <span className="font-mono-code text-[10px] sm:text-xs uppercase tracking-widest text-[#2340FF] font-bold block mb-1.5 sm:mb-4 lg:mb-[clamp(0.5rem,1.8vh,1rem)]">
+                Especialidades &amp; Craft
+              </span>
 
-              {/* Categorias & Entregas 01 a 04 */}
-              <div className="mt-2.5 sm:mt-4 space-y-0.5 sm:space-y-0">
-                {isEditMode && (
-                  <div className="py-1 text-xs font-mono-code text-[#2340FF] font-bold flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5" /> Editar Especialidades & Itens:
+              <div className="space-y-1.5 sm:space-y-2 w-full">
+                {isEditMode ? (
+                  <div className="space-y-2 p-3 rounded-xl bg-[#0F1222]/5 border border-[#2340FF]/30">
+                    <label className="text-[10px] font-mono-code text-[#2340FF] font-bold flex items-center gap-1">
+                      <Type className="w-3 h-3" /> Editar Manifesto Principal:
+                    </label>
+                    <input
+                      type="text"
+                      value={manifesto.line1}
+                      onChange={(e) => handleUpdate('manifesto', { ...manifesto, line1: e.target.value })}
+                      className="w-full text-sm font-disp font-bold bg-white border border-[#2340FF]/30 p-2 rounded text-[#0F1222]"
+                      placeholder="Linha 1..."
+                    />
+                    <input
+                      type="text"
+                      value={manifesto.line2}
+                      onChange={(e) => handleUpdate('manifesto', { ...manifesto, line2: e.target.value })}
+                      className="w-full text-sm font-disp font-bold bg-white border border-[#2340FF]/30 p-2 rounded text-[#0F1222]"
+                      placeholder="Linha 2..."
+                    />
                   </div>
+                ) : (
+                  <p className="font-disp font-extrabold text-base sm:text-2xl md:text-3xl lg:text-[32px] tracking-[-0.03em] leading-tight sm:leading-[1.06] text-[#0F1222] w-full">
+                    <span className="font-serif-it italic text-[#2340FF] text-[1.18em] leading-none align-[-0.12em] mr-1.5">
+                      “
+                    </span>
+                    {manifesto.line1}<br />
+                    {manifesto.line2}
+                  </p>
                 )}
-                {especialidades.map((item: any, idx: number) => (
-                  <div
-                    key={item.num || idx}
-                    className="grid grid-cols-1 lg:grid-cols-12 gap-0.5 sm:gap-1 lg:gap-6 2xl:gap-8 items-baseline py-1.5 sm:py-2.5 border-t border-[#DADCE3] group"
-                  >
-                    <div className="lg:col-span-4 xl:col-span-4 2xl:col-span-4">
-                      {isEditMode ? (
-                        <div className="space-y-1.5 p-2 rounded bg-white border border-[#2340FF]/30">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono-code text-xs font-bold text-[#2340FF]">{item.num}</span>
-                            <input
-                              type="text"
-                              value={item.categoria}
-                              onChange={(e) => {
-                                const newEsp = [...especialidades];
-                                newEsp[idx] = { ...newEsp[idx], categoria: e.target.value };
-                                handleUpdate('especialidades', newEsp);
-                              }}
-                              className="text-xs font-bold bg-[#F6F7F2] p-1 rounded border border-gray-300 w-full"
-                              placeholder="Categoria..."
-                            />
-                          </div>
+
+                {isEditMode ? (
+                  <div className="space-y-2 p-3 rounded-xl bg-[#0F1222]/5 border border-[#2340FF]/30">
+                    <label className="text-[10px] font-mono-code text-[#2340FF] font-bold flex items-center gap-1">
+                      <Type className="w-3 h-3" /> Editar Chamada Secundária e Destaque:
+                    </label>
+                    <input
+                      type="text"
+                      value={manifesto.subText}
+                      onChange={(e) => handleUpdate('manifesto', { ...manifesto, subText: e.target.value })}
+                      className="w-full text-xs font-sans bg-white border border-[#2340FF]/30 p-2 rounded text-[#0F1222]"
+                      placeholder="Texto secundário..."
+                    />
+                    <input
+                      type="text"
+                      value={manifesto.badge}
+                      onChange={(e) => handleUpdate('manifesto', { ...manifesto, badge: e.target.value })}
+                      className="w-full text-xs font-sans bg-white border border-[#2340FF]/30 p-2 rounded text-[#0F1222]"
+                      placeholder="Texto do Badge (ex: Inclusive... todos.)"
+                    />
+                  </div>
+                ) : (
+                  <p className="text-xs sm:text-base md:text-lg lg:text-[20px] font-medium text-[#343848] leading-snug sm:whitespace-nowrap whitespace-normal pt-0.5 w-full">
+                    {manifesto.subText}{' '}
+                    <span className="inline-block bg-[#D4FF3A] text-[#0F1222] px-2 py-0.5 font-bold rounded-[255px_15px_225px_15px/15px_225px_15px_255px] transform -rotate-1 shadow-sm">
+                      {manifesto.badge}”
+                    </span>
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Categorias & Entregas 01 a 04 */}
+            <div className="mt-2.5 sm:mt-4 lg:mt-[clamp(0.75rem,2.4vh,1.5rem)] space-y-0.5 sm:space-y-0">
+              {isEditMode && (
+                <div className="py-1 text-xs font-mono-code text-[#2340FF] font-bold flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5" /> Editar Especialidades & Itens:
+                </div>
+              )}
+              {especialidades.map((item: any, idx: number) => (
+                <div
+                  key={item.num || idx}
+                  className="grid grid-cols-1 lg:grid-cols-12 gap-0.5 sm:gap-1 lg:gap-6 2xl:gap-8 items-baseline py-1.5 sm:py-2.5 lg:py-[clamp(0.5rem,1.9vh,1.25rem)] border-t border-[#DADCE3] group"
+                >
+                  <div className="lg:col-span-4 xl:col-span-3">
+                    {isEditMode ? (
+                      <div className="space-y-1.5 p-2 rounded bg-white border border-[#2340FF]/30">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono-code text-xs font-bold text-[#2340FF]">{item.num}</span>
                           <input
                             type="text"
-                            value={item.resto}
+                            value={item.categoria}
                             onChange={(e) => {
                               const newEsp = [...especialidades];
-                              newEsp[idx] = { ...newEsp[idx], resto: e.target.value };
+                              newEsp[idx] = { ...newEsp[idx], categoria: e.target.value };
                               handleUpdate('especialidades', newEsp);
                             }}
                             className="text-xs font-bold bg-[#F6F7F2] p-1 rounded border border-gray-300 w-full"
-                            placeholder="Resto do título..."
+                            placeholder="Categoria..."
                           />
                         </div>
-                      ) : (
-                        <div className="flex items-baseline gap-1.5 sm:gap-2">
-                          <span className="font-mono-code text-[10px] sm:text-[11px] font-bold text-[#2340FF] tracking-wider shrink-0">
-                            {item.num}
-                          </span>
-                          <h3 className="font-disp font-extrabold text-xs sm:text-base md:text-[17px] 2xl:text-[19px] tracking-tight text-[#0F1222]">
-                            {item.categoria}{' '}
-                            <span className="font-serif-it italic font-normal text-[#2340FF] text-[1.12em] align-baseline">
-                              {item.amp}
-                            </span>{' '}
-                            {item.resto}
-                          </h3>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="lg:col-span-8 xl:col-span-8 2xl:col-span-8">
-                      {isEditMode ? (
-                        <textarea
-                          value={Array.isArray(item.itens) ? item.itens.join('\n') : item.itens}
-                          rows={2}
+                        <input
+                          type="text"
+                          value={item.resto}
                           onChange={(e) => {
-                            const newItens = e.target.value.split('\n').filter(Boolean);
                             const newEsp = [...especialidades];
-                            newEsp[idx] = { ...newEsp[idx], itens: newItens };
+                            newEsp[idx] = { ...newEsp[idx], resto: e.target.value };
                             handleUpdate('especialidades', newEsp);
                           }}
-                          className="w-full text-xs font-sans bg-white border border-gray-300 p-2 rounded text-[#0F1222]"
-                          placeholder="Digite um item por linha..."
+                          className="text-xs font-bold bg-[#F6F7F2] p-1 rounded border border-gray-300 w-full"
+                          placeholder="Resto do título..."
                         />
-                      ) : (
-                        <p className="text-[11px] sm:text-sm md:text-[13px] lg:text-[14px] 2xl:text-[15px] text-[#343848] font-normal leading-normal sm:leading-relaxed w-full">
-                          {Array.isArray(item.itens) && item.itens.map((sub: string, sIdx: number) => (
-                            <React.Fragment key={sIdx}>
-                              <span className="text-[#202433] hover:text-[#2340FF] transition-colors duration-200">
-                                {sub}
-                              </span>
-                              {sIdx < item.itens.length - 1 && (
-                                <span className="text-[#2340FF]/40 mx-1 sm:mx-2 font-light select-none">
-                                  —
-                                </span>
-                              )}
-                            </React.Fragment>
-                          ))}
-                          <span className="text-[#2340FF] font-bold ml-0.5">.</span>
-                        </p>
-                      )}
-                    </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-baseline gap-1.5 sm:gap-2">
+                        <span className="font-mono-code text-[10px] sm:text-[11px] font-bold text-[#2340FF] tracking-wider shrink-0">
+                          {item.num}
+                        </span>
+                        <h3 className="font-disp font-extrabold text-xs sm:text-base md:text-[18px] 2xl:text-[20px] tracking-tight text-[#0F1222]">
+                          {item.categoria}{' '}
+                          <span className="font-serif-it italic font-normal text-[#2340FF] text-[1.25em] align-baseline">
+                            {item.amp}
+                          </span>{' '}
+                          {item.resto}
+                        </h3>
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
 
-            </div>
-          </div>
-        </div>
-
-        {/* BARRA DE RODAPÉ // 05 (Altura expandida e texto alinhado com respiro inferior elegante) */}
-        <div className="bg-[#0F1222] text-[#F6F7F2] w-full max-w-full pt-4 sm:pt-12 pb-6 sm:pb-18 lg:pb-24 m-0 border-b-0 overflow-hidden box-border flex flex-col justify-center">
-          <div className="max-w-[1600px] mx-auto w-full px-4 sm:px-10 lg:px-16">
-            <div className="w-full space-y-1 sm:space-y-1.5">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full">
-                {isEditMode ? (
-                  <input
-                    type="text"
-                    value={footer?.badge || '05 // E O QUE MAIS FOR PRECISO'}
-                    onChange={(e) => handleUpdate('footer', { ...footer, badge: e.target.value })}
-                    className="font-mono-code text-xs uppercase font-bold bg-black border border-[#D4FF3A]/50 text-[#D4FF3A] p-1 rounded max-w-xs"
-                  />
-                ) : (
-                  <span className="font-mono-code text-[10px] sm:text-xs uppercase tracking-widest text-[#D4FF3A] font-bold shrink-0">
-                    {footer?.badge || '05 // E O QUE MAIS FOR PRECISO'}
-                  </span>
-                )}
-                <span className="h-px w-8 sm:w-16 bg-[#D4FF3A]/50 block shrink-0" />
-              </div>
-
-              {isEditMode ? (
-                <div className="space-y-2 p-3 rounded bg-white/10 border border-white/20 w-full max-w-full">
-                  <input
-                    type="text"
-                    value={footer?.line1 || 'Especialista cascudo, ponta firme, sangue nos olhos'}
-                    onChange={(e) => handleUpdate('footer', { ...footer, line1: e.target.value })}
-                    className="w-full text-xs bg-black text-white p-2 rounded border border-white/20"
-                    placeholder="Linha 1 do rodapé..."
-                  />
-                  <input
-                    type="text"
-                    value={footer?.line2 || 'sem nunca abrir mão da criatividade.'}
-                    onChange={(e) => handleUpdate('footer', { ...footer, line2: e.target.value })}
-                    className="w-full text-xs bg-black text-white p-2 rounded border border-white/20"
-                    placeholder="Linha 2 do rodapé..."
-                  />
+                  <div className="lg:col-span-8 xl:col-span-9">
+                    {isEditMode ? (
+                      <textarea
+                        value={Array.isArray(item.itens) ? item.itens.join('\n') : item.itens}
+                        rows={2}
+                        onChange={(e) => {
+                          const newItens = e.target.value.split('\n').filter(Boolean);
+                          const newEsp = [...especialidades];
+                          newEsp[idx] = { ...newEsp[idx], itens: newItens };
+                          handleUpdate('especialidades', newEsp);
+                        }}
+                        className="w-full text-xs font-sans bg-white border border-gray-300 p-2 rounded text-[#0F1222]"
+                        placeholder="Digite um item por linha..."
+                      />
+                    ) : (
+                      <p className="text-[11px] sm:text-sm md:text-[13px] lg:text-[14px] 2xl:text-[15px] text-[#343848] font-normal leading-normal sm:leading-relaxed w-full lg:max-w-[44rem]">
+                        {Array.isArray(item.itens) && item.itens.map((sub: string, sIdx: number) => {
+                          const isLast = sIdx === item.itens.length - 1;
+                          return (
+                            <React.Fragment key={sIdx}>
+                              {/* Cada item é um bloco inline: a quebra de linha acontece entre itens, nunca no meio de um */}
+                              <span className="inline-block max-w-full align-top">
+                                <span className="text-[#202433] hover:text-[#2340FF] transition-colors duration-200">
+                                  {sub}
+                                </span>
+                                {isLast ? (
+                                  <span className="text-[#2340FF] font-bold ml-0.5">.</span>
+                                ) : (
+                                  <span className="text-[#2340FF]/40 mx-1 sm:mx-2 font-light select-none">
+                                    —
+                                  </span>
+                                )}
+                              </span>
+                              {!isLast && ' '}
+                            </React.Fragment>
+                          );
+                        })}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              ) : (
-                <p className="font-disp font-extrabold text-xs sm:text-base md:text-lg lg:text-[20px] leading-snug sm:leading-tight tracking-tight text-white w-full break-words">
-                  {footer?.line1 || 'Especialista cascudo, ponta firme, sangue nos olhos'}<br />
-                  <span className="font-serif-it italic font-normal text-[#AFC0FF]">
-                    {footer?.line2 || 'sem nunca abrir mão da criatividade.'}
-                  </span>
-                </p>
-              )}
+              ))}
             </div>
+
           </div>
         </div>
+      </div>
 
+      {/* BARRA DE RODAPÉ // 05 (Dentro do fluxo proporcional da seção sem cortes) */}
+      <div className="bg-[#0F1222] text-[#F6F7F2] w-full max-w-full pt-4 sm:pt-5 md:pt-6 lg:pt-[clamp(1rem,3.4vh,2.25rem)] pb-6 sm:pb-8 md:pb-10 lg:pb-[clamp(1.25rem,4vh,3rem)] m-0 border-b-0 overflow-hidden box-border flex flex-col justify-center shrink-0">
+        <div className="max-w-[1600px] mx-auto w-full px-6 sm:px-10 lg:px-16">
+          <div className="w-full space-y-1 sm:space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full">
+              {isEditMode ? (
+                <input
+                  type="text"
+                  value={footer?.badge || '05 // E O QUE MAIS FOR PRECISO'}
+                  onChange={(e) => handleUpdate('footer', { ...footer, badge: e.target.value })}
+                  className="font-mono-code text-xs uppercase font-bold bg-black border border-[#D4FF3A]/50 text-[#D4FF3A] p-1 rounded max-w-xs"
+                />
+              ) : (
+                <span className="font-mono-code text-[10px] sm:text-xs uppercase tracking-widest text-[#D4FF3A] font-bold shrink-0">
+                  {footer?.badge || '05 // E O QUE MAIS FOR PRECISO'}
+                </span>
+              )}
+              <span className="h-px w-8 sm:w-16 bg-[#D4FF3A]/50 block shrink-0" />
+            </div>
+
+            {isEditMode ? (
+              <div className="space-y-2 p-3 rounded bg-white/10 border border-white/20 w-full max-w-full">
+                <input
+                  type="text"
+                  value={footer?.line1 || 'Especialista cascudo, ponta firme, sangue nos olhos'}
+                  onChange={(e) => handleUpdate('footer', { ...footer, line1: e.target.value })}
+                  className="w-full text-xs bg-black text-white p-2 rounded border border-white/20"
+                  placeholder="Linha 1 do rodapé..."
+                />
+                <input
+                  type="text"
+                  value={footer?.line2 || 'sem nunca abrir mão da criatividade.'}
+                  onChange={(e) => handleUpdate('footer', { ...footer, line2: e.target.value })}
+                  className="w-full text-xs bg-black text-white p-2 rounded border border-white/20"
+                  placeholder="Linha 2 do rodapé..."
+                />
+              </div>
+            ) : (
+              <p className="font-disp font-extrabold text-xs sm:text-base md:text-lg lg:text-[22px] leading-snug sm:leading-tight tracking-tight text-white w-full break-words">
+                {footer?.line1 || 'Especialista cascudo, ponta firme, sangue nos olhos'}<br />
+                <span className="font-serif-it italic font-normal text-[#AFC0FF]">
+                  {footer?.line2 || 'sem nunca abrir mão da criatividade.'}
+                </span>
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
     </section>
   );
 };

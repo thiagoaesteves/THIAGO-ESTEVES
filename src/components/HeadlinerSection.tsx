@@ -18,22 +18,22 @@ const TITLE_SIZE_MAP: Record<string, string> = {
   xl: 'text-3xl sm:text-5xl lg:text-6xl',
 };
 
-const TEXT_COLOR_MAP: Record<string, { label: string; class: string }> = {
-  white: { label: 'Branco Padrão', class: 'text-white/95' },
-  accent: { label: 'Verde Limão', class: 'text-[#D4FF3A]' },
-  muted: { label: 'Azul Suave', class: 'text-[#AFC0FF]' },
+const TEXT_COLOR_MAP: Record<string, string> = {
+  white: 'text-white/95',
+  accent: 'text-[#D4FF3A]',
+  muted: 'text-[#AFC0FF]',
 };
 
-const TEXT_STYLE_MAP: Record<string, { label: string; class: string }> = {
-  normal: { label: 'Normal', class: 'font-sans font-normal' },
-  serifItalic: { label: 'Caligrafia Editorial', class: 'font-serif-it italic font-normal' },
-  semibold: { label: 'Destaque Forte', class: 'font-sans font-semibold' },
+const TEXT_STYLE_MAP: Record<string, string> = {
+  normal: 'font-sans font-normal',
+  serifItalic: 'font-serif-it italic font-normal',
+  semibold: 'font-sans font-semibold',
 };
 
 const PARAGRAPH_SIZE_MAP: Record<string, string> = {
   normal: '', 
-  lg: 'text-sm sm:text-lg lg:text-[19px] leading-snug sm:leading-snug',
-  xl: 'text-base sm:text-xl lg:text-[21px] leading-snug sm:leading-snug',
+  lg: 'text-sm sm:text-lg lg:text-[19px]',
+  xl: 'text-base sm:text-xl lg:text-[21px]',
 };
 
 export const HeadlinerSection: React.FC = () => {
@@ -43,26 +43,18 @@ export const HeadlinerSection: React.FC = () => {
   const updateHeadlinerField = cms.updateHeadlinerField || cms.updateSobreField;
   const updateHeadlinerTypography = cms.updateHeadlinerTypography || cms.updateSobreTypography;
 
-  // Fallback seguro consolidado para evitar qualquer TypeError se headliner estiver indefinido
   const safeHeadliner = { ...ORIGINAL_HEADLINE_DATA, ...(headliner || {}) };
-
   const currentTitle = safeHeadliner?.title || ORIGINAL_HEADLINE_DATA.title || 'Quem é do Méier não bobéia.';
 
-  const cleanName = (safeHeadliner?.name || ORIGINAL_HEADLINE_DATA.name || 'Thiago Esteves')
-    .replace(/\s*undefined\b/gi, '')
-    .trim() || 'Thiago Esteves';
-  const cleanRole = (safeHeadliner?.role || ORIGINAL_HEADLINE_DATA.role || 'Creative Copywriter & Storyteller')
-    .replace(/\s*undefined\b/gi, '')
-    .trim() || 'Creative Copywriter & Storyteller';
-  const cleanBadge = (safeHeadliner?.badge || ORIGINAL_HEADLINE_DATA.badge || 'Based in Brazil · Available Worldwide')
-    .replace(/\s*undefined\b/gi, '')
-    .trim() || 'Based in Brazil · Available Worldwide';
+  const cleanName = (safeHeadliner?.name || ORIGINAL_HEADLINE_DATA.name || 'Thiago Esteves').replace(/\s*undefined\b/gi, '').trim();
+  const cleanRole = (safeHeadliner?.role || ORIGINAL_HEADLINE_DATA.role || 'Creative Copywriter & Storyteller').replace(/\s*undefined\b/gi, '').trim();
+  const cleanBadge = (safeHeadliner?.badge || ORIGINAL_HEADLINE_DATA.badge || 'Based in Brazil · Available Worldwide').replace(/\s*undefined\b/gi, '').trim();
 
   const rawBio = Array.isArray(safeHeadliner?.bio) && safeHeadliner.bio.length > 0 
     ? safeHeadliner.bio 
     : (ORIGINAL_HEADLINE_DATA.bio || [currentTitle]);
 
-  const normalizedBioItems = rawBio.map((item) => {
+  const normalizedBioItems = rawBio.map((item: any) => {
     if (typeof item === 'string') {
       return { text: item, color: 'white', style: 'normal', size: 'normal' };
     }
@@ -75,7 +67,7 @@ export const HeadlinerSection: React.FC = () => {
   });
 
   const narrativeItems = normalizedBioItems.filter(
-    (item) =>
+    (item: any) =>
       item.text.trim() !== currentTitle.trim() &&
       !item.text.toLowerCase().includes('quem é do méier')
   );
@@ -125,14 +117,14 @@ export const HeadlinerSection: React.FC = () => {
   return (
     <section
       id="headliner"
-      className="w-full bg-[#2340FF] text-white flex flex-col justify-between py-16 sm:py-24 px-6 sm:px-10 lg:px-16 scroll-mt-[69px] sm:scroll-mt-[73px] relative min-h-screen min-h-[100dvh] overflow-hidden"
+      className="w-full bg-[#2340FF] text-white flex flex-col justify-between pt-4 sm:pt-8 lg:pt-12 pb-14 sm:pb-20 lg:pb-24 px-6 sm:px-10 lg:px-16 scroll-mt-[69px] sm:scroll-mt-[73px] relative min-h-screen min-h-[100dvh] overflow-hidden"
     >
       <div 
         className="absolute inset-0 opacity-[0.035] pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:24px_24px]" 
         aria-hidden="true" 
       />
 
-      <div className="max-w-[1600px] w-full mx-auto my-auto flex flex-col justify-between relative z-10 space-y-4 sm:space-y-6 lg:space-y-8">
+      <div className="max-w-[1600px] w-full mx-auto my-auto flex flex-col justify-between relative z-10 space-y-3 sm:space-y-5 lg:space-y-6">
         
         {isEditMode && (
           <div className="flex flex-wrap items-center gap-3 p-2.5 rounded-xl bg-black/80 backdrop-blur-md border border-[#D4FF3A]/30 text-xs font-mono-code mb-1 shadow-xl">
@@ -158,9 +150,10 @@ export const HeadlinerSection: React.FC = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 lg:gap-10 xl:gap-12 items-center">
+        {/* Grid Principal Otimizado: col-span-4 para foto e col-span-8 estendido até o limite direito */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start w-full">
           
-          <div className="lg:col-span-5 flex justify-center lg:justify-start items-center">
+          <div className="lg:col-span-4 flex justify-center lg:justify-start items-center">
             <ProfilePhotoBox
               isEditMode={isEditMode}
               cleanName={cleanName}
@@ -211,10 +204,11 @@ export const HeadlinerSection: React.FC = () => {
             />
           </div>
 
-          <div className="lg:col-span-7 flex flex-col justify-center space-y-2.5 sm:space-y-4">
+          <div className="lg:col-span-8 flex flex-col justify-start w-full">
             
+            {/* Título Principal */}
             {isEditMode ? (
-              <div className="space-y-1">
+              <div className="space-y-1 mb-3">
                 <label className="text-[10px] font-mono-code text-[#D4FF3A] font-bold flex items-center gap-1">
                   <Type className="w-3 h-3" /> Título Principal:
                 </label>
@@ -226,7 +220,7 @@ export const HeadlinerSection: React.FC = () => {
                 />
               </div>
             ) : (
-              <div>
+              <div className="mb-3 sm:mb-4 w-full">
                 <h2 className={`font-disp font-extrabold ${titleSizeClass} tracking-[-0.03em] text-white leading-tight sm:leading-[1.08] relative break-words`}>
                   <span className="text-[#D4FF3A] font-serif select-none mr-1.5 inline-block -translate-y-0.5">“</span>
                   {titleParts[0]}
@@ -239,63 +233,17 @@ export const HeadlinerSection: React.FC = () => {
               </div>
             )}
 
+            {/* Parágrafos da Narrativa com Entrelinha Justa (leading-snug) e Afastamento Editorial Entre Blocos (space-y-3 sm:space-y-4) */}
             {isEditMode ? (
-              <div className="space-y-4">
+              <div className="space-y-3 w-full">
                 <label className="text-[10px] font-mono-code text-[#D4FF3A] font-bold flex items-center gap-1">
                   <Sparkles className="w-3 h-3" /> Parágrafos & Personalização Editorial:
                 </label>
-                {effectiveNarrativeItems.map((item, idx) => (
+                {effectiveNarrativeItems.map((item: any, idx: number) => (
                   <div key={idx} className="p-3 rounded-xl bg-black/50 border border-white/20 space-y-2">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-[10px] font-mono-code text-[#AFC0FF] font-bold">
-                        Parágrafo {idx + 1}
-                      </span>
-
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <select
-                          value={item.color}
-                          onChange={(e) => {
-                            const newItems = [...effectiveNarrativeItems];
-                            newItems[idx] = { ...newItems[idx], color: e.target.value };
-                            handleUpdateField('bio', [currentTitle, ...newItems]);
-                          }}
-                          className="bg-black text-[10px] font-mono-code text-[#D4FF3A] border border-[#D4FF3A]/40 rounded px-1.5 py-0.5 focus:outline-none cursor-pointer"
-                        >
-                          <option value="white">Cor: Branco</option>
-                          <option value="accent">Cor: Verde Limão</option>
-                          <option value="muted">Cor: Azul Suave</option>
-                        </select>
-
-                        <select
-                          value={item.style}
-                          onChange={(e) => {
-                            const newItems = [...effectiveNarrativeItems];
-                            newItems[idx] = { ...newItems[idx], style: e.target.value };
-                            handleUpdateField('bio', [currentTitle, ...newItems]);
-                          }}
-                          className="bg-black text-[10px] font-mono-code text-white border border-white/30 rounded px-1.5 py-0.5 focus:outline-none cursor-pointer"
-                        >
-                          <option value="normal">Estilo: Normal</option>
-                          <option value="serifItalic">Estilo: Caligrafia (Itálico)</option>
-                          <option value="semibold">Estilo: Destaque Forte</option>
-                        </select>
-
-                        <select
-                          value={item.size}
-                          onChange={(e) => {
-                            const newItems = [...effectiveNarrativeItems];
-                            newItems[idx] = { ...newItems[idx], size: e.target.value };
-                            handleUpdateField('bio', [currentTitle, ...newItems]);
-                          }}
-                          className="bg-black text-[10px] font-mono-code text-[#AFC0FF] border border-white/30 rounded px-1.5 py-0.5 focus:outline-none cursor-pointer"
-                        >
-                          <option value="normal">Tamanho: Padrão</option>
-                          <option value="lg">Tamanho: Maior (L)</option>
-                          <option value="xl">Tamanho: Destaque (XL)</option>
-                        </select>
-                      </div>
-                    </div>
-
+                    <span className="text-[10px] font-mono-code text-[#AFC0FF] font-bold">
+                      Parágrafo {idx + 1}
+                    </span>
                     <textarea
                       value={item.text}
                       rows={3}
@@ -310,10 +258,10 @@ export const HeadlinerSection: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="space-y-2 sm:space-y-3">
-                {effectiveNarrativeItems.map((item, idx) => {
-                  const colorClass = TEXT_COLOR_MAP[item.color]?.class || 'text-white/95';
-                  const styleClass = TEXT_STYLE_MAP[item.style]?.class || 'font-sans font-normal';
+              <div className="space-y-2.5 sm:space-y-3.5 w-full">
+                {effectiveNarrativeItems.map((item: any, idx: number) => {
+                  const colorClass = TEXT_COLOR_MAP[item.color] || 'text-white/95';
+                  const styleClass = TEXT_STYLE_MAP[item.style] || 'font-sans font-normal';
                   const individualSizeClass = item.size && item.size !== 'normal' 
                     ? PARAGRAPH_SIZE_MAP[item.size] 
                     : globalBodySizeClass;
@@ -321,7 +269,7 @@ export const HeadlinerSection: React.FC = () => {
                   return (
                     <p 
                       key={idx} 
-                      className={`${colorClass} ${styleClass} ${individualSizeClass} whitespace-pre-line transition-colors duration-300`}
+                      className={`${colorClass} ${styleClass} ${individualSizeClass} leading-[1.35] sm:leading-[1.4] w-full whitespace-pre-line transition-colors duration-300`}
                     >
                       {item.text}
                     </p>
@@ -333,8 +281,9 @@ export const HeadlinerSection: React.FC = () => {
           </div>
         </div>
 
-        <div className="pt-3.5 sm:pt-5 border-t border-white/20">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-8 lg:gap-12">
+        {/* Rodapé da Seção com alinhamento na linha limite da foto */}
+        <div className="pt-4 sm:pt-6 pb-2 sm:pb-4 border-t border-white/20 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 lg:gap-12 w-full">
             
             <div className="flex flex-col space-y-0.5 sm:space-y-1">
               <span className="font-disp text-[11px] sm:text-sm lg:text-[14px] text-white uppercase tracking-[0.14em] font-black block leading-none">
