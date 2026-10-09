@@ -15,10 +15,10 @@ export const Hero: React.FC<HeroProps> = ({
     e.preventDefault();
     const element = document.getElementById(targetId);
     if (element) {
-      const headerEl = document.querySelector('header');
-      const headerOffset = headerEl ? headerEl.offsetHeight : 56;
+      const isSm = window.innerWidth >= 640;
+      const closedNavbarHeight = isSm ? 73 : 69;
       const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      const offsetPosition = elementPosition + window.pageYOffset - closedNavbarHeight;
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth',

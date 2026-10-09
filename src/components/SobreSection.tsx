@@ -5,17 +5,17 @@ import { ORIGINAL_SOBRE_DATA } from '../data/sobre';
 import { ProfilePhotoBox } from './ProfilePhotoBox';
 
 const FONT_SIZE_MAP: Record<string, string> = {
-  sm: 'text-sm',
-  base: 'text-base',
-  lg: 'text-lg',
-  xl: 'text-xl',
+  sm: 'text-xs sm:text-sm',
+  base: 'text-xs sm:text-base leading-snug sm:leading-relaxed',
+  lg: 'text-sm sm:text-lg leading-snug sm:leading-relaxed',
+  xl: 'text-base sm:text-xl leading-snug sm:leading-relaxed',
 };
 
 const TITLE_SIZE_MAP: Record<string, string> = {
-  sm: 'text-2xl sm:text-3xl',
-  base: 'text-3xl sm:text-4xl',
-  lg: 'text-3xl sm:text-4xl lg:text-5xl',
-  xl: 'text-4xl sm:text-5xl lg:text-6xl',
+  sm: 'text-xl sm:text-3xl',
+  base: 'text-2xl sm:text-4xl',
+  lg: 'text-2xl sm:text-4xl lg:text-5xl',
+  xl: 'text-3xl sm:text-5xl lg:text-6xl',
 };
 
 const TEXT_COLOR_MAP: Record<string, { label: string; class: string }> = {
@@ -32,8 +32,8 @@ const TEXT_STYLE_MAP: Record<string, { label: string; class: string }> = {
 
 const PARAGRAPH_SIZE_MAP: Record<string, string> = {
   normal: '', 
-  lg: 'text-base sm:text-lg lg:text-[19px] leading-snug',
-  xl: 'text-lg sm:text-xl lg:text-[21px] leading-snug',
+  lg: 'text-sm sm:text-lg lg:text-[19px] leading-snug sm:leading-snug',
+  xl: 'text-base sm:text-xl lg:text-[21px] leading-snug sm:leading-snug',
 };
 
 export const SobreSection: React.FC = () => {
@@ -81,6 +81,23 @@ export const SobreSection: React.FC = () => {
       !item.text.toLowerCase().includes('quem é do méier')
   );
 
+  const DEFAULT_OFFICIAL_BIO = [
+    'E, como uma boa cria da Zona Norte carioca, eu tive que usar a criatividade para me virar e sobreviver desde cedo.',
+    'A vida me fez vendedor por muitos anos, até eu deixar de ser ao me tornar publicitário (e continuar vendendo).',
+    'Essa sagacidade me ensinou alguns soft skills off label que uso para vender ideias e conceitos nas minhas criações.',
+    'Já bati o ponto em agências do Rio de Janeiro, do Sul e de São Paulo, e algumas das minhas ideias já saíram do país.',
+    'Amo boas histórias, novas culturas e a minha profissão. Sou apaixonado por música e poesia, mas se você está procurando um músico ou poeta, eu passo a bola, porque o que eu faço bem é criar propaganda.',
+  ];
+
+  const effectiveNarrativeItems = narrativeItems.length > 0
+    ? narrativeItems
+    : DEFAULT_OFFICIAL_BIO.map((text) => ({
+        text,
+        color: 'white',
+        style: 'normal',
+        size: 'normal',
+      }));
+
   const fontSizeKey = safeSobre?.typography?.fontSize || 'base';
   const titleSizeKey = safeSobre?.typography?.titleSize || 'lg';
   const globalBodySizeClass = FONT_SIZE_MAP[fontSizeKey] || FONT_SIZE_MAP.base;
@@ -97,14 +114,14 @@ export const SobreSection: React.FC = () => {
   return (
     <section
       id="sobre"
-      className="w-full bg-[#2340FF] text-white flex flex-col justify-between py-8 sm:py-10 lg:py-12 px-6 sm:px-10 lg:px-16 scroll-mt-[54px] sm:scroll-mt-[58px] relative min-h-screen min-h-[100dvh] overflow-hidden"
+      className="w-full bg-[#2340FF] text-white flex flex-col justify-between py-16 sm:py-24 px-6 sm:px-10 lg:px-16 scroll-mt-[69px] sm:scroll-mt-[73px] relative min-h-screen min-h-[100dvh] overflow-hidden"
     >
       <div 
         className="absolute inset-0 opacity-[0.035] pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:24px_24px]" 
         aria-hidden="true" 
       />
 
-      <div className="max-w-[1600px] w-full mx-auto my-auto flex flex-col justify-between relative z-10 space-y-6 lg:space-y-8">
+      <div className="max-w-[1600px] w-full mx-auto my-auto flex flex-col justify-between relative z-10 space-y-4 sm:space-y-6 lg:space-y-8">
         
         {isEditMode && (
           <div className="flex flex-wrap items-center gap-3 p-2.5 rounded-xl bg-black/80 backdrop-blur-md border border-[#D4FF3A]/30 text-xs font-mono-code mb-1 shadow-xl">
@@ -130,7 +147,7 @@ export const SobreSection: React.FC = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 xl:gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 lg:gap-10 xl:gap-12 items-center">
           
           <div className="lg:col-span-5 flex justify-center lg:justify-start items-center">
             <ProfilePhotoBox
@@ -183,7 +200,7 @@ export const SobreSection: React.FC = () => {
             />
           </div>
 
-          <div className="lg:col-span-7 flex flex-col justify-center space-y-3 sm:space-y-4">
+          <div className="lg:col-span-7 flex flex-col justify-center space-y-2.5 sm:space-y-4">
             
             {isEditMode ? (
               <div className="space-y-1">
@@ -199,7 +216,7 @@ export const SobreSection: React.FC = () => {
               </div>
             ) : (
               <div>
-                <h2 className={`font-disp font-extrabold ${titleSizeClass} tracking-[-0.03em] text-white leading-[1.08] relative break-words`}>
+                <h2 className={`font-disp font-extrabold ${titleSizeClass} tracking-[-0.03em] text-white leading-tight sm:leading-[1.08] relative break-words`}>
                   <span className="text-[#D4FF3A] font-serif select-none mr-1.5 inline-block -translate-y-0.5">“</span>
                   {titleParts[0]}
                   <br />
@@ -216,7 +233,7 @@ export const SobreSection: React.FC = () => {
                 <label className="text-[10px] font-mono-code text-[#D4FF3A] font-bold flex items-center gap-1">
                   <Sparkles className="w-3 h-3" /> Parágrafos & Personalização Editorial:
                 </label>
-                {narrativeItems.map((item, idx) => (
+                {effectiveNarrativeItems.map((item, idx) => (
                   <div key={idx} className="p-3 rounded-xl bg-black/50 border border-white/20 space-y-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="text-[10px] font-mono-code text-[#AFC0FF] font-bold">
@@ -227,7 +244,7 @@ export const SobreSection: React.FC = () => {
                         <select
                           value={item.color}
                           onChange={(e) => {
-                            const newItems = [...narrativeItems];
+                            const newItems = [...effectiveNarrativeItems];
                             newItems[idx] = { ...newItems[idx], color: e.target.value };
                             updateSobreField('bio', [currentTitle, ...newItems]);
                           }}
@@ -241,7 +258,7 @@ export const SobreSection: React.FC = () => {
                         <select
                           value={item.style}
                           onChange={(e) => {
-                            const newItems = [...narrativeItems];
+                            const newItems = [...effectiveNarrativeItems];
                             newItems[idx] = { ...newItems[idx], style: e.target.value };
                             updateSobreField('bio', [currentTitle, ...newItems]);
                           }}
@@ -255,7 +272,7 @@ export const SobreSection: React.FC = () => {
                         <select
                           value={item.size}
                           onChange={(e) => {
-                            const newItems = [...narrativeItems];
+                            const newItems = [...effectiveNarrativeItems];
                             newItems[idx] = { ...newItems[idx], size: e.target.value };
                             updateSobreField('bio', [currentTitle, ...newItems]);
                           }}
@@ -272,7 +289,7 @@ export const SobreSection: React.FC = () => {
                       value={item.text}
                       rows={3}
                       onChange={(e) => {
-                        const newItems = [...narrativeItems];
+                        const newItems = [...effectiveNarrativeItems];
                         newItems[idx] = { ...newItems[idx], text: e.target.value };
                         updateSobreField('bio', [currentTitle, ...newItems]);
                       }}
@@ -282,8 +299,8 @@ export const SobreSection: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="space-y-3">
-                {narrativeItems.map((item, idx) => {
+              <div className="space-y-2 sm:space-y-3">
+                {effectiveNarrativeItems.map((item, idx) => {
                   const colorClass = TEXT_COLOR_MAP[item.color]?.class || 'text-white/95';
                   const styleClass = TEXT_STYLE_MAP[item.style]?.class || 'font-sans font-normal';
                   const individualSizeClass = item.size && item.size !== 'normal' 
@@ -305,11 +322,11 @@ export const SobreSection: React.FC = () => {
           </div>
         </div>
 
-        <div className="pt-4 sm:pt-5 border-t border-white/20">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
+        <div className="pt-3.5 sm:pt-5 border-t border-white/20">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-8 lg:gap-12">
             
-            <div className="flex flex-col space-y-1">
-              <span className="font-disp text-xs sm:text-sm lg:text-[14px] text-white uppercase tracking-[0.14em] font-black block leading-none">
+            <div className="flex flex-col space-y-0.5 sm:space-y-1">
+              <span className="font-disp text-[11px] sm:text-sm lg:text-[14px] text-white uppercase tracking-[0.14em] font-black block leading-none">
                 REPERTÓRIO
               </span>
               <span className="font-disp text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-white block leading-none pt-0.5">
@@ -325,8 +342,8 @@ export const SobreSection: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex flex-col space-y-1">
-              <span className="font-disp text-xs sm:text-sm lg:text-[14px] text-white uppercase tracking-[0.14em] font-black block leading-none">
+            <div className="flex flex-col space-y-0.5 sm:space-y-1">
+              <span className="font-disp text-[11px] sm:text-sm lg:text-[14px] text-white uppercase tracking-[0.14em] font-black block leading-none">
                 TURNÊS
               </span>
               <span className="font-disp text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-white block leading-none pt-0.5">
@@ -342,8 +359,8 @@ export const SobreSection: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex flex-col space-y-1">
-              <span className="font-disp text-xs sm:text-sm lg:text-[14px] text-white uppercase tracking-[0.14em] font-black block leading-none">
+            <div className="flex flex-col space-y-0.5 sm:space-y-1">
+              <span className="font-disp text-[11px] sm:text-sm lg:text-[14px] text-white uppercase tracking-[0.14em] font-black block leading-none">
                 BAGAGEM
               </span>
               <span className="font-disp text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-white block leading-none pt-0.5">

@@ -1,11 +1,12 @@
 import React from 'react';
 import { Mail, Linkedin, Instagram, ArrowUpRight } from 'lucide-react';
+import { Footer } from './Footer';
 
 export const ContatoSection: React.FC = () => {
   return (
     <section
       id="contato"
-      className="min-h-screen min-h-[100dvh] flex flex-col justify-center py-12 sm:py-16 md:py-20 lg:py-24 bg-[#0F1222] text-[#F6F7F2] relative overflow-hidden scroll-mt-[54px] sm:scroll-mt-[58px]"
+      className="w-full min-h-screen min-h-[100dvh] flex flex-col justify-between py-16 sm:py-24 px-6 sm:px-10 lg:px-16 bg-[#0F1222] text-[#F6F7F2] relative overflow-hidden scroll-mt-[69px] sm:scroll-mt-[73px]"
     >
       {/* Importação da fonte manuscrita para o efeito de caligrafia */}
       <style>{`
@@ -15,7 +16,7 @@ export const ContatoSection: React.FC = () => {
         }
       `}</style>
 
-      <div className="max-w-[1600px] mx-auto w-full px-6 sm:px-10 lg:px-16 relative z-10 my-auto">
+      <div className="max-w-[1600px] mx-auto w-full relative z-10 my-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center w-full">
           
           {/* Left Column: Headline & Links */}
@@ -128,6 +129,9 @@ export const ContatoSection: React.FC = () => {
 
         </div>
       </div>
+
+      {/* Rodapé Alinhado Perfeitamente no Final da Seção Contato */}
+      <Footer />
     </section>
   );
 };

@@ -3,12 +3,15 @@ import { Menu, X } from 'lucide-react';
 import { useCms } from '../context/CmsContext';
 
 export const Header: React.FC = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const mobileMenuOpen = isOpen;
+  const setMobileMenuOpen = setIsOpen;
   const { isEditMode, gridColumns, setGridColumns } = useCms();
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
     e.preventDefault();
-    setMobileMenuOpen(false);
+    // 1. Fechamento automático e imediato do menu mobile
+    setIsOpen(false);
 
     if (targetId === 'topo') {
       window.scrollTo({
@@ -21,10 +24,11 @@ export const Header: React.FC = () => {
 
     const element = document.getElementById(targetId);
     if (element) {
-      const headerEl = document.querySelector('header');
-      const headerOffset = headerEl ? headerEl.offsetHeight : 56;
+      // 2. Altura exata da navbar fixa fechada para encaixe perfeito no topo sem cortes
+      const isSm = window.innerWidth >= 640;
+      const closedNavbarHeight = isSm ? 73 : 69;
       const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      const offsetPosition = elementPosition + window.pageYOffset - closedNavbarHeight;
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth',
@@ -37,8 +41,8 @@ export const Header: React.FC = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#2340FF] text-[#F6F7F2] border-b border-[#3b55ff] transition-all shadow-md">
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16 py-3 sm:py-3.5">
-        <div className="flex items-center justify-between gap-4">
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-16">
+        <div className="flex items-center justify-between gap-4 h-[68px] sm:h-[72px]">
           {/* Brand Logo */}
           <a
             id="brand-logo-link"
@@ -175,7 +179,7 @@ export const Header: React.FC = () => {
         {mobileMenuOpen && (
           <nav
             aria-label="Navegação mobile"
-            className="md:hidden mt-3 pt-3 border-t border-[#6F85FF]/40 flex flex-col font-mono-code text-sm animate-fade-in"
+            className="md:hidden pb-4 border-t border-[#6F85FF]/40 flex flex-col font-mono-code text-sm animate-fade-in"
           >
             <a
               href="#lado-a"

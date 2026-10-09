@@ -9,7 +9,6 @@ import { LightboxModal } from './components/LightboxModal';
 import { ServicosSection } from './components/ServicosSection';
 import { SobreSection } from './components/SobreSection';
 import { ContatoSection } from './components/ContatoSection';
-import { Footer } from './components/Footer';
 import { CmsToolbar } from './components/CmsToolbar';
 import { CmsExportModal } from './components/CmsExportModal';
 import { AddCaseModal } from './components/AddCaseModal';
@@ -85,6 +84,10 @@ function PortfolioApp() {
       const hash = window.location.hash.replace('#', '');
       if (hash) {
         if (hash === 'edit') return;
+        if (hash === 'topo') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
         const found = cases.find((c) => c.slug === hash);
         if (found) {
           setSelectedCase(found);
@@ -92,10 +95,10 @@ function PortfolioApp() {
           const element = document.getElementById(hash);
           if (element) {
             setTimeout(() => {
-              const headerEl = document.querySelector('header');
-              const headerOffset = headerEl ? headerEl.offsetHeight : 56;
+              const isSm = window.innerWidth >= 640;
+              const closedNavbarHeight = isSm ? 73 : 69;
               const elementPosition = element.getBoundingClientRect().top;
-              const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+              const offsetPosition = elementPosition + window.pageYOffset - closedNavbarHeight;
               window.scrollTo({
                 top: offsetPosition,
                 behavior: 'smooth',
@@ -147,9 +150,9 @@ function PortfolioApp() {
         {/* Lado A */}
         <section
           id="lado-a"
-          className="min-h-screen min-h-[100dvh] flex flex-col justify-start pt-6 sm:pt-8 md:pt-10 pb-14 sm:pb-18 md:pb-24 bg-[#F6F7F2] scroll-mt-[54px] sm:scroll-mt-[58px]"
+          className="w-full min-h-screen min-h-[100dvh] flex flex-col justify-start py-16 sm:py-24 px-6 sm:px-10 lg:px-16 bg-[#F6F7F2] scroll-mt-[69px] sm:scroll-mt-[73px]"
         >
-          <div className="max-w-[1600px] w-full mx-auto px-6 sm:px-10 lg:px-16 flex-1 flex flex-col">
+          <div className="max-w-[1600px] w-full mx-auto flex-1 flex flex-col">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4 sm:mb-6 md:mb-8">
               <div className="max-w-3xl space-y-1">
                 <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block select-text">
@@ -289,9 +292,9 @@ function PortfolioApp() {
         {casesLadoB.length > 0 && (
           <section
             id="lado-b"
-            className="min-h-screen min-h-[100dvh] flex flex-col justify-start pt-6 sm:pt-8 md:pt-10 pb-14 sm:pb-18 md:pb-24 bg-[#0F1222] text-[#F6F7F2] border-t border-[#262A3D] scroll-mt-[54px] sm:scroll-mt-[58px]"
+            className="w-full min-h-screen min-h-[100dvh] flex flex-col justify-start py-16 sm:py-24 px-6 sm:px-10 lg:px-16 bg-[#0F1222] text-[#F6F7F2] scroll-mt-[69px] sm:scroll-mt-[73px]"
           >
-            <div className="max-w-[1600px] w-full mx-auto px-6 sm:px-10 lg:px-16 flex-1 flex flex-col">
+            <div className="max-w-[1600px] w-full mx-auto flex-1 flex flex-col">
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4 sm:mb-6 md:mb-8">
                 <div className="max-w-3xl space-y-1">
                   <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#FF4FA0] font-bold block select-text">
@@ -423,9 +426,9 @@ function PortfolioApp() {
         {casesBonus.length > 0 && (
           <section
             id="faixa-bonus"
-            className="min-h-screen min-h-[100dvh] flex flex-col justify-start pt-6 sm:pt-8 md:pt-10 pb-14 sm:pb-18 md:pb-24 bg-[#D4FF3A] text-[#0F1222] border-t border-black/10 scroll-mt-[54px] sm:scroll-mt-[58px]"
+            className="w-full min-h-screen min-h-[100dvh] flex flex-col justify-start py-16 sm:py-24 px-6 sm:px-10 lg:px-16 bg-[#D4FF3A] text-[#0F1222] scroll-mt-[69px] sm:scroll-mt-[73px]"
           >
-            <div className="max-w-[1600px] w-full mx-auto px-6 sm:px-10 lg:px-16 flex-1 flex flex-col">
+            <div className="max-w-[1600px] w-full mx-auto flex-1 flex flex-col">
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4 sm:mb-6 md:mb-8">
                 <div className="max-w-4xl space-y-1">
                   <span className="font-mono-code text-[11px] sm:text-xs uppercase tracking-[0.22em] text-[#2340FF] font-bold block select-text">
@@ -560,8 +563,6 @@ function PortfolioApp() {
         <SobreSection />
         <ContatoSection />
       </main>
-
-      <Footer />
 
       <CaseModal
         item={selectedCase}
