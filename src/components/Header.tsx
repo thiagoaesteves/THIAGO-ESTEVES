@@ -13,12 +13,12 @@ export const Header: React.FC = () => {
     // 1. Fechamento automático e imediato do menu mobile
     setIsOpen(false);
 
-    if (targetId === 'topo') {
+    if (targetId === 'topo' || targetId === 'home') {
       window.scrollTo({
         top: 0,
         behavior: 'smooth',
       });
-      window.history.pushState(null, '', '#topo');
+      window.history.pushState(null, '', '#home');
       return;
     }
 
@@ -46,8 +46,8 @@ export const Header: React.FC = () => {
           {/* Brand Logo */}
           <a
             id="brand-logo-link"
-            href="#topo"
-            onClick={(e) => handleNavClick(e, 'topo')}
+            href="#home"
+            onClick={(e) => handleNavClick(e, 'home')}
             className="flex items-center gap-3 text-xl font-bold tracking-tight text-[#F6F7F2] hover:opacity-95 transition-opacity cursor-pointer select-none"
             aria-label="Thiago Esteves - Início"
           >
@@ -112,17 +112,17 @@ export const Header: React.FC = () => {
               Bônus
             </a>
             <a
-              id="nav-servicos"
-              href="#servicos"
-              onClick={(e) => handleNavClick(e, 'servicos')}
+              id="nav-backstage"
+              href="#backstage"
+              onClick={(e) => handleNavClick(e, 'backstage')}
               className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium cursor-pointer py-1"
             >
               Backstage
             </a>
             <a
-              id="nav-sobre"
-              href="#sobre"
-              onClick={(e) => handleNavClick(e, 'sobre')}
+              id="nav-headliner"
+              href="#headliner"
+              onClick={(e) => handleNavClick(e, 'headliner')}
               className="text-[#F6F7F2] hover:text-[#D4FF3A] transition-colors font-medium cursor-pointer py-1"
             >
               Headliner
@@ -203,15 +203,15 @@ export const Header: React.FC = () => {
               Bônus
             </a>
             <a
-              href="#servicos"
-              onClick={(e) => handleNavClick(e, 'servicos')}
+              href="#backstage"
+              onClick={(e) => handleNavClick(e, 'backstage')}
               className="text-[#F6F7F2] py-3 min-h-[44px] flex items-center border-b border-white/10 active:text-[#D4FF3A]"
             >
               Backstage
             </a>
             <a
-              href="#sobre"
-              onClick={(e) => handleNavClick(e, 'sobre')}
+              href="#headliner"
+              onClick={(e) => handleNavClick(e, 'headliner')}
               className="text-[#F6F7F2] py-3 min-h-[44px] flex items-center border-b border-white/10 active:text-[#D4FF3A]"
             >
               Headliner

@@ -3,9 +3,10 @@ import { useCms } from '../context/CmsContext';
 import { X, Copy, Check, Download, Code, FileText, User } from 'lucide-react';
 
 export const CmsExportModal: React.FC = () => {
-  const { exportModalOpen, setExportModalOpen, cases, sobre } = useCms();
+  const { exportModalOpen, setExportModalOpen, cases, headliner, sobre } = useCms();
+  const currentHeadliner = headliner || sobre;
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<'cases-json' | 'cases-ts' | 'sobre-json' | 'sobre-ts'>('cases-json');
+  const [activeTab, setActiveTab] = useState<'cases-json' | 'cases-ts' | 'headliner-json' | 'headliner-ts'>('cases-json');
 
   if (!exportModalOpen) return null;
 
@@ -15,10 +16,10 @@ export const CmsExportModal: React.FC = () => {
 export const CASES: CaseItem[] = ${JSON.stringify(cases, null, 2)};
 `;
 
-  const sobreJson = JSON.stringify(sobre, null, 2);
-  const sobreTs = `import { SobreData } from '../data/sobre';
+  const headlinerJson = JSON.stringify(currentHeadliner, null, 2);
+  const headlinerTs = `import { HeadlinerData } from '../data/headliner';
 
-export const ORIGINAL_SOBRE_DATA: SobreData = ${JSON.stringify(sobre, null, 2)};
+export const ORIGINAL_HEADLINE_DATA: HeadlinerData = ${JSON.stringify(currentHeadliner, null, 2)};
 `;
 
   let contentToCopy = casesJson;
@@ -30,12 +31,12 @@ export const ORIGINAL_SOBRE_DATA: SobreData = ${JSON.stringify(sobre, null, 2)};
   } else if (activeTab === 'cases-ts') {
     contentToCopy = casesTs;
     filename = 'cases.ts';
-  } else if (activeTab === 'sobre-json') {
-    contentToCopy = sobreJson;
-    filename = 'sobre.json';
-  } else if (activeTab === 'sobre-ts') {
-    contentToCopy = sobreTs;
-    filename = 'sobre.ts';
+  } else if (activeTab === 'headliner-json') {
+    contentToCopy = headlinerJson;
+    filename = 'headliner.json';
+  } else if (activeTab === 'headliner-ts') {
+    contentToCopy = headlinerTs;
+    filename = 'headliner.ts';
   }
 
   const handleCopy = async () => {
@@ -131,25 +132,25 @@ export const ORIGINAL_SOBRE_DATA: SobreData = ${JSON.stringify(sobre, null, 2)};
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('sobre-json')}
+            onClick={() => setActiveTab('headliner-json')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-t-lg font-mono-code text-xs font-semibold border-b-2 transition-colors cursor-pointer shrink-0 min-h-[36px] ${
-              activeTab === 'sobre-json'
+              activeTab === 'headliner-json'
                 ? 'border-[#FF4FA0] text-[#FF4FA0] bg-white/5'
                 : 'border-transparent text-white/60 hover:text-white'
             }`}
           >
-            <User className="w-3.5 h-3.5" /> Seção Sobre (JSON)
+            <User className="w-3.5 h-3.5" /> Seção Headliner (JSON)
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('sobre-ts')}
+            onClick={() => setActiveTab('headliner-ts')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-t-lg font-mono-code text-xs font-semibold border-b-2 transition-colors cursor-pointer shrink-0 min-h-[36px] ${
-              activeTab === 'sobre-ts'
+              activeTab === 'headliner-ts'
                 ? 'border-[#D4FF3A] text-[#D4FF3A] bg-white/5'
                 : 'border-transparent text-white/60 hover:text-white'
             }`}
           >
-            <Code className="w-3.5 h-3.5" /> Seção Sobre (TypeScript)
+            <Code className="w-3.5 h-3.5" /> Seção Headliner (TypeScript)
           </button>
         </div>
 

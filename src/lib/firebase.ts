@@ -60,7 +60,9 @@ export interface SectionGridSettings {
 
 // Chaves de armazenamento do localStorage para sincronização com a nuvem
 export const STORAGE_KEY = 'thiago_portfolio_custom_cases_v19';
+export const STORAGE_HEADLINER_KEY = 'thiago_portfolio_custom_headliner_v1';
 export const STORAGE_SOBRE_KEY = 'thiago_portfolio_custom_sobre_v2';
+export const STORAGE_BACKSTAGE_KEY = 'thiago_portfolio_custom_backstage_v1';
 export const STORAGE_SERVICOS_KEY = 'thiago_portfolio_custom_servicos_v4';
 export const STORAGE_LAYOUT_KEY = 'thiago_portfolio_grid_columns';
 export const STORAGE_GRIDS_KEY = 'thiago_portfolio_section_grids_v1';
@@ -91,7 +93,9 @@ export function cleanForFirestore<T>(data: T): T {
  */
 export async function fetchCloudPortfolio(): Promise<{
   cases?: any[];
+  headliner?: any;
   sobre?: any;
+  backstage?: any;
   servicos?: any;
   gridSettings?: SectionGridSettings;
   updatedAt?: string;
@@ -105,17 +109,21 @@ export async function fetchCloudPortfolio(): Promise<{
 
     if (snap && snap.exists()) {
       const data = snap.data();
-      if (data && (Array.isArray(data.cases) || data.sobre || data.servicos)) {
+      if (data && (Array.isArray(data.cases) || data.headliner || data.sobre || data.backstage || data.servicos)) {
+        const headlinerData = data.headliner || data.sobre;
+        const backstageData = data.backstage || data.servicos;
         // Atualiza imediatamente o localStorage para anular dados locais defasados
         try {
           if (Array.isArray(data.cases) && data.cases.length > 0) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data.cases));
           }
-          if (data.sobre && typeof data.sobre === 'object') {
-            localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(data.sobre));
+          if (headlinerData && typeof headlinerData === 'object') {
+            localStorage.setItem(STORAGE_HEADLINER_KEY, JSON.stringify(headlinerData));
+            localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(headlinerData));
           }
-          if (data.servicos && typeof data.servicos === 'object') {
-            localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(data.servicos));
+          if (backstageData && typeof backstageData === 'object') {
+            localStorage.setItem(STORAGE_BACKSTAGE_KEY, JSON.stringify(backstageData));
+            localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(backstageData));
           }
           if (data.gridSettings) {
             localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(data.gridSettings));
@@ -128,8 +136,10 @@ export async function fetchCloudPortfolio(): Promise<{
         // Retorna imediatamente os dados oficiais do Firestore unificado para a aplicação
         return {
           cases: Array.isArray(data.cases) ? data.cases : undefined,
-          sobre: data.sobre || undefined,
-          servicos: data.servicos || undefined,
+          headliner: headlinerData || undefined,
+          sobre: headlinerData || undefined,
+          backstage: backstageData || undefined,
+          servicos: backstageData || undefined,
           gridSettings: data.gridSettings || undefined,
           updatedAt: data.updatedAt || undefined,
         };
@@ -211,11 +221,15 @@ export async function fetchCloudPortfolio(): Promise<{
   });
 
   const bestCandidate = candidates[0];
+  const headlinerData = bestCandidate.headliner || bestCandidate.sobre;
+  const backstageData = bestCandidate.backstage || bestCandidate.servicos;
 
   return {
     cases: Array.isArray(bestCandidate.cases) ? bestCandidate.cases : undefined,
-    sobre: bestCandidate.sobre || undefined,
-    servicos: bestCandidate.servicos || undefined,
+    headliner: headlinerData || undefined,
+    sobre: headlinerData || undefined,
+    backstage: backstageData || undefined,
+    servicos: backstageData || undefined,
     gridSettings: bestCandidate.gridSettings || undefined,
     updatedAt: bestCandidate.updatedAt || undefined,
   };
@@ -230,17 +244,21 @@ export async function fetchCloudPortfolio(): Promise<{
  */
 export async function saveCloudPortfolio(
   cases?: any[],
-  sobre?: any,
+  headlinerOrSobre?: any,
   gridSettings?: any,
-  servicos?: any
+  backstageOrServicos?: any
 ): Promise<{ success: boolean; error?: string }> {
   const allCases = Array.isArray(cases) ? cases : [];
   const timestamp = new Date().toISOString();
+  const headlinerData = headlinerOrSobre || {};
+  const backstageData = backstageOrServicos || {};
 
   const payloadToSave = {
     cases: allCases,
-    sobre: sobre || {},
-    servicos: servicos || {},
+    headliner: headlinerData,
+    sobre: headlinerData,
+    backstage: backstageData,
+    servicos: backstageData,
     gridSettings: gridSettings || {},
     updatedAt: timestamp,
     version: '3.0',
@@ -286,9 +304,11 @@ export async function saveCloudPortfolio(
         setDoc(
           DOC_META_REF,
           cleanForFirestore({
-            sobre: sobre || {},
+            headliner: headlinerData,
+            sobre: headlinerData,
             gridSettings: gridSettings || {},
-            servicos: servicos || {},
+            backstage: backstageData,
+            servicos: backstageData,
             version: '3.0',
             editorSignature: 'thiago-cms',
             updatedAt: timestamp,

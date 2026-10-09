@@ -1,13 +1,25 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { CaseItem, CaseBlock, GridSpanType } from '../types';
 import { CASES as ORIGINAL_CASES } from '../data/cases';
-import { SobreData, ORIGINAL_SOBRE_DATA, SobreTypography } from '../data/sobre';
 import {
+  HeadlinerData,
+  ORIGINAL_HEADLINE_DATA,
+  HeadlinerTypography,
+  sanitizeHeadlinerData,
+  SobreData,
+  ORIGINAL_SOBRE_DATA,
+  SobreTypography,
+  sanitizeSobreData,
+} from '../data/headliner';
+import {
+  BackstageData,
+  DEFAULT_BACKSTAGE_DATA,
+  DEFAULT_FOOTER,
+  sanitizeBackstageData,
   ServicosData,
   DEFAULT_SERVICOS_DATA,
-  DEFAULT_FOOTER,
   sanitizeServicosData,
-} from '../data/servicos';
+} from '../data/backstage';
 import {
   fetchCloudPortfolio,
   saveCloudPortfolio,
@@ -16,7 +28,9 @@ import {
 } from '../lib/firebase';
 
 const STORAGE_KEY = 'thiago_portfolio_custom_cases_v19';
+const STORAGE_HEADLINER_KEY = 'thiago_portfolio_custom_headliner_v1';
 const STORAGE_SOBRE_KEY = 'thiago_portfolio_custom_sobre_v2';
+const STORAGE_BACKSTAGE_KEY = 'thiago_portfolio_custom_backstage_v1';
 const STORAGE_SERVICOS_KEY = 'thiago_portfolio_custom_servicos_v4';
 const STORAGE_LAYOUT_KEY = 'thiago_portfolio_grid_columns';
 const STORAGE_GRIDS_KEY = 'thiago_portfolio_section_grids_v1';
@@ -29,8 +43,10 @@ interface CmsContextType {
   triggerAdminEasterEgg: () => void;
   changePassword: () => void;
   cases: CaseItem[];
-  sobre: SobreData;
-  servicos: ServicosData;
+  headliner: HeadlinerData;
+  sobre: HeadlinerData;
+  backstage: BackstageData;
+  servicos: BackstageData;
   gridLadoA: 1 | 2 | 3;
   gridLadoB: 1 | 2 | 3;
   gridBonus: 1 | 2 | 3;
@@ -56,14 +72,23 @@ interface CmsContextType {
   addCaseVideo: (slug: string, ytId: string) => Promise<void>;
   removeCaseVideo: (slug: string, index: number) => Promise<void>;
   updateCaseBlocks: (slug: string, blocks: CaseBlock[]) => Promise<void>;
+  updateHeadlinerField: <K extends keyof HeadlinerData>(field: K, value: HeadlinerData[K]) => Promise<void>;
   updateSobreField: <K extends keyof SobreData>(field: K, value: SobreData[K]) => Promise<void>;
+  updateHeadlinerBioParagraph: (index: number, value: string) => Promise<void>;
   updateSobreBioParagraph: (index: number, value: string) => Promise<void>;
+  addHeadlinerBioParagraph: () => Promise<void>;
   addSobreBioParagraph: () => Promise<void>;
+  removeHeadlinerBioParagraph: (index: number) => Promise<void>;
   removeSobreBioParagraph: (index: number) => Promise<void>;
+  updateHeadlinerStat: (statKey: keyof HeadlinerData['stats'], value: string) => Promise<void>;
   updateSobreStat: (statKey: keyof SobreData['stats'], value: string) => Promise<void>;
+  updateHeadlinerTypography: (key: keyof HeadlinerTypography, value: any) => Promise<void>;
   updateSobreTypography: (key: keyof SobreTypography, value: any) => Promise<void>;
+  addHeadlinerSegment: (segment: string) => Promise<void>;
   addSobreSegment: (segment: string) => Promise<void>;
+  removeHeadlinerSegment: (index: number) => Promise<void>;
   removeSobreSegment: (index: number) => Promise<void>;
+  updateBackstageField: (field: string, value: any) => Promise<void>;
   updateServicosField: (field: string, value: any) => Promise<void>;
   saveChanges: () => Promise<void>;
   resetToOriginal: () => Promise<void>;
@@ -91,20 +116,6 @@ interface CmsContextType {
 }
 
 const CmsContext = createContext<CmsContextType | undefined>(undefined);
-
-const sanitizeSobreData = (data: any): SobreData => {
-  const merged: SobreData = { ...ORIGINAL_SOBRE_DATA, ...(data || {}) };
-  if (typeof merged.name === 'string') {
-    merged.name = merged.name.replace(/\s*undefined\b/gi, '').trim() || 'Thiago Esteves';
-  }
-  if (typeof merged.role === 'string') {
-    merged.role = merged.role.replace(/\s*undefined\b/gi, '').trim() || 'Creative Copywriter & Storyteller';
-  }
-  if (typeof merged.badge === 'string') {
-    merged.badge = merged.badge.replace(/\s*undefined\b/gi, '').trim() || 'Based in Brazil · Available Worldwide';
-  }
-  return merged;
-};
 
 export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
@@ -141,20 +152,23 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return ORIGINAL_CASES;
   });
 
-  const [sobre, setSobre] = useState<SobreData>(() => {
+  const [headliner, setHeadliner] = useState<HeadlinerData>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_SOBRE_KEY);
+      const saved = localStorage.getItem(STORAGE_HEADLINER_KEY) || localStorage.getItem(STORAGE_SOBRE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object') {
-          return sanitizeSobreData(parsed);
+          return sanitizeHeadlinerData(parsed);
         }
       }
     } catch (e) {
-      console.error('Erro ao ler dados do Sobre do localStorage:', e);
+      console.error('Erro ao ler dados de Headliner do localStorage:', e);
     }
-    return ORIGINAL_SOBRE_DATA;
+    return ORIGINAL_HEADLINE_DATA;
   });
+
+  const sobre = headliner;
+  const setSobre = setHeadliner;
 
   const [gridSettings, setGridSettings] = useState<SectionGridSettings>(() => {
     try {
@@ -173,17 +187,17 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { gridLadoA: 2, gridLadoB: 3, gridBonus: 2 };
   });
 
-  const [servicos, setServicos] = useState<ServicosData>(() => {
+  const [backstage, setBackstage] = useState<BackstageData>(() => {
     try {
       localStorage.removeItem('thiago_portfolio_custom_servicos_v1');
       localStorage.removeItem('thiago_portfolio_custom_servicos_v2');
       localStorage.removeItem('thiago_portfolio_custom_servicos_v3');
 
-      const saved = localStorage.getItem(STORAGE_SERVICOS_KEY);
+      const saved = localStorage.getItem(STORAGE_BACKSTAGE_KEY) || localStorage.getItem(STORAGE_SERVICOS_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object') {
-          const sanitized = sanitizeServicosData(parsed);
+          const sanitized = sanitizeBackstageData(parsed);
           if (!sanitized.footer?.badge || sanitized.footer.badge.trim() === '') {
             sanitized.footer = { ...DEFAULT_FOOTER };
           }
@@ -191,13 +205,17 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     } catch (e) {
-      console.error('Erro ao ler dados de Serviços do localStorage:', e);
+      console.error('Erro ao ler dados de Backstage do localStorage:', e);
     }
     try {
-      localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(DEFAULT_SERVICOS_DATA));
+      localStorage.setItem(STORAGE_BACKSTAGE_KEY, JSON.stringify(DEFAULT_BACKSTAGE_DATA));
+      localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(DEFAULT_BACKSTAGE_DATA));
     } catch (e) {}
-    return { ...DEFAULT_SERVICOS_DATA };
+    return { ...DEFAULT_BACKSTAGE_DATA };
   });
+
+  const servicos = backstage;
+  const setServicos = setBackstage;
 
   const showToast = (msg: string) => {
     setActiveNotification(msg);
@@ -208,14 +226,14 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const syncToCloud = async (
     targetCases: CaseItem[],
-    targetSobre: SobreData,
+    targetHeadliner: HeadlinerData,
     targetGrids: SectionGridSettings,
-    targetServicos: ServicosData,
+    targetBackstage: BackstageData,
     msg: string
   ) => {
     setIsSaving(true);
     try {
-      const cloudPromise = saveCloudPortfolio(targetCases, targetSobre, targetGrids, targetServicos);
+      const cloudPromise = saveCloudPortfolio(targetCases, targetHeadliner, targetGrids, targetBackstage);
       const timeoutPromise = new Promise<{ success: boolean; error?: string }>((_, reject) =>
         setTimeout(() => reject(new Error('Tempo limite de nuvem excedido')), 20000)
       );
@@ -242,19 +260,19 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const commitChanges = async (
     newCases: CaseItem[],
-    newSobre: SobreData,
+    newHeadliner: HeadlinerData,
     newGrids: SectionGridSettings,
-    newServicosOrMsg?: ServicosData | string,
+    newBackstageOrMsg?: BackstageData | string,
     successMsg?: string
   ) => {
-    let currentServicos = servicos;
+    let currentBackstage = backstage;
     let baseText = 'Alterações salvas';
 
-    if (typeof newServicosOrMsg === 'string') {
-      baseText = newServicosOrMsg;
-    } else if (newServicosOrMsg && typeof newServicosOrMsg === 'object') {
-      currentServicos = sanitizeServicosData(newServicosOrMsg);
-      setServicos(currentServicos);
+    if (typeof newBackstageOrMsg === 'string') {
+      baseText = newBackstageOrMsg;
+    } else if (newBackstageOrMsg && typeof newBackstageOrMsg === 'object') {
+      currentBackstage = sanitizeBackstageData(newBackstageOrMsg);
+      setBackstage(currentBackstage);
       if (successMsg) {
         baseText = successMsg;
       }
@@ -263,15 +281,17 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     setCases(newCases);
-    setSobre(newSobre);
+    setHeadliner(newHeadliner);
     setGridSettings(newGrids);
 
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newCases));
-      localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(newSobre));
+      localStorage.setItem(STORAGE_HEADLINER_KEY, JSON.stringify(newHeadliner));
+      localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(newHeadliner));
       localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(newGrids));
       localStorage.setItem(STORAGE_LAYOUT_KEY, String(newGrids.gridLadoA));
-      localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(currentServicos));
+      localStorage.setItem(STORAGE_BACKSTAGE_KEY, JSON.stringify(currentBackstage));
+      localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(currentBackstage));
     } catch (e) {
       console.warn('Erro ao atualizar cache local:', e);
     }
@@ -282,22 +302,22 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       clearTimeout(cloudTimeoutRef.current);
     }
 
-    await syncToCloud(newCases, newSobre, newGrids, currentServicos, baseText);
+    await syncToCloud(newCases, newHeadliner, newGrids, currentBackstage, baseText);
   };
 
   const setGridLadoA = (cols: 1 | 2 | 3) => {
     const updated = { ...gridSettings, gridLadoA: cols };
-    commitChanges(cases, sobre, updated, servicos, 'Grid do Lado A atualizado');
+    commitChanges(cases, headliner, updated, backstage, 'Grid do Lado A atualizado');
   };
 
   const setGridLadoB = (cols: 1 | 2 | 3) => {
     const updated = { ...gridSettings, gridLadoB: cols };
-    commitChanges(cases, sobre, updated, servicos, 'Grid do Lado B atualizado');
+    commitChanges(cases, headliner, updated, backstage, 'Grid do Lado B atualizado');
   };
 
   const setGridBonus = (cols: 1 | 2 | 3) => {
     const updated = { ...gridSettings, gridBonus: cols };
-    commitChanges(cases, sobre, updated, servicos, 'Grid da Faixa Bônus atualizado');
+    commitChanges(cases, headliner, updated, backstage, 'Grid da Faixa Bônus atualizado');
   };
 
   const setGridColumns = (cols: 1 | 2 | 3) => {
@@ -306,16 +326,17 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify(updated));
     } catch (e) {}
-    commitChanges(cases, sobre, updated, servicos, `Grid ajustado para ${cols} ${cols === 1 ? 'coluna' : 'colunas'}`);
+    commitChanges(cases, headliner, updated, backstage, `Grid ajustado para ${cols} ${cols === 1 ? 'coluna' : 'colunas'}`);
   };
 
-  const updateServicosField = async (field: string, value: any) => {
-    const updated = sanitizeServicosData({
-      ...servicos,
+  const updateBackstageField = async (field: string, value: any) => {
+    const updated = sanitizeBackstageData({
+      ...backstage,
       [field]: value,
     });
-    await commitChanges(cases, sobre, gridSettings, updated, 'Serviços atualizados');
+    await commitChanges(cases, headliner, gridSettings, updated, 'Backstage atualizado');
   };
+  const updateServicosField = updateBackstageField;
 
   useEffect(() => {
     testFirestoreConnection();
@@ -328,32 +349,37 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudData.cases));
           } catch (e) {}
         }
-        if (cloudData.sobre && typeof cloudData.sobre === 'object') {
-          const sanitized = sanitizeSobreData(cloudData.sobre);
-          setSobre(sanitized);
+        const cloudHeadliner = cloudData.headliner || cloudData.sobre;
+        if (cloudHeadliner && typeof cloudHeadliner === 'object') {
+          const sanitized = sanitizeHeadlinerData(cloudHeadliner);
+          setHeadliner(sanitized);
           try {
+            localStorage.setItem(STORAGE_HEADLINER_KEY, JSON.stringify(sanitized));
             localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(sanitized));
           } catch (e) {}
         }
-        if (cloudData.servicos && typeof cloudData.servicos === 'object') {
-          const sanitizedServicos = sanitizeServicosData(cloudData.servicos);
-          if (!sanitizedServicos.footer?.badge || sanitizedServicos.footer.badge.trim() === '') {
-            sanitizedServicos.footer.badge = DEFAULT_FOOTER.badge;
+        const cloudBackstage = cloudData.backstage || cloudData.servicos;
+        if (cloudBackstage && typeof cloudBackstage === 'object') {
+          const sanitizedBackstage = sanitizeBackstageData(cloudBackstage);
+          if (!sanitizedBackstage.footer?.badge || sanitizedBackstage.footer.badge.trim() === '') {
+            sanitizedBackstage.footer.badge = DEFAULT_FOOTER.badge;
           }
-          if (!sanitizedServicos.footer?.line1 || sanitizedServicos.footer.line1.trim() === '') {
-            sanitizedServicos.footer.line1 = DEFAULT_FOOTER.line1;
+          if (!sanitizedBackstage.footer?.line1 || sanitizedBackstage.footer.line1.trim() === '') {
+            sanitizedBackstage.footer.line1 = DEFAULT_FOOTER.line1;
           }
-          if (!sanitizedServicos.footer?.line2 || sanitizedServicos.footer.line2.trim() === '') {
-            sanitizedServicos.footer.line2 = DEFAULT_FOOTER.line2;
+          if (!sanitizedBackstage.footer?.line2 || sanitizedBackstage.footer.line2.trim() === '') {
+            sanitizedBackstage.footer.line2 = DEFAULT_FOOTER.line2;
           }
-          setServicos(sanitizedServicos);
+          setBackstage(sanitizedBackstage);
           try {
-            localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(sanitizedServicos));
+            localStorage.setItem(STORAGE_BACKSTAGE_KEY, JSON.stringify(sanitizedBackstage));
+            localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(sanitizedBackstage));
           } catch (e) {}
         } else {
-          setServicos({ ...DEFAULT_SERVICOS_DATA });
+          setBackstage({ ...DEFAULT_BACKSTAGE_DATA });
           try {
-            localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(DEFAULT_SERVICOS_DATA));
+            localStorage.setItem(STORAGE_BACKSTAGE_KEY, JSON.stringify(DEFAULT_BACKSTAGE_DATA));
+            localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(DEFAULT_BACKSTAGE_DATA));
           } catch (e) {}
         }
 
@@ -477,13 +503,13 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateCaseField = async (slug: string, field: keyof CaseItem, value: any) => {
     const updatedCasesList = cases.map((c) => (c.slug === slug ? { ...c, [field]: value } : c));
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Campo atualizado');
+    await commitChanges(updatedCasesList, headliner, gridSettings, 'Campo atualizado');
   };
 
   const updateCaseGridSpan = async (slug: string, span: GridSpanType) => {
     const updatedCasesList = cases.map((c) => (c.slug === slug ? { ...c, gridSpan: span } : c));
     const spanLabel = span === 'full' ? 'Destaque (100%)' : span === 'half' ? 'Médio (50%)' : 'Compacto (33%)';
-    await commitChanges(updatedCasesList, sobre, gridSettings, `Layout alterado para ${spanLabel}`);
+    await commitChanges(updatedCasesList, headliner, gridSettings, `Layout alterado para ${spanLabel}`);
   };
 
   const updateCaseParagraph = async (slug: string, index: number, value: string) => {
@@ -493,7 +519,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       newText[index] = value;
       return { ...c, text: newText };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Parágrafo atualizado');
+    await commitChanges(updatedCasesList, headliner, gridSettings, 'Parágrafo atualizado');
   };
 
   const addCaseParagraph = async (slug: string) => {
@@ -501,7 +527,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (c.slug !== slug) return c;
       return { ...c, text: [...c.text, 'Novo parágrafo de texto...'] };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Novo parágrafo adicionado');
+    await commitChanges(updatedCasesList, headliner, gridSettings, 'Novo parágrafo adicionado');
   };
 
   const removeCaseParagraph = async (slug: string, index: number) => {
@@ -510,7 +536,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const newText = c.text.filter((_, i) => i !== index);
       return { ...c, text: newText };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Parágrafo removido');
+    await commitChanges(updatedCasesList, headliner, gridSettings, 'Parágrafo removido');
   };
 
   const renumberFaixasSequentially = (items: CaseItem[]): CaseItem[] => {
@@ -572,7 +598,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     newCases.splice(toIndex, 0, moved);
 
     const renumberedCases = renumberFaixasSequentially(newCases);
-    await commitChanges(renumberedCases, sobre, gridSettings, 'Ordem dos projetos atualizada');
+    await commitChanges(renumberedCases, headliner, gridSettings, 'Ordem dos projetos atualizada');
   };
 
   const moveCaseOrder = async (slug: string, direction: 'up' | 'down') => {
@@ -597,7 +623,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     newCases.splice(toGlobalIndex, 0, moved);
 
     const renumberedCases = renumberFaixasSequentially(newCases);
-    await commitChanges(renumberedCases, sobre, gridSettings, 'Projeto movido');
+    await commitChanges(renumberedCases, headliner, gridSettings, 'Projeto movido');
   };
 
   const reorderCaseImages = async (slug: string, sourceIdx: number, targetIdx: number) => {
@@ -608,7 +634,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [moved] = newImgs.splice(sourceIdx, 1);
     newImgs.splice(targetIdx, 0, moved);
     const updatedCasesList = cases.map((c) => (c.slug === slug ? { ...c, imgs: newImgs } : c));
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Ordem das imagens atualizada');
+    await commitChanges(updatedCasesList, headliner, gridSettings, 'Ordem das imagens atualizada');
   };
 
   const addCaseImage = async (slug: string, url: string) => {
@@ -617,7 +643,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const currentImgs = Array.isArray(c.imgs) ? c.imgs : [];
       return { ...c, imgs: [...currentImgs, url] };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Imagem adicionada');
+    await commitChanges(updatedCasesList, headliner, gridSettings, 'Imagem adicionada');
   };
 
   const removeCaseImage = async (slug: string, index: number) => {
@@ -626,7 +652,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const currentImgs = Array.isArray(c.imgs) ? c.imgs : [];
       return { ...c, imgs: currentImgs.filter((_, i) => i !== index) };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Imagem removida');
+    await commitChanges(updatedCasesList, headliner, gridSettings, 'Imagem removida');
   };
 
   const reorderCaseVideos = async (slug: string, sourceIdx: number, targetIdx: number) => {
@@ -637,7 +663,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [moved] = newYt.splice(sourceIdx, 1);
     newYt.splice(targetIdx, 0, moved);
     const updatedCasesList = cases.map((c) => (c.slug === slug ? { ...c, yt: newYt } : c));
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Ordem dos vídeos atualizada');
+    await commitChanges(updatedCasesList, headliner, gridSettings, 'Ordem dos vídeos atualizada');
   };
 
   const addCaseVideo = async (slug: string, ytId: string) => {
@@ -646,7 +672,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const currentYt = Array.isArray(c.yt) ? c.yt : [];
       return { ...c, yt: [...currentYt, ytId] };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Vídeo adicionado');
+    await commitChanges(updatedCasesList, headliner, gridSettings, 'Vídeo adicionado');
   };
 
   const removeCaseVideo = async (slug: string, index: number) => {
@@ -655,7 +681,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const currentYt = Array.isArray(c.yt) ? c.yt : [];
       return { ...c, yt: currentYt.filter((_, i) => i !== index) };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Vídeo removido');
+    await commitChanges(updatedCasesList, headliner, gridSettings, 'Vídeo removido');
   };
 
   const updateCaseBlocks = async (slug: string, blocks: CaseBlock[]) => {
@@ -663,58 +689,66 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (c.slug !== slug) return c;
       return { ...c, blocks };
     });
-    await commitChanges(updatedCasesList, sobre, gridSettings, 'Layout do projeto atualizado');
+    await commitChanges(updatedCasesList, headliner, gridSettings, 'Layout do projeto atualizado');
   };
 
-  const updateSobreField = async <K extends keyof SobreData>(field: K, value: SobreData[K]) => {
-    const updatedSobre = sanitizeSobreData({ ...sobre, [field]: value });
-    await commitChanges(cases, updatedSobre, gridSettings, 'Seção Sobre atualizada');
+  const updateHeadlinerField = async <K extends keyof HeadlinerData>(field: K, value: HeadlinerData[K]) => {
+    const updatedHeadliner = sanitizeHeadlinerData({ ...headliner, [field]: value });
+    await commitChanges(cases, updatedHeadliner, gridSettings, 'Seção Headliner atualizada');
   };
+  const updateSobreField = updateHeadlinerField;
 
-  const updateSobreBioParagraph = async (index: number, value: string) => {
-    const currentBio = Array.isArray(sobre.bio) ? [...sobre.bio] : [];
+  const updateHeadlinerBioParagraph = async (index: number, value: string) => {
+    const currentBio = Array.isArray(headliner.bio) ? [...headliner.bio] : [];
     currentBio[index] = value;
-    await updateSobreField('bio', currentBio);
+    await updateHeadlinerField('bio', currentBio);
   };
+  const updateSobreBioParagraph = updateHeadlinerBioParagraph;
 
-  const addSobreBioParagraph = async () => {
-    const currentBio = Array.isArray(sobre.bio) ? [...sobre.bio] : [];
+  const addHeadlinerBioParagraph = async () => {
+    const currentBio = Array.isArray(headliner.bio) ? [...headliner.bio] : [];
     currentBio.push('Novo parágrafo...');
-    await updateSobreField('bio', currentBio);
+    await updateHeadlinerField('bio', currentBio);
   };
+  const addSobreBioParagraph = addHeadlinerBioParagraph;
 
-  const removeSobreBioParagraph = async (index: number) => {
-    const currentBio = Array.isArray(sobre.bio) ? sobre.bio.filter((_, i) => i !== index) : [];
-    await updateSobreField('bio', currentBio);
+  const removeHeadlinerBioParagraph = async (index: number) => {
+    const currentBio = Array.isArray(headliner.bio) ? headliner.bio.filter((_, i) => i !== index) : [];
+    await updateHeadlinerField('bio', currentBio);
   };
+  const removeSobreBioParagraph = removeHeadlinerBioParagraph;
 
-  const updateSobreStat = async (statKey: keyof SobreData['stats'], value: string) => {
-    const updatedStats = { ...sobre.stats, [statKey]: value };
-    await updateSobreField('stats', updatedStats);
+  const updateHeadlinerStat = async (statKey: keyof HeadlinerData['stats'], value: string) => {
+    const updatedStats = { ...headliner.stats, [statKey]: value };
+    await updateHeadlinerField('stats', updatedStats);
   };
+  const updateSobreStat = updateHeadlinerStat;
 
-  const updateSobreTypography = async (key: keyof SobreTypography, value: any) => {
-    const currentTypo: SobreTypography = sobre.typography || {
+  const updateHeadlinerTypography = async (key: keyof HeadlinerTypography, value: any) => {
+    const currentTypo: HeadlinerTypography = headliner.typography || {
       fontSize: 'base',
       fontWeight: 'normal',
       titleSize: 'xl',
     };
-    const updatedTypo: SobreTypography = { ...currentTypo, [key]: value };
-    await updateSobreField('typography', updatedTypo);
+    const updatedTypo: HeadlinerTypography = { ...currentTypo, [key]: value };
+    await updateHeadlinerField('typography', updatedTypo);
   };
+  const updateSobreTypography = updateHeadlinerTypography;
 
-  const addSobreSegment = async (segment: string) => {
-    const currentSegments = Array.isArray(sobre.segments) ? [...sobre.segments, segment] : [segment];
-    await updateSobreField('segments', currentSegments);
+  const addHeadlinerSegment = async (segment: string) => {
+    const currentSegments = Array.isArray(headliner.segments) ? [...headliner.segments, segment] : [segment];
+    await updateHeadlinerField('segments', currentSegments);
   };
+  const addSobreSegment = addHeadlinerSegment;
 
-  const removeSobreSegment = async (index: number) => {
-    const currentSegments = Array.isArray(sobre.segments) ? sobre.segments.filter((_, i) => i !== index) : [];
-    await updateSobreField('segments', currentSegments);
+  const removeHeadlinerSegment = async (index: number) => {
+    const currentSegments = Array.isArray(headliner.segments) ? headliner.segments.filter((_, i) => i !== index) : [];
+    await updateHeadlinerField('segments', currentSegments);
   };
+  const removeSobreSegment = removeHeadlinerSegment;
 
   const saveChanges = async () => {
-    await syncToCloud(cases, sobre, gridSettings, servicos, 'Todas as alterações salvas');
+    await syncToCloud(cases, headliner, gridSettings, backstage, 'Todas as alterações salvas');
   };
 
   const resetToOriginal = async () => {
@@ -722,23 +756,17 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     setCases(ORIGINAL_CASES);
-    setSobre(ORIGINAL_SOBRE_DATA);
+    setHeadliner(ORIGINAL_HEADLINE_DATA);
     setGridSettings({ gridLadoA: 2, gridLadoB: 3, gridBonus: 2 });
-    setServicos({ ...DEFAULT_SERVICOS_DATA });
+    setBackstage({ ...DEFAULT_BACKSTAGE_DATA });
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(ORIGINAL_CASES));
-      localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(ORIGINAL_SOBRE_DATA));
-      localStorage.setItem(STORAGE_GRIDS_KEY, JSON.stringify({ gridLadoA: 2, gridLadoB: 3, gridBonus: 2 }));
-      localStorage.setItem(STORAGE_LAYOUT_KEY, '2');
-      localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(DEFAULT_SERVICOS_DATA));
+      localStorage.setItem(STORAGE_HEADLINER_KEY, JSON.stringify(ORIGINAL_HEADLINE_DATA));
+      localStorage.setItem(STORAGE_SOBRE_KEY, JSON.stringify(ORIGINAL_HEADLINE_DATA));
+      localStorage.setItem(STORAGE_BACKSTAGE_KEY, JSON.stringify(DEFAULT_BACKSTAGE_DATA));
+      localStorage.setItem(STORAGE_SERVICOS_KEY, JSON.stringify(DEFAULT_BACKSTAGE_DATA));
     } catch (e) {}
-    await syncToCloud(
-      ORIGINAL_CASES,
-      ORIGINAL_SOBRE_DATA,
-      { gridLadoA: 2, gridLadoB: 3, gridBonus: 2 },
-      DEFAULT_SERVICOS_DATA,
-      'Portfólio restaurado para o original'
-    );
+    await syncToCloud(ORIGINAL_CASES, ORIGINAL_HEADLINE_DATA, { gridLadoA: 2, gridLadoB: 3, gridBonus: 2 }, DEFAULT_BACKSTAGE_DATA, 'Dados restaurados aos originais');
   };
 
   const addCase = async (newProject: CaseItem): Promise<void> => {
@@ -770,7 +798,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     const updatedCasesList = renumberFaixasSequentially([validatedProject, ...cases]);
-    await commitChanges(updatedCasesList, sobre, gridSettings, `Projeto "${validatedProject.name}" adicionado`);
+    await commitChanges(updatedCasesList, headliner, gridSettings, `Projeto "${validatedProject.name}" adicionado`);
   };
 
   const deleteCase = async (slug: string): Promise<void> => {
@@ -778,7 +806,7 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const updatedCasesList = renumberFaixasSequentially(cases.filter((c) => c.slug !== slug));
     await commitChanges(
       updatedCasesList,
-      sobre,
+      headliner,
       gridSettings,
       projectToDelete ? `Projeto "${projectToDelete.name}" excluído` : 'Projeto excluído'
     );
@@ -817,15 +845,17 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     const newCasesList = renumberFaixasSequentially([newCase, ...cases]);
-    await commitChanges(newCasesList, sobre, gridSettings, 'Novo projeto adicionado');
+    await commitChanges(newCasesList, headliner, gridSettings, 'Novo projeto adicionado');
     return newCase;
   };
 
   const exportCasesJson = () => {
     const payload = {
       cases,
-      sobre,
-      servicos,
+      headliner,
+      sobre: headliner,
+      backstage,
+      servicos: backstage,
       gridSettings,
       exportedAt: new Date().toISOString(),
     };
@@ -861,8 +891,10 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         triggerAdminEasterEgg,
         changePassword,
         cases,
-        sobre,
-        servicos,
+        headliner,
+        sobre: headliner,
+        backstage,
+        servicos: backstage,
         gridLadoA: gridSettings.gridLadoA,
         gridLadoB: gridSettings.gridLadoB,
         gridBonus: gridSettings.gridBonus,
@@ -888,14 +920,23 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addCaseVideo,
         removeCaseVideo,
         updateCaseBlocks,
+        updateHeadlinerField,
         updateSobreField,
+        updateHeadlinerBioParagraph,
         updateSobreBioParagraph,
+        addHeadlinerBioParagraph,
         addSobreBioParagraph,
+        removeHeadlinerBioParagraph,
         removeSobreBioParagraph,
+        updateHeadlinerStat,
         updateSobreStat,
+        updateHeadlinerTypography,
         updateSobreTypography,
+        addHeadlinerSegment,
         addSobreSegment,
+        removeHeadlinerSegment,
         removeSobreSegment,
+        updateBackstageField,
         updateServicosField,
         saveChanges,
         resetToOriginal,

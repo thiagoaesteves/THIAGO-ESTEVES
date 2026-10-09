@@ -1,5 +1,6 @@
 import React from 'react';
-import { ServicosSection } from './ServicosSection';
+import { BackstageSection } from './BackstageSection';
 
-export const ManifestoSection: React.FC = ServicosSection;
-export { ServicosSection };
+export const ManifestoSection: React.FC = BackstageSection;
+export { BackstageSection, BackstageSection as ServicosSection };
+export default BackstageSection;

@@ -81,7 +81,13 @@ export interface CmsContextType {
   moveCaseOrder: (slug: string, direction: 'up' | 'down') => void;
   updateCaseField: (slug: string, field: keyof CaseItem, value: any) => void;
   updateCaseGridSpan: (slug: string, span: GridSpanType) => void;
+  backstage?: any;
+  updateBackstageField?: (field: string, value: any) => void;
+  headliner?: any;
+  updateHeadlinerField?: (field: string, value: any) => void;
   servicos?: any;
   updateServicosField?: (field: string, value: any) => void;
+  sobre?: any;
+  updateSobreField?: (field: string, value: any) => void;
   [key: string]: any;
 }

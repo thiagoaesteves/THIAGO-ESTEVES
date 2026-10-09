@@ -6,8 +6,8 @@ import { Marquee } from './components/Marquee';
 import { CaseCard } from './components/CaseCard';
 import { CaseModal } from './components/CaseModal';
 import { LightboxModal } from './components/LightboxModal';
-import { ServicosSection } from './components/ServicosSection';
-import { SobreSection } from './components/SobreSection';
+import { BackstageSection } from './components/BackstageSection';
+import { HeadlinerSection } from './components/HeadlinerSection';
 import { ContatoSection } from './components/ContatoSection';
 import { CmsToolbar } from './components/CmsToolbar';
 import { CmsExportModal } from './components/CmsExportModal';
@@ -84,7 +84,7 @@ function PortfolioApp() {
       const hash = window.location.hash.replace('#', '');
       if (hash) {
         if (hash === 'edit') return;
-        if (hash === 'topo') {
+        if (hash === 'topo' || hash === 'home') {
           window.scrollTo({ top: 0, behavior: 'smooth' });
           return;
         }
@@ -92,7 +92,8 @@ function PortfolioApp() {
         if (found) {
           setSelectedCase(found);
         } else {
-          const element = document.getElementById(hash);
+          const targetId = hash === 'servicos' ? 'backstage' : hash === 'sobre' ? 'headliner' : hash;
+          const element = document.getElementById(targetId);
           if (element) {
             setTimeout(() => {
               const isSm = window.innerWidth >= 640;
@@ -559,8 +560,8 @@ function PortfolioApp() {
           </section>
         )}
 
-        <ServicosSection />
-        <SobreSection />
+        <BackstageSection />
+        <HeadlinerSection />
         <ContatoSection />
       </main>
 
