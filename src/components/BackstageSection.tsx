@@ -3,6 +3,23 @@ import { Type, Sparkles } from 'lucide-react';
 import { useCms } from '../context/CmsContext';
 import { DEFAULT_BACKSTAGE_DATA, BackstageData } from '../data/backstage';
 
+// Pontos de quebra de linha permitidos nas descrições: entre itens, após vírgulas e antes de
+// um "e" (conjunção) quando os dois lados são trechos longos (evita órfãos como "e PDV" ou "on / e off").
+const splitBreakable = (text: string): string[] => {
+  const chunks: string[] = [];
+  const parts = text.split(', ');
+  parts.forEach((part, i) => {
+    const piece = i < parts.length - 1 ? `${part},` : part;
+    const match = piece.match(/^(.{12,}?)\s+(e\s.{10,})$/);
+    if (match) {
+      chunks.push(match[1], match[2]);
+    } else {
+      chunks.push(piece);
+    }
+  });
+  return chunks;
+};
+
 export const BackstageSection: React.FC = () => {
   const cms = (useCms() as any) || {};
   const isEditMode = !!cms.isEditMode;
@@ -17,8 +34,8 @@ export const BackstageSection: React.FC = () => {
       resto: 'Estratégia',
       itens: [
         'Desenvolvimento de conceitos',
-        'Branding, Brand Content e Branded Experience',
-        'Naming, Identidade verbal e Manifestos',
+        'branding, naming, identidade verbal e manifestos',
+        'KVs, insights e títulos',
       ],
     },
     {
@@ -27,9 +44,9 @@ export const BackstageSection: React.FC = () => {
       amp: '&',
       resto: 'Conteúdo',
       itens: [
-        'Campanhas 360°, on e off',
-        'Títulos, roteiros audiovisuais e jingles',
-        'Desdobramentos cross-media, Conteúdo para social e projetos de transmídia storytelling',
+        'Campanhas 360° (on e off)',
+        'roteiros audiovisuais, jingles e brand content',
+        'social media e transmídia',
       ],
     },
     {
@@ -38,8 +55,8 @@ export const BackstageSection: React.FC = () => {
       amp: '&',
       resto: 'Ativação',
       itens: [
-        'Ações de live marketing, Big Ideas e PDV',
-        'Comunicação interna',
+        'Brand experience e ações de live marketing',
+        'big ideas, ativações de PDV e comunicação interna',
       ],
     },
     {
@@ -48,8 +65,7 @@ export const BackstageSection: React.FC = () => {
       amp: '&',
       resto: 'Conexão',
       itens: [
-        'Storytelling de projetos',
-        'Defesa de ideias com argumentos afiados para aprovar campanhas e tirar o projeto do papel',
+        'Storytelling de projetos e defesa de ideias com argumentos afiados para aprovar campanhas e tirar o papel',
       ],
     },
   ];
@@ -261,26 +277,33 @@ export const BackstageSection: React.FC = () => {
                         placeholder="Digite um item por linha..."
                       />
                     ) : (
-                      <p className="text-[11px] sm:text-sm md:text-[13px] lg:text-[14px] 2xl:text-[15px] text-[#343848] font-normal leading-normal sm:leading-relaxed w-full lg:max-w-[44rem]">
+                      <p className="text-[11px] sm:text-sm md:text-[13px] lg:text-[14px] 2xl:text-[15px] text-[#343848] font-normal leading-normal sm:leading-relaxed w-full">
                         {Array.isArray(item.itens) && item.itens.map((sub: string, sIdx: number) => {
-                          const isLast = sIdx === item.itens.length - 1;
+                          const isLastItem = sIdx === item.itens.length - 1;
+                          const phrases = splitBreakable(sub);
                           return (
-                            <React.Fragment key={sIdx}>
-                              {/* Cada item é um bloco inline: a quebra de linha acontece entre itens, nunca no meio de um */}
-                              <span className="inline-block max-w-full align-top">
-                                <span className="text-[#202433] hover:text-[#2340FF] transition-colors duration-200">
-                                  {sub}
-                                </span>
-                                {isLast ? (
-                                  <span className="text-[#2340FF] font-bold ml-0.5">.</span>
-                                ) : (
-                                  <span className="text-[#2340FF]/40 mx-1 sm:mx-2 font-light select-none">
-                                    —
-                                  </span>
-                                )}
-                              </span>
-                              {!isLast && ' '}
-                            </React.Fragment>
+                            <span key={sIdx} className="group/item">
+                              {phrases.map((phrase, pIdx) => {
+                                const isLastPhrase = pIdx === phrases.length - 1;
+                                return (
+                                  <React.Fragment key={pIdx}>
+                                    <span className="inline-block max-w-full align-top">
+                                      <span className="text-[#202433] group-hover/item:text-[#2340FF] transition-colors duration-200">
+                                        {phrase}
+                                      </span>
+                                      {isLastPhrase && (isLastItem ? (
+                                        <span className="text-[#2340FF] font-bold ml-0.5">.</span>
+                                      ) : (
+                                        <span className="text-[#2340FF]/40 mx-1 sm:mx-2 font-light select-none">
+                                          —
+                                        </span>
+                                      ))}
+                                    </span>
+                                    {!(isLastItem && isLastPhrase) && ' '}
+                                  </React.Fragment>
+                                );
+                              })}
+                            </span>
                           );
                         })}
                       </p>

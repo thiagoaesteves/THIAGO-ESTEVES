@@ -117,14 +117,14 @@ export const HeadlinerSection: React.FC = () => {
   return (
     <section
       id="headliner"
-      className="w-full bg-[#2340FF] text-white flex flex-col justify-between pt-4 sm:pt-8 lg:pt-12 pb-14 sm:pb-20 lg:pb-24 px-6 sm:px-10 lg:px-16 scroll-mt-[69px] sm:scroll-mt-[73px] relative min-h-screen min-h-[100dvh] overflow-hidden"
+      className="w-full bg-[#2340FF] text-white flex flex-col justify-between pt-4 sm:pt-6 lg:pt-[clamp(1rem,2.8vh,2.5rem)] pb-8 sm:pb-12 lg:pb-[clamp(2rem,4.5vh,3.5rem)] px-6 sm:px-10 lg:px-16 scroll-mt-[69px] sm:scroll-mt-[73px] relative min-h-[calc(100dvh-69px)] sm:min-h-[calc(100dvh-73px)] overflow-hidden"
     >
       <div 
         className="absolute inset-0 opacity-[0.035] pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:24px_24px]" 
         aria-hidden="true" 
       />
 
-      <div className="max-w-[1600px] w-full mx-auto my-auto flex flex-col justify-between relative z-10 space-y-3 sm:space-y-5 lg:space-y-6">
+      <div className="max-w-[1600px] w-full mx-auto flex-1 flex flex-col justify-between relative z-10 space-y-3 sm:space-y-4 lg:space-y-[clamp(0.75rem,2vh,1.5rem)]">
         
         {isEditMode && (
           <div className="flex flex-wrap items-center gap-3 p-2.5 rounded-xl bg-black/80 backdrop-blur-md border border-[#D4FF3A]/30 text-xs font-mono-code mb-1 shadow-xl">
@@ -220,7 +220,7 @@ export const HeadlinerSection: React.FC = () => {
                 />
               </div>
             ) : (
-              <div className="mb-3 sm:mb-4 w-full">
+              <div className="mb-3 sm:mb-4 lg:mb-[clamp(0.5rem,1.5vh,1rem)] w-full">
                 <h2 className={`font-disp font-extrabold ${titleSizeClass} tracking-[-0.03em] text-white leading-tight sm:leading-[1.08] relative break-words`}>
                   <span className="text-[#D4FF3A] font-serif select-none mr-1.5 inline-block -translate-y-0.5">“</span>
                   {titleParts[0]}
@@ -258,7 +258,7 @@ export const HeadlinerSection: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="space-y-2.5 sm:space-y-3.5 w-full">
+              <div className="space-y-2 sm:space-y-3 lg:space-y-[clamp(0.375rem,1vh,0.75rem)] w-full">
                 {effectiveNarrativeItems.map((item: any, idx: number) => {
                   const colorClass = TEXT_COLOR_MAP[item.color] || 'text-white/95';
                   const styleClass = TEXT_STYLE_MAP[item.style] || 'font-sans font-normal';
@@ -282,7 +282,7 @@ export const HeadlinerSection: React.FC = () => {
         </div>
 
         {/* Rodapé da Seção com alinhamento na linha limite da foto */}
-        <div className="pt-4 sm:pt-6 pb-2 sm:pb-4 border-t border-white/20 w-full">
+        <div className="pt-3 sm:pt-5 lg:pt-[clamp(0.75rem,1.8vh,1.25rem)] pb-1 sm:pb-2 border-t border-white/20 w-full">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 lg:gap-12 w-full">
             
             <div className="flex flex-col space-y-0.5 sm:space-y-1">

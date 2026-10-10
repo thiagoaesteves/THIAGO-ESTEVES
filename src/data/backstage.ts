@@ -37,8 +37,8 @@ export const DEFAULT_ESPECIALIDADES: EspecialidadeItem[] = [
     resto: 'Estratégia',
     itens: [
       'Desenvolvimento de conceitos',
-      'Branding, Brand Content e Branded Experience',
-      'Naming, Identidade verbal e Manifestos',
+      'branding, naming, identidade verbal e manifestos',
+      'KVs, insights e títulos',
     ],
   },
   {
@@ -47,9 +47,9 @@ export const DEFAULT_ESPECIALIDADES: EspecialidadeItem[] = [
     amp: '&',
     resto: 'Conteúdo',
     itens: [
-      'Campanhas 360°, on e off',
-      'Títulos, roteiros audiovisuais e jingles',
-      'Desdobramentos cross-media, Conteúdo para social e projetos de transmídia storytelling',
+      'Campanhas 360° (on e off)',
+      'roteiros audiovisuais, jingles e brand content',
+      'social media e transmídia',
     ],
   },
   {
@@ -58,8 +58,8 @@ export const DEFAULT_ESPECIALIDADES: EspecialidadeItem[] = [
     amp: '&',
     resto: 'Ativação',
     itens: [
-      'Ações de live marketing, Big Ideas e PDV',
-      'Comunicação interna',
+      'Brand experience e ações de live marketing',
+      'big ideas, ativações de PDV e comunicação interna',
     ],
   },
   {
@@ -68,8 +68,7 @@ export const DEFAULT_ESPECIALIDADES: EspecialidadeItem[] = [
     amp: '&',
     resto: 'Conexão',
     itens: [
-      'Storytelling de projetos',
-      'Defesa de ideias com argumentos afiados para aprovar campanhas e tirar o projeto do papel',
+      'Storytelling de projetos e defesa de ideias com argumentos afiados para aprovar campanhas e tirar o papel',
     ],
   },
 ];
